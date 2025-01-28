@@ -1,18 +1,18 @@
-import { Button, Layout, Menu } from 'antd';
+import { Layout, Menu, Button } from 'antd';
 import {
   DashboardOutlined,
   UnorderedListOutlined,
   ShopOutlined,
   TeamOutlined,
+  LogoutOutlined,
 } from '@ant-design/icons';
 import { Link, Outlet } from 'react-router-dom';
 
 const { Header, Content, Sider } = Layout;
 
-const AppLayout = ({ user }) => {
+const AppLayout = ({ user, onLogout }) => {
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      {/* Sidebar */}
       <Sider collapsible>
         <div
           className="logo"
@@ -41,19 +41,21 @@ const AppLayout = ({ user }) => {
         </Menu>
       </Sider>
 
-      {/* Main Layout */}
       <Layout>
         <Header
           style={{
             background: '#fff',
-            padding: 0,
+            padding: '0 24px',
             textAlign: 'center',
             fontSize: '18px',
             fontWeight: 'bold',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}
         >
-          Welcome, {user.role}
-          <Button type="primary" className="ml-3">
+          <span>Welcome, {user?.name}</span>
+          <Button type="link" icon={<LogoutOutlined />} onClick={onLogout}>
             Logout
           </Button>
         </Header>

@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+stock-trail
 
 # Editor directories and files
 .vscode/*
