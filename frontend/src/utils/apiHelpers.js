@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { message } from 'antd';
 
 const axiosInstance = axios.create({
   baseURL: 'http://localhost:3003/api',
@@ -17,11 +16,9 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    const { status, data } = error.response || {};
+    const { status } = error.response || {};
     if (status === 401) {
-      window.location.href = '/login';
-    } else {
-      message.error(data?.message || 'Something went wrong');
+      window.location.href = '/signin';
     }
     return Promise.reject(error);
   }

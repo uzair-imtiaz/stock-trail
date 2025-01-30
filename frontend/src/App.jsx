@@ -11,9 +11,11 @@ import { useEffect, useState } from 'react';
 import { getUser, logout } from './apis';
 import Cookies from 'js-cookie';
 import { message } from 'antd';
+import InventoryForm from './components/InventoryForm';
 
 const App = () => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -23,10 +25,10 @@ const App = () => {
       } else {
         message.error(response?.message || 'Something went wrong');
       }
+      setLoading(false);
     };
 
     const token = Cookies.get('token');
-    console.log('token', token);
     if (token) {
       fetchUser();
     }
@@ -37,9 +39,12 @@ const App = () => {
   };
 
   const handleLogout = async () => {
-    await logout();
-    Cookies.remove('token');
-    setUser(null);
+    const response = await logout();
+    if (response?.success) {
+      Cookies.remove('token');
+      setUser(null);
+      message.success('Logout successful!');
+    }
   };
 
   return (
@@ -50,11 +55,16 @@ const App = () => {
         {/* Layout wrapper */}
         <Route element={<AppLayout user={user} onLogout={handleLogout} />}>
           {/* Protected routes */}
-          <Route path="/" element={<ProtectedRoute user={user} />}>
+          <Route
+            path="/"
+            element={<ProtectedRoute user={user} loading={loading} />}
+          >
             <Route index element={<Dashboard />} />
             <Route path="routes" element={<RoutesPage />} />
             <Route path="inventory" element={<Inventory />} />
             <Route path="users" element={<Users />} />
+            <Route path="inventory/new" element={<InventoryForm />} />
+            <Route path="inventory/:id/edit" element={<InventoryForm />} />
           </Route>
         </Route>
       </Routes>

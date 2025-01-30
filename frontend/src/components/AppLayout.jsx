@@ -7,6 +7,7 @@ import {
   LogoutOutlined,
 } from '@ant-design/icons';
 import { Link, Outlet } from 'react-router-dom';
+import { getPermission } from '../utils';
 
 const { Header, Content, Sider } = Layout;
 
@@ -29,15 +30,21 @@ const AppLayout = ({ user, onLogout }) => {
           <Menu.Item key="1" icon={<DashboardOutlined />}>
             <Link to="/">Dashboard</Link>
           </Menu.Item>
-          <Menu.Item key="2" icon={<UnorderedListOutlined />}>
-            <Link to="/routes">Routes</Link>
-          </Menu.Item>
-          <Menu.Item key="3" icon={<ShopOutlined />}>
-            <Link to="/inventory">Inventory</Link>
-          </Menu.Item>
-          <Menu.Item key="4" icon={<TeamOutlined />}>
-            <Link to="/users">Users</Link>
-          </Menu.Item>
+          {getPermission(user, 'routes') && (
+            <Menu.Item key="2" icon={<UnorderedListOutlined />}>
+              <Link to="/routes">Routes</Link>
+            </Menu.Item>
+          )}
+          {getPermission(user, 'inventory') && (
+            <Menu.Item key="3" icon={<ShopOutlined />}>
+              <Link to="/inventory">Inventory</Link>
+            </Menu.Item>
+          )}
+          {getPermission(user, 'users') && (
+            <Menu.Item key="4" icon={<TeamOutlined />}>
+              <Link to="/users">Users</Link>
+            </Menu.Item>
+          )}
         </Menu>
       </Sider>
 

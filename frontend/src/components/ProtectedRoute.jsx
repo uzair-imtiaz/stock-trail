@@ -1,9 +1,22 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { message, Spin } from 'antd';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
-function ProtectedRoute({ user }) {
-  console.log(user);
+function ProtectedRoute({ user, loading }) {
+  const location = useLocation();
+  const hasAccess = user?.modules?.includes(location.pathname);
+  if (user?.role === 'admin') {
+    return <Outlet />;
+  }
+  if (loading) {
+    return <Spin />;
+  }
   if (!user) {
     return <Navigate to="/signin" replace />;
+  }
+
+  if (!hasAccess) {
+    message.error('You are not authorized to access this page');
+    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;

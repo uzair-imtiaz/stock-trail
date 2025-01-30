@@ -2,7 +2,6 @@ import User from '../models/user.model.js';
 import { generateToken } from '../utils/auth.util.js';
 
 export const register = async (req, res) => {
-  console.log('first', req.body);
   const { name, email, password, role } = req.body;
 
   const userExists = await User.findOne({ email });
@@ -21,6 +20,7 @@ export const register = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        modules: user.modules,
         token,
       },
     });
@@ -53,10 +53,10 @@ export const login = async (req, res) => {
     return;
   }
 
-  const token = await generateToken(user._id);
+  const token = await generateToken(user);
   return res
     .cookie('token', token, {
-      httpOnly: true,
+      httpOnly: false,
       sameSite: 'strict',
       secure: process.env.NODE_ENV === 'production',
       maxAge: 30 * 24 * 60 * 60 * 1000,
@@ -70,6 +70,7 @@ export const login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        modules: user.modules,
         token,
       },
     });
@@ -84,9 +85,8 @@ export const logout = async (req, res) => {
 };
 
 export const me = async (req, res) => {
-  const user = await User.findById(req.user._id);
   res.status(200).json({
     success: true,
-    data: user,
+    data: req.user,
   });
 };

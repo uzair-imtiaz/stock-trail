@@ -6,6 +6,7 @@ import routes from './routes/index.js';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import { corsOptions } from './utils/cors.utils.js';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -18,7 +19,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
-
+app.use(cookieParser());
 app.use('/api', routes);
 
 app.get('/health-check', (req, res) => {
