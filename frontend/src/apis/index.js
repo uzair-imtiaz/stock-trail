@@ -79,3 +79,8 @@ export const deleteInventory = async (id) => {
   const response = await deleteCallback(`/inventory/${id}/delete`);
   return response;
 };
+
+export const getGroupedInventory = async () => {
+  const response = await getCallback('/inventory/grouped');
+  return response;
+};

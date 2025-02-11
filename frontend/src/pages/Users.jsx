@@ -71,6 +71,8 @@ const Users = () => {
         dataSource={users}
         loading={loading}
         rowKey="_id"
+        bordered
+        scroll={{ x: true }}
       />
     </div>
   );

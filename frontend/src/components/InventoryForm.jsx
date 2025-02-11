@@ -8,6 +8,8 @@ import {
   message,
   Card,
   DatePicker,
+  Row,
+  Col,
 } from 'antd';
 import { createInventory, updateInventory } from '../apis';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -20,13 +22,14 @@ const InventoryForm = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const location = useLocation();
-  const { item } = location.state;
+  const { item } = location.state || {};
   useEffect(() => {
     form.setFieldsValue({
       product: 'Lays',
       location: 'Main',
+      vendor: { name: 'Pepsico' },
       ...item,
-      expiryDate: item?.expiryDate ? dayjs(item.expiryDate) : null,
+      openingDate: item?.openingDate ? dayjs(item.openingDate) : null,
     });
   }, [item, form]);
 
@@ -55,92 +58,120 @@ const InventoryForm = () => {
     <div>
       <Card title="Add Inventory" style={{ width: '70%', margin: '0 auto' }}>
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
-          <Form.Item
-            name="product"
-            label="Product"
-            rules={[{ required: true }]}
-          >
-            <Select defaultValue="Lays">
-              <Option value="Lays">Lays</Option>
-            </Select>
-          </Form.Item>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="product"
+                label="Product"
+                rules={[{ required: true }]}
+              >
+                <Input defaultValue="Lays" />
+              </Form.Item>
 
-          <Form.Item
-            name="flavor"
-            label="Flavor"
-            rules={[{ required: true, message: 'Flavor is required' }]}
-          >
-            <Input />
-          </Form.Item>
+              <Form.Item
+                name="flavor"
+                label="Flavor"
+                rules={[{ required: true, message: 'Flavor is required' }]}
+              >
+                <Input />
+              </Form.Item>
 
-          <Form.Item
-            name="grammage"
-            label="Grammage (g)"
-            rules={[
-              {
-                required: true,
-                type: 'number',
-                message: 'Enter valid grammage',
-              },
-            ]}
-          >
-            <InputNumber min={1} />
-          </Form.Item>
+              <Form.Item
+                name="grammage"
+                label="Grammage (g)"
+                rules={[
+                  {
+                    required: true,
+                    type: 'number',
+                    message: 'Enter valid grammage',
+                  },
+                ]}
+              >
+                <InputNumber min={1} />
+              </Form.Item>
 
-          <Form.Item
-            name="location"
-            label="Location"
-            rules={[{ required: true }]}
-          >
-            <Select>
-              <Option value="Main">Main</Option>
-              <Option value="Secondary">Secondary</Option>
-            </Select>
-          </Form.Item>
+              <Form.Item
+                name="category"
+                label="Category"
+                rules={[{ required: true, message: 'Category is required' }]}
+              >
+                <Input />
+              </Form.Item>
 
-          <Form.Item
-            name={['vendor', 'name']}
-            label="Vendor Name"
-            rules={[{ required: true, message: 'Vendor name is required' }]}
-          >
-            <Input />
-          </Form.Item>
+              <Form.Item
+                name="location"
+                label="Location"
+                rules={[{ required: true }]}
+              >
+                <Select>
+                  <Option value="Main">Main</Option>
+                  <Option value="Secondary">Wastage</Option>
+                </Select>
+              </Form.Item>
+            </Col>
 
-          <Form.Item name={['vendor', 'phone']} label="Vendor Phone">
-            <Input />
-          </Form.Item>
+            <Col span={12}>
+              <Form.Item
+                name={['vendor', 'name']}
+                label="Vendor Name"
+                rules={[{ required: true, message: 'Vendor name is required' }]}
+              >
+                <Input defaultValue="Pepsico" />
+              </Form.Item>
 
-          <Form.Item
-            name="purchasePrice"
-            label="Purchase Price (PKR)"
-            rules={[
-              { required: true, type: 'number', message: 'Enter valid price' },
-            ]}
-          >
-            <InputNumber min={1} />
-          </Form.Item>
+              <Form.Item
+                name="stockType"
+                label="Stock Type"
+                rules={[{ required: true, message: 'Stock type is required' }]}
+              >
+                <Select>
+                  <Option value="Cartons">Cartons</Option>
+                  <Option value="Pieces">Pieces</Option>
+                </Select>
+              </Form.Item>
 
-          <Form.Item
-            name="quantity"
-            label="Quantity"
-            rules={[
-              {
-                required: true,
-                type: 'number',
-                message: 'Enter valid quantity',
-              },
-            ]}
-          >
-            <InputNumber min={1} />
-          </Form.Item>
+              <Form.Item
+                name="quantity"
+                label="Quantity"
+                rules={[
+                  {
+                    required: true,
+                    type: 'number',
+                    message: 'Enter valid quantity',
+                  },
+                ]}
+              >
+                <InputNumber min={1} />
+              </Form.Item>
 
-          <Form.Item
-            name="expiryDate"
-            label="Expiry Date"
-            rules={[{ required: true, message: 'Select expiry date' }]}
-          >
-            <DatePicker format="YYYY-MM-DD" />
-          </Form.Item>
+              <Form.Item
+                name="unitPrice"
+                label="Unit Price (PKR)"
+                rules={[
+                  {
+                    required: true,
+                    type: 'number',
+                    message: 'Enter valid price',
+                  },
+                ]}
+              >
+                <InputNumber min={1} />
+              </Form.Item>
+
+              <Form.Item
+                name="openingDate"
+                label="Opening Date"
+                rules={[{ required: true, message: 'Select opening date' }]}
+              >
+                <DatePicker
+                  format="YYYY-MM-DD"
+                  disabledDate={(current) =>
+                    current && current > dayjs().endOf('day')
+                  }
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
           <div className="d-flex justify-content-end">
             <Form.Item>
