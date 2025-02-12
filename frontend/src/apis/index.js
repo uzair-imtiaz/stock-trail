@@ -94,3 +94,8 @@ export const transferStock = async (data) => {
   const response = await postCallback('/inventory/transfer-stock', data);
   return response;
 };
+
+export const createSale = async (data) => {
+  const response = await postCallback('/sales/new', data);
+  return response;
+};

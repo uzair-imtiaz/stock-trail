@@ -8,6 +8,8 @@ import {
   UsergroupAddOutlined,
   ShoppingCartOutlined,
   LogoutOutlined,
+  FileAddOutlined,
+  FileTextOutlined,
 } from '@ant-design/icons';
 import { Link, Outlet } from 'react-router-dom';
 import { getPermission } from '../utils';
@@ -88,11 +90,18 @@ const AppLayout = ({ user, onLogout }) => {
             </Menu.Item>
           )}
           {getPermission(user, 'sales') && (
-            <Menu.Item key="5" icon={<ShoppingCartOutlined />}>
-              <Link to="/sales" style={{ textDecoration: 'none' }}>
-                Sales
-              </Link>
-            </Menu.Item>
+            <Menu.SubMenu key="5" icon={<ShoppingCartOutlined />} title="Sales">
+              <Menu.Item key="5-1" icon={<FileAddOutlined />}>
+                <Link to="/sales" style={{ textDecoration: 'none' }}>
+                  Add Sale
+                </Link>
+              </Menu.Item>
+              <Menu.Item key="5-2" icon={<FileTextOutlined />}>
+                <Link to="/invoices" style={{ textDecoration: 'none' }}>
+                  Invoices
+                </Link>
+              </Menu.Item>
+            </Menu.SubMenu>
           )}
         </Menu>
       </Sider>

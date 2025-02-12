@@ -7,18 +7,18 @@ const ItemSchema = new mongoose.Schema({
     required: true,
   },
   quantityDropped: { type: Number, required: true },
+  unitPrice: { type: Number },
 });
 
 const InventoryDroppedSchema = new mongoose.Schema({
-  shopId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Shops',
-    required: true,
-  },
   items: [ItemSchema],
-  collectedAmount: { type: Number, required: true, default: 0 },
   creditAmount: { type: Number, required: true, default: 0 },
   tpr: { type: Number, required: true, default: 0 },
+});
+
+const ExpenseSchema = new mongoose.Schema({
+  description: { type: String, required: true },
+  amount: { type: Number, required: true, default: 0 },
 });
 
 const RouteActivitySchema = new mongoose.Schema(
@@ -48,12 +48,64 @@ const RouteActivitySchema = new mongoose.Schema(
       required: true,
     },
     inventoryDropped: [InventoryDroppedSchema],
-    expenses: { type: Number, required: true, default: 0 },
-    totalAmount: { type: Number, required: true, default: 0 },
-    profit: { type: Number, required: true, default: 0 },
+    expenses: [ExpenseSchema],
+    totalAmount: { type: Number, default: 0 },
+    profit: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
+
+RouteActivitySchema.pre('save', async function (next) {
+  try {
+    let totalAmount = 0;
+    let totalExpenses = 0;
+    const inventoryIds = new Set();
+
+    if (this.inventoryDropped && this.inventoryDropped.length > 0) {
+      for (const drop of this.inventoryDropped) {
+        for (const item of drop.items) {
+          if (!item.unitPrice) {
+            inventoryIds.add(item.itemId.toString());
+          }
+        }
+      }
+    }
+
+    const inventoryItems = await mongoose
+      .model('Inventory')
+      .find({ _id: { $in: Array.from(inventoryIds) } })
+      .select('_id unitPrice');
+
+    const inventoryMap = {};
+    inventoryItems.forEach((inv) => {
+      inventoryMap[inv._id.toString()] = inv.unitPrice;
+    });
+
+    for (const drop of this.inventoryDropped) {
+      for (const item of drop.items) {
+        if (!item.unitPrice) {
+          item.unitPrice = inventoryMap[item.itemId.toString()] || 0;
+        }
+        totalAmount += item.quantityDropped * item.unitPrice;
+      }
+      totalAmount -= drop.creditAmount;
+    }
+
+    if (this.expenses && this.expenses.length > 0) {
+      totalExpenses = this.expenses.reduce(
+        (sum, expense) => sum + expense.amount,
+        0
+      );
+    }
+
+    this.totalAmount = totalAmount;
+    this.profit = totalAmount - totalExpenses;
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 const RouteActivity = mongoose.model('RouteActivity', RouteActivitySchema);
 

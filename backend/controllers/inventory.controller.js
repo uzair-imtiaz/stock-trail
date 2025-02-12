@@ -134,6 +134,7 @@ export const getGroupedInventory = asyncHandler(async (req, res) => {
         _id: 1,
         product: 1,
         quantity: 1,
+        unitPrice: 1,
         category: 1,
         grammage: 1,
       },
@@ -156,7 +157,6 @@ export const getGroupedInventory = asyncHandler(async (req, res) => {
 
 export const transferStock = asyncHandler(async (req, res) => {
   const { id, quantity, from, to } = req.body;
-  debugger;
   const inventoryItem = await Inventory.findById(id);
 
   if (!inventoryItem) {
