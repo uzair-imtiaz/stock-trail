@@ -105,7 +105,7 @@ const InventoryForm = () => {
               >
                 <Select>
                   <Option value="Main">Main</Option>
-                  <Option value="Secondary">Wastage</Option>
+                  <Option value="Wastage">Wastage</Option>
                 </Select>
               </Form.Item>
             </Col>

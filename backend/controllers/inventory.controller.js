@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import Inventory from '../models/inventory.model.js';
 import { asyncHandler } from '../utils/error.util.js';
 
@@ -16,68 +15,6 @@ export const getInventory = async (req, res) => {
     message: 'Inventory fetched successfully',
   });
 };
-
-// export const createInventory = async (req, res) => {
-//   const data = req.body;
-
-//   if (data.stockType === 'Pieces') {
-//     if (!data.piecesPerCarton || data.piecesPerCarton <= 0) {
-//       return res
-//         .status(400)
-//         .json({ success: false, message: 'Invalid piecesPerCarton value' });
-//     }
-//     data.quantity = data.quantity / 10;
-//   }
-
-//   const existingItem = await Inventory.findOne({
-//     product: { $regex: new RegExp(`^${data.product.trim()}$`, 'i') },
-//     flavor: { $regex: new RegExp(`^${data.flavor.trim()}$`, 'i') },
-//     grammage: data.grammage,
-//   });
-
-//   if (existingItem) {
-//     const newQuantity = existingItem.quantity + data.quantity;
-
-//     const newUnitPrice =
-//       (existingItem.quantity * existingItem.unitPrice +
-//         data.quantity * data.unitPrice) /
-//       newQuantity;
-
-//     const updatedItem = await Inventory.findByIdAndUpdate(
-//       existingItem._id,
-//       {
-//         quantity: newQuantity,
-//         unitPrice: newUnitPrice,
-//       },
-//       { new: true }
-//     );
-
-//     return res.status(200).json({
-//       success: true,
-//       message: 'Inventory updated successfully',
-//       data: updatedItem,
-//     });
-//   }
-
-//   const newItem = await Inventory.create({
-//     ...data,
-//     product: data.product.trim(),
-//     flavor: data.flavor.trim(),
-//   });
-
-//   if (!newItem) {
-//     return res.status(400).json({
-//       success: false,
-//       message: 'Unable to add item to the inventory.',
-//     });
-//   }
-
-//   return res.status(201).json({
-//     success: true,
-//     message: 'Item added successfully',
-//     data: newItem,
-//   });
-// };
 
 export const createInventory = async (req, res) => {
   let data = req.body;
@@ -214,5 +151,56 @@ export const getGroupedInventory = asyncHandler(async (req, res) => {
     success: true,
     data: inventory,
     message: 'Inventory fetched successfully',
+  });
+});
+
+export const transferStock = asyncHandler(async (req, res) => {
+  const { id, quantity, from, to } = req.body;
+  debugger;
+  const inventoryItem = await Inventory.findById(id);
+
+  if (!inventoryItem) {
+    return res.status(404).json({
+      success: false,
+      message: 'Inventory item not found',
+    });
+  }
+
+  if (inventoryItem.location !== from) {
+    return res.status(400).json({
+      success: false,
+      message: `Item is not located in ${from}`,
+    });
+  }
+
+  if (inventoryItem.quantity < quantity) {
+    return res.status(400).json({
+      success: false,
+      message: `Not enough stock to transfer. Available: ${inventoryItem.quantity}`,
+    });
+  }
+
+  inventoryItem.quantity -= quantity;
+  await inventoryItem.save();
+
+  const {
+    _id,
+    quantity: oldQuantity,
+    location,
+    ...newItem
+  } = inventoryItem.toObject();
+
+  const transferredInventoryItem = new Inventory({
+    ...newItem,
+    location: to,
+    quantity,
+  });
+
+  await transferredInventoryItem.save();
+
+  res.status(200).json({
+    success: true,
+    message: `Stock successfully transferred to ${to} location.`,
+    data: transferredInventoryItem,
   });
 });

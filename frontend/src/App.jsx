@@ -13,6 +13,7 @@ import Cookies from 'js-cookie';
 import { message } from 'antd';
 import InventoryForm from './components/InventoryForm';
 import Sales from './pages/Sales';
+import StockManagement from './pages/StockManagement';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -67,6 +68,10 @@ const App = () => {
             <Route path="inventory/new" element={<InventoryForm />} />
             <Route path="inventory/:id/edit" element={<InventoryForm />} />
             <Route path="sales" element={<Sales />} />
+            <Route
+              path="inventory/stock-management"
+              element={<StockManagement />}
+            />
           </Route>
         </Route>
       </Routes>

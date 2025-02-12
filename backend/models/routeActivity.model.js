@@ -7,7 +7,6 @@ const ItemSchema = new mongoose.Schema({
     required: true,
   },
   quantityDropped: { type: Number, required: true },
-  itemPrice: { type: Number, required: true },
 });
 
 const InventoryDroppedSchema = new mongoose.Schema({
@@ -35,9 +34,17 @@ const RouteActivitySchema = new mongoose.Schema(
       enum: ['Pending', 'In Progress', 'Completed'],
       default: 'Pending',
     },
-    deliveryPersonId: {
+    salesman: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Users',
+      required: true,
+    },
+    driverName: {
+      type: String,
+      required: true,
+    },
+    licenseNumber: {
+      type: String,
       required: true,
     },
     inventoryDropped: [InventoryDroppedSchema],

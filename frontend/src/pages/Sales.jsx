@@ -1,23 +1,21 @@
 import { useEffect, useState } from 'react';
-import { Table, InputNumber, Select, Button, Switch } from 'antd';
+import { Table, InputNumber, Select, Button, Switch, message } from 'antd';
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import { getGroupedInventory, getRoutes } from '../apis';
+import { getGroupedInventory, getRoutes, getUsersByRole } from '../apis';
 
 const { Option } = Select;
 
 const processRowSpan = (data) => {
-  const categoryCount = {}; // Track count of each category
+  const categoryCount = {};
 
-  // Count occurrences of each category
   data.forEach((item) => {
     categoryCount[item.category] = (categoryCount[item.category] || 0) + 1;
   });
 
-  // Assign rowSpan values
   let categoryRowTracker = {};
   return data.map((item) => {
     if (!categoryRowTracker[item.category]) {
-      categoryRowTracker[item.category] = true; // Mark first occurrence
+      categoryRowTracker[item.category] = true;
       return { ...item, categoryRowSpan: categoryCount[item.category] };
     }
     return { ...item, categoryRowSpan: 0 };
@@ -27,6 +25,7 @@ const processRowSpan = (data) => {
 const SalesScreen = () => {
   const [inventory, setInventory] = useState([]);
   const [routes, setRoutes] = useState([]);
+  const [salesmen, setSalesmen] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -36,12 +35,19 @@ const SalesScreen = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await getGroupedInventory();
-      if (response.success) {
-        const processedData = processRowSpan(response.data);
+      const [routesRes, inventoryRes, salesManRes] = await Promise.all([
+        getRoutes(),
+        getGroupedInventory(),
+        getUsersByRole('salesman'),
+      ]);
+      if (inventoryRes.success && routesRes.success) {
+        const processedData = processRowSpan(inventoryRes.data);
         setInventory(processedData);
+        setRoutes(routesRes.data);
+        setSalesmen(salesManRes.data);
       }
     } catch (error) {
+      message.error(error.message || 'Failed to fetch data');
       console.error(error);
     }
     setLoading(false);
@@ -80,6 +86,11 @@ const SalesScreen = () => {
       render: (text) => `${text} g`,
     },
     {
+      title: 'Unit Price',
+      dataIndex: 'unitPrice',
+      key: 'unitPrice',
+    },
+    {
       title: 'Available Qty',
       dataIndex: 'quantity',
       key: 'quantity',
@@ -89,14 +100,29 @@ const SalesScreen = () => {
       dataIndex: 'dispatchQty',
       key: 'dispatchQty',
       render: (_, record) => (
-        <InputNumber min={0} max={record.quantity} placeholder="Enter Qty" />
+        <InputNumber
+          min={0}
+          max={record.quantity}
+          placeholder="Enter Qty"
+          defaultValue={0}
+        />
       ),
     },
     {
       title: 'TPR (Free Pieces)',
       dataIndex: 'tpr',
       key: 'tpr',
-      render: () => <InputNumber min={0} placeholder="Enter TPR" />,
+      render: () => (
+        <InputNumber min={0} placeholder="Enter TPR" defaultValue={0} />
+      ),
+    },
+    {
+      title: 'Expenses',
+      dataIndex: 'expenses',
+      key: 'expenses',
+      render: () => (
+        <InputNumber min={0} placeholder="Enter Expenses" defaultValue={0} />
+      ),
     },
     {
       title: 'Transfer to Wastage',
@@ -115,12 +141,14 @@ const SalesScreen = () => {
     <div>
       <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
         <Select placeholder="Select Route" style={{ width: 200 }}>
-          <Option value="route1">Route 1</Option>
-          <Option value="route2">Route 2</Option>
+          {routes.map((route) => (
+            <Option value={route._id}>{route.name}</Option>
+          ))}
         </Select>
         <Select placeholder="Select Salesman" style={{ width: 200 }}>
-          <Option value="salesman1">Salesman 1</Option>
-          <Option value="salesman2">Salesman 2</Option>
+          {salesmen.map((salesman) => (
+            <Option value={salesman._id}>{salesman.name}</Option>
+          ))}
         </Select>
         <InputNumber placeholder="Driver Name" style={{ width: 200 }} />
         <InputNumber placeholder="License Plate #" style={{ width: 200 }} />
@@ -132,6 +160,7 @@ const SalesScreen = () => {
         rowKey="_id"
         loading={loading}
         pagination={false}
+        bordered
       />
       <Button type="primary" style={{ marginTop: '20px' }}>
         Submit Sales
@@ -141,3 +170,5 @@ const SalesScreen = () => {
 };
 
 export default SalesScreen;
+
+// only one field for expenses

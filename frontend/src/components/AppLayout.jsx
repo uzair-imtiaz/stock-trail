@@ -1,9 +1,12 @@
 import { Layout, Menu, Button } from 'antd';
 import {
-  DashboardOutlined,
-  UnorderedListOutlined,
-  ShopOutlined,
-  TeamOutlined,
+  HomeOutlined,
+  CompassOutlined,
+  InboxOutlined,
+  TableOutlined,
+  BarChartOutlined,
+  UsergroupAddOutlined,
+  ShoppingCartOutlined,
   LogoutOutlined,
 } from '@ant-design/icons';
 import { Link, Outlet } from 'react-router-dom';
@@ -48,34 +51,44 @@ const AppLayout = ({ user, onLogout }) => {
           Stock Trail
         </div>
         <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
-          <Menu.Item key="1" icon={<DashboardOutlined />}>
+          <Menu.Item key="1" icon={<HomeOutlined />}>
             <Link to="/" style={{ textDecoration: 'none' }}>
               Dashboard
             </Link>
           </Menu.Item>
           {getPermission(user, 'routes') && (
-            <Menu.Item key="2" icon={<UnorderedListOutlined />}>
+            <Menu.Item key="2" icon={<CompassOutlined />}>
               <Link to="/routes" style={{ textDecoration: 'none' }}>
                 Routes
               </Link>
             </Menu.Item>
           )}
           {getPermission(user, 'inventory') && (
-            <Menu.Item key="3" icon={<ShopOutlined />}>
-              <Link to="/inventory" style={{ textDecoration: 'none' }}>
-                Inventory
-              </Link>
-            </Menu.Item>
+            <Menu.SubMenu key="3" icon={<InboxOutlined />} title="Inventory">
+              <Menu.Item key="3-1" icon={<TableOutlined />}>
+                <Link to="/inventory" style={{ textDecoration: 'none' }}>
+                  Listing
+                </Link>
+              </Menu.Item>
+              <Menu.Item key="3-2" icon={<BarChartOutlined />}>
+                <Link
+                  to="/inventory/stock-management"
+                  style={{ textDecoration: 'none' }}
+                >
+                  Stock Management
+                </Link>
+              </Menu.Item>
+            </Menu.SubMenu>
           )}
           {getPermission(user, 'users') && (
-            <Menu.Item key="4" icon={<TeamOutlined />}>
+            <Menu.Item key="4" icon={<UsergroupAddOutlined />}>
               <Link to="/users" style={{ textDecoration: 'none' }}>
                 Users
               </Link>
             </Menu.Item>
           )}
           {getPermission(user, 'sales') && (
-            <Menu.Item key="5" icon={<ShopOutlined />}>
+            <Menu.Item key="5" icon={<ShoppingCartOutlined />}>
               <Link to="/sales" style={{ textDecoration: 'none' }}>
                 Sales
               </Link>

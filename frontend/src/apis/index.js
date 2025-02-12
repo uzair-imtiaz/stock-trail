@@ -55,6 +55,11 @@ export const getUsers = async () => {
   return response;
 };
 
+export const getUsersByRole = async (role) => {
+  const response = await getCallback(`/users/${role}`);
+  return response;
+};
+
 export const updateUserAccess = async (userId, data) => {
   const response = await putCallback(`/users/${userId}/update-access`, data);
   return response;
@@ -82,5 +87,10 @@ export const deleteInventory = async (id) => {
 
 export const getGroupedInventory = async () => {
   const response = await getCallback('/inventory/grouped');
+  return response;
+};
+
+export const transferStock = async (data) => {
+  const response = await postCallback('/inventory/transfer-stock', data);
   return response;
 };

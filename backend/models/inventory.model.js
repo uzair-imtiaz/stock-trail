@@ -13,7 +13,7 @@ const inventorySchema = new mongoose.Schema(
     location: {
       type: String,
       required: true,
-      enum: ['Main', 'Secondary'],
+      enum: ['Main', 'Wastage'],
       default: 'Main',
     },
     stockType: {
@@ -22,7 +22,13 @@ const inventorySchema = new mongoose.Schema(
       enum: ['Cartons', 'Pieces'],
       default: 'Cartons',
     },
-    vendor: { name: { type: String, required: true } },
+    vendor: {
+      type: Object,
+      required: true,
+      properties: {
+        name: { type: String, required: true },
+      },
+    },
     unitPrice: { type: Number, required: true },
     quantity: { type: Number, required: true },
     openingDate: { type: Date, required: true },

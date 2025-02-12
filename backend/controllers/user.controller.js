@@ -1,4 +1,5 @@
 import User from '../models/user.model.js';
+import { asyncHandler } from '../utils/error.util.js';
 
 export const getUsers = async (req, res) => {
   const users = await User.find();
@@ -33,3 +34,17 @@ export const updateUserAccess = async (req, res) => {
     message: 'User access updated successfully',
   });
 };
+
+export const getSingleUSer = asyncHandler(async (req, res) => {
+  const { role } = req.params;
+  const users = await User.find({ role });
+
+  if (!users) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+  res.status(200).json({
+    success: true,
+    data: users,
+    message: 'User fetched successfully',
+  });
+});
