@@ -137,6 +137,7 @@ export const getGroupedInventory = asyncHandler(async (req, res) => {
         unitPrice: 1,
         category: 1,
         grammage: 1,
+        location: 1,
       },
     },
   ]);

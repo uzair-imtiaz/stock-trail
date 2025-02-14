@@ -12,7 +12,8 @@ import { useNavigate } from 'react-router-dom';
 
 const { Option } = Select;
 
-const processRowSpan = (data) => {
+const processRowSpan = (list) => {
+  const data = list.filter((item) => item?.location !== 'Wastage');
   const categoryCount = {};
   data.forEach((item) => {
     categoryCount[item.category] = (categoryCount[item.category] || 0) + 1;

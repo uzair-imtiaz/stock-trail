@@ -9,12 +9,14 @@ import {
   Space,
   Divider,
   Flex,
+  Select,
 } from 'antd';
 import {
   DeleteOutlined,
   PlusOutlined,
   DollarOutlined,
 } from '@ant-design/icons';
+import { EXPENSE_OPTIONS } from '../constants';
 
 const { Text } = Typography;
 
@@ -38,7 +40,7 @@ const ExpensesSection = ({
         Add Expense
       </Button>
     }
-    style={{ maxWidth: '50%' }} // Set maxWidth to "50%"
+    style={{ maxWidth: '50%' }}
   >
     <List
       itemLayout="horizontal"
@@ -48,13 +50,16 @@ const ExpensesSection = ({
         <List.Item className="p-2">
           <div className="flex w-full align-items-center gap-2">
             <Flex direction="row">
-              <Input
-                placeholder="Expense Description"
-                value={expense.description}
-                onChange={(e) =>
-                  onExpenseChange(index, 'description', e.target.value)
+              <Select
+                placeholder="Select Expense Type"
+                // value={expense.description}
+                onChange={(value) =>
+                  onExpenseChange(index, 'description', value)
                 }
+                mode="single"
+                style={{ width: 120 }}
                 className="flex-grow mb-1"
+                options={EXPENSE_OPTIONS}
               />
               <Button
                 type="text"
