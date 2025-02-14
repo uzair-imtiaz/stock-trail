@@ -8,6 +8,7 @@ import {
 } from '../apis';
 import ExpensesSection from '../components/Expenses';
 import Title from 'antd/es/typography/Title';
+import { useNavigate } from 'react-router-dom';
 
 const { Option } = Select;
 
@@ -38,6 +39,7 @@ const SalesScreen = () => {
   const [licensePlate, setLicensePlate] = useState('');
   const [loading, setLoading] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
@@ -203,10 +205,10 @@ const SalesScreen = () => {
           {
             itemId: item._id,
             quantityDropped: item.dispatchQty,
+            tpr: item.tpr || 0,
+            wastage: item.wastage || 0,
           },
         ],
-        creditAmount: 0,
-        tpr: item.tpr || 0,
       }));
 
     const payload = {
@@ -219,6 +221,7 @@ const SalesScreen = () => {
       expenses,
       totalAmount,
       profit: 0,
+      creditAmount: 0,
     };
 
     try {
@@ -226,13 +229,8 @@ const SalesScreen = () => {
       const response = await createSale(payload);
 
       if (response?.success) {
-        message.success('Sales recorded successfully!');
-        setExpenses([]);
-        setTotalAmount(0);
-        setSelectedRoute(null);
-        setSelectedSalesman(null);
-        setDriverName('');
-        setLicensePlate('');
+        message.success(response?.message);
+        navigate('/invoices');
       } else {
         message.error(response?.message || 'Submission failed');
       }
@@ -252,7 +250,7 @@ const SalesScreen = () => {
           <Select
             placeholder="Select Route"
             style={{ width: 200 }}
-            onSelect={(value) => setSelectedRoute(value.id)}
+            onSelect={(value) => setSelectedRoute(value)}
           >
             {routes.map((route) => (
               <Option key={route._id} value={route._id}>
@@ -263,7 +261,7 @@ const SalesScreen = () => {
           <Select
             placeholder="Select Salesman"
             style={{ width: 200 }}
-            onSelect={(value) => setSelectedSalesman(value.id)}
+            onSelect={(value) => setSelectedSalesman(value)}
           >
             {salesmen.map((salesman) => (
               <Option key={salesman._id} value={salesman._id}>

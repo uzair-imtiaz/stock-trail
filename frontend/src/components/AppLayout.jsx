@@ -54,7 +54,7 @@ const AppLayout = ({ user, onLogout }) => {
         </div>
         <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
           <Menu.Item key="1" icon={<HomeOutlined />}>
-            <Link to="/" style={{ textDecoration: 'none' }}>
+            <Link to="/dashboard" style={{ textDecoration: 'none' }}>
               Dashboard
             </Link>
           </Menu.Item>

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import RouteActivity from '../models/routeActivity.model.js';
+import Inventory from '../models/inventory.model.js';
 
 export const createSale = async (req, res) => {
   const session = await mongoose.startSession();
@@ -40,12 +41,13 @@ export const createSale = async (req, res) => {
               success: false,
               message: 'Inventory item not found',
             });
+          } else {
+            await wastageItem.save();
           }
-          inventoryItem.quantity -=
-            item.quantityDropped + (item.tpr / 10 || 0) + item.wastage;
-          await inventoryItem.save();
-          await wastageItem.save();
         }
+        inventoryItem.quantity -=
+          item.quantityDropped + (item.tpr / 10 || 0) + item.wastage;
+        await inventoryItem.save();
       }
     }
     await session.commitTransaction();
@@ -57,9 +59,42 @@ export const createSale = async (req, res) => {
       data: savedSale,
     });
   } catch (error) {
+    console.log('error', error);
     await session.abortTransaction();
     session.endSession();
 
+    res.status(500).json({
+      success: false,
+      message: 'Internal Server Error',
+    });
+  }
+};
+
+export const getInvoices = async (req, res) => {
+  try {
+    const invoices = await RouteActivity.find({})
+      .populate({
+        path: 'routeId',
+        select: 'name',
+      })
+      .populate({
+        path: 'salesman',
+        select: 'name',
+      })
+      .sort({ createdAt: -1 });
+    if (!invoices) {
+      return res.status(400).json({
+        success: false,
+        message: 'Failed to fetch invoices',
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: 'Invoices fetched successfully',
+      data: invoices,
+    });
+  } catch (error) {
+    console.log(error.message);
     res.status(500).json({
       success: false,
       message: 'Internal Server Error',

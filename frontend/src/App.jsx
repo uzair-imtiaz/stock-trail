@@ -14,6 +14,7 @@ import { message } from 'antd';
 import InventoryForm from './components/InventoryForm';
 import Sales from './pages/Sales';
 import StockManagement from './pages/StockManagement';
+import Invoices from './pages/Invoices';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -21,13 +22,18 @@ const App = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const response = await getUser();
-      if (response?.success) {
-        setUser(response.data);
-      } else {
-        message.error(response?.message || 'Something went wrong');
+      try {
+        const response = await getUser();
+        if (response?.success) {
+          setUser(response.data);
+        } else {
+          message.error(response?.message || 'Something went wrong');
+        }
+      } catch (error) {
+        message.error(error.message);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     const token = Cookies.get('token');
@@ -61,13 +67,14 @@ const App = () => {
             path="/"
             element={<ProtectedRoute user={user} loading={loading} />}
           >
-            <Route index element={<Dashboard />} />
+            <Route path="dashboard" element={<Dashboard />} />
             <Route path="routes" element={<RoutesPage />} />
             <Route path="inventory" element={<Inventory />} />
             <Route path="users" element={<Users />} />
             <Route path="inventory/new" element={<InventoryForm />} />
             <Route path="inventory/:id/edit" element={<InventoryForm />} />
             <Route path="sales" element={<Sales />} />
+            <Route path="invoices" element={<Invoices />} />
             <Route
               path="inventory/stock-management"
               element={<StockManagement />}

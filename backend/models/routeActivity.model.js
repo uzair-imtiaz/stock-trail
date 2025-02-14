@@ -7,13 +7,13 @@ const ItemSchema = new mongoose.Schema({
     required: true,
   },
   quantityDropped: { type: Number, required: true },
+  wastage: { type: Number, default: 0, required: true },
+  tpr: { type: Number, default: 0, required: true },
   unitPrice: { type: Number },
 });
 
 const InventoryDroppedSchema = new mongoose.Schema({
   items: [ItemSchema],
-  creditAmount: { type: Number, required: true, default: 0 },
-  tpr: { type: Number, required: true, default: 0 },
 });
 
 const ExpenseSchema = new mongoose.Schema({
@@ -25,18 +25,13 @@ const RouteActivitySchema = new mongoose.Schema(
   {
     routeId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Routes',
+      ref: 'Route',
       required: true,
     },
     date: { type: Date, required: true },
-    status: {
-      type: String,
-      enum: ['Pending', 'In Progress', 'Completed'],
-      default: 'Pending',
-    },
     salesman: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Users',
+      ref: 'User',
       required: true,
     },
     driverName: {
@@ -51,6 +46,7 @@ const RouteActivitySchema = new mongoose.Schema(
     expenses: [ExpenseSchema],
     totalAmount: { type: Number, default: 0 },
     profit: { type: Number, default: 0 },
+    creditAmount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
@@ -88,7 +84,6 @@ RouteActivitySchema.pre('save', async function (next) {
         }
         totalAmount += item.quantityDropped * item.unitPrice;
       }
-      totalAmount -= drop.creditAmount;
     }
 
     if (this.expenses && this.expenses.length > 0) {
@@ -99,7 +94,7 @@ RouteActivitySchema.pre('save', async function (next) {
     }
 
     this.totalAmount = totalAmount;
-    this.profit = totalAmount - totalExpenses;
+    this.profit = totalAmount - totalExpenses - this.creditAmount;
 
     next();
   } catch (error) {

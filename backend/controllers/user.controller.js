@@ -30,7 +30,13 @@ export const updateUserAccess = async (req, res) => {
   await user.save();
   res.status(200).json({
     success: true,
-    data: user,
+    data: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      modules: user.modules,
+    },
     message: 'User access updated successfully',
   });
 };
@@ -44,7 +50,13 @@ export const getSingleUSer = asyncHandler(async (req, res) => {
   }
   res.status(200).json({
     success: true,
-    data: users,
+    data: users.map((user) => ({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      modules: user.modules,
+    })),
     message: 'User fetched successfully',
   });
 });

@@ -99,3 +99,8 @@ export const createSale = async (data) => {
   const response = await postCallback('/sales/new', data);
   return response;
 };
+
+export const getInvoices = async () => {
+  const response = await getCallback('/sales');
+  return response;
+};
