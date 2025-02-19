@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Table, Button, message, Popconfirm } from 'antd';
+import { Table, Button, message, Popconfirm, Flex } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { deleteInventory, getInventory } from '../apis';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
+import Title from 'antd/es/typography/Title';
 
 const InventoryList = () => {
   const [inventory, setInventory] = useState([]);
@@ -115,17 +116,17 @@ const InventoryList = () => {
 
   return (
     <>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-0">Inventory Management</h2>
+      <Flex align="center" justify="space-between">
+        <Title level={3}>Inventory Management</Title>
         <Button
           type="primary"
           icon={<PlusOutlined />}
           onClick={() => navigate('/inventory/new')}
-          size="large"
+          className="mb-3"
         >
           Add Inventory
         </Button>
-      </div>
+      </Flex>
       <Table
         columns={columns}
         dataSource={inventory}

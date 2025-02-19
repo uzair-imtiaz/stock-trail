@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import AutoIncrement from 'mongoose-sequence';
 
 const ItemSchema = new mongoose.Schema({
   itemId: {
@@ -23,6 +24,7 @@ const ExpenseSchema = new mongoose.Schema({
 
 const RouteActivitySchema = new mongoose.Schema(
   {
+    _id: Number,
     routeId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Route',
@@ -48,7 +50,8 @@ const RouteActivitySchema = new mongoose.Schema(
     profit: { type: Number, default: 0 },
     creditAmount: { type: Number, default: 0 },
   },
-  { timestamps: true }
+  { timestamps: true },
+  { _id: false }
 );
 
 RouteActivitySchema.pre('save', async function (next) {
@@ -101,6 +104,8 @@ RouteActivitySchema.pre('save', async function (next) {
     next(error);
   }
 });
+
+RouteActivitySchema.plugin(AutoIncrement(mongoose));
 
 const RouteActivity = mongoose.model('RouteActivity', RouteActivitySchema);
 

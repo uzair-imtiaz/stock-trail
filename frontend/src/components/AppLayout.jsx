@@ -82,13 +82,6 @@ const AppLayout = ({ user, onLogout }) => {
               </Menu.Item>
             </Menu.SubMenu>
           )}
-          {getPermission(user, 'users') && (
-            <Menu.Item key="4" icon={<UsergroupAddOutlined />}>
-              <Link to="/users" style={{ textDecoration: 'none' }}>
-                Users
-              </Link>
-            </Menu.Item>
-          )}
           {getPermission(user, 'sales') && (
             <Menu.SubMenu key="5" icon={<ShoppingCartOutlined />} title="Sales">
               <Menu.Item key="5-1" icon={<FileAddOutlined />}>
@@ -102,6 +95,13 @@ const AppLayout = ({ user, onLogout }) => {
                 </Link>
               </Menu.Item>
             </Menu.SubMenu>
+          )}
+          {getPermission(user, 'users') && (
+            <Menu.Item key="4" icon={<UsergroupAddOutlined />}>
+              <Link to="/users" style={{ textDecoration: 'none' }}>
+                Users
+              </Link>
+            </Menu.Item>
           )}
         </Menu>
       </Sider>

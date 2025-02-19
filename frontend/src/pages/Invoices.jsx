@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, message } from 'antd';
 import { getInvoices } from '../apis';
+import Title from 'antd/es/typography/Title';
 
 const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
@@ -30,12 +31,10 @@ const Invoices = () => {
       title: 'Sales ID',
       dataIndex: '_id',
       key: '_id',
-      // render: (text) => <span style={{ width: "100%" }}>{text}</span>,
-      // width: "250px",
     },
     {
       title: 'Route Name',
-      dataIndex: 'routeName',
+      dataIndex: ['routeId', 'name'],
       key: 'routeName',
     },
     {
@@ -58,7 +57,15 @@ const Invoices = () => {
   ];
 
   return (
-    <Table dataSource={invoices} columns={columns} bordered loading={loading} />
+    <>
+      <Title level={3}>Invoices</Title>
+      <Table
+        dataSource={invoices}
+        columns={columns}
+        bordered
+        loading={loading}
+      />
+    </>
   );
 };
 

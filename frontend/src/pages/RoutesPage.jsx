@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Table, Button, Modal, Form, Input, Select, message } from 'antd';
+import { Table, Button, Modal, Form, Input, Select, message, Flex } from 'antd';
 import { createRoute, deleteRoute, getRoutes, updateRoute } from '../apis';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import Title from 'antd/es/typography/Title';
 
 const RoutesPage = () => {
   const [routes, setRoutes] = useState([]);
@@ -116,15 +117,17 @@ const RoutesPage = () => {
 
   return (
     <div>
-      <h2>Route Management</h2>
-      <Button
-        type="primary"
-        className="mb-3"
-        style={{ float: 'inline-end' }}
-        onClick={() => openModal()}
-      >
-        Add Route
-      </Button>
+      <Flex direction="row" justify="space-between">
+        <Title level={3}>Route Management</Title>
+        <Button
+          type="primary"
+          className="mb-3"
+          icon={<PlusOutlined />}
+          onClick={() => openModal()}
+        >
+          Add Route
+        </Button>
+      </Flex>
       <Table
         dataSource={routes}
         columns={columns}

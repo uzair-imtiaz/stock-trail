@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Table, message } from 'antd';
 import { getUsers, updateUserAccess } from '../apis';
 import AccessModulesColumn from '../components/AccessModulesColumn';
+import Title from 'antd/es/typography/Title';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -65,7 +66,7 @@ const Users = () => {
 
   return (
     <div>
-      <h2>User Access Management</h2>
+      <Title level={3}>User Access Management</Title>
       <Table
         columns={columns}
         dataSource={users}

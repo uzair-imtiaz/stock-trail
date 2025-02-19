@@ -11,6 +11,7 @@ import {
 } from 'antd';
 import { SwapOutlined } from '@ant-design/icons';
 import { getInventory, transferStock } from '../apis';
+import Title from 'antd/es/typography/Title';
 
 const StockManagement = () => {
   const [loading, setLoading] = useState(true);
@@ -108,8 +109,8 @@ const StockManagement = () => {
   ];
 
   return (
-    <Flex vertical gap="large">
-      <h1>Stock Management</h1>
+    <Flex vertical>
+      <Title level={2}>Stock Management</Title>
       <Table
         columns={columns}
         dataSource={inventory}
