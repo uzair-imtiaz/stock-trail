@@ -10,7 +10,10 @@ import {
   LogoutOutlined,
   FileAddOutlined,
   FileTextOutlined,
+  ShoppingOutlined,
 } from '@ant-design/icons';
+import { IoReceiptOutline } from 'react-icons/io5';
+import { LuReceipt } from 'react-icons/lu';
 import { Link, Outlet } from 'react-router-dom';
 import { getPermission } from '../utils';
 import { useState } from 'react';
@@ -83,18 +86,30 @@ const AppLayout = ({ user, onLogout }) => {
             </Menu.SubMenu>
           )}
           {getPermission(user, 'sales') && (
-            <Menu.SubMenu key="5" icon={<ShoppingCartOutlined />} title="Sales">
-              <Menu.Item key="5-1" icon={<FileAddOutlined />}>
+            <Menu.SubMenu key="6" icon={<ShoppingCartOutlined />} title="Sales">
+              <Menu.Item key="6-1" icon={<FileAddOutlined />}>
                 <Link to="/sales" style={{ textDecoration: 'none' }}>
                   Add Sale
                 </Link>
               </Menu.Item>
-              <Menu.Item key="5-2" icon={<FileTextOutlined />}>
+              <Menu.Item key="6-2" icon={<FileTextOutlined />}>
                 <Link to="/invoices" style={{ textDecoration: 'none' }}>
                   Invoices
                 </Link>
               </Menu.Item>
+              <Menu.Item key="6-3" icon={<IoReceiptOutline />}>
+                <Link to="/receipts" style={{ textDecoration: 'none' }}>
+                  Receipts
+                </Link>
+              </Menu.Item>
             </Menu.SubMenu>
+          )}
+          {getPermission(user, 'reports') && (
+            <Menu.Item key="5" icon={<ShoppingOutlined />}>
+              <Link to="/shops" style={{ textDecoration: 'none' }}>
+                Shops
+              </Link>
+            </Menu.Item>
           )}
           {getPermission(user, 'users') && (
             <Menu.Item key="4" icon={<UsergroupAddOutlined />}>

@@ -1,20 +1,23 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import ProtectedRoute from './components/ProtectedRoute';
-import RoutesPage from './pages/RoutesPage';
-import Inventory from './pages/Inventory';
-import Users from './pages/Users';
-import AppLayout from './components/AppLayout';
-import Dashboard from './pages/Dashbaord';
-import SignIn from './pages/Signin';
-import Register from './pages/Register';
-import { useEffect, useState } from 'react';
-import { getUser, logout } from './apis';
-import Cookies from 'js-cookie';
 import { message } from 'antd';
+import Cookies from 'js-cookie';
+import { useEffect, useState } from 'react';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { getUser, logout } from './apis';
+import AppLayout from './components/AppLayout';
 import InventoryForm from './components/InventoryForm';
-import Sales from './pages/Sales';
-import StockManagement from './pages/StockManagement';
+import ProtectedRoute from './components/ProtectedRoute';
+import Dashboard from './pages/Dashbaord';
+import Inventory from './pages/Inventory';
 import Invoices from './pages/Invoices';
+import Register from './pages/Register';
+import RoutesPage from './pages/RoutesPage';
+import Sales from './pages/Sales';
+import SignIn from './pages/Signin';
+import StockManagement from './pages/StockManagement';
+import Users from './pages/Users';
+import ReceiptForm from './pages/addReceipt';
+import Receipts from './pages/Receipts';
+import Shops from './pages/Shops';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -75,10 +78,13 @@ const App = () => {
             <Route path="inventory/:id/edit" element={<InventoryForm />} />
             <Route path="sales" element={<Sales />} />
             <Route path="invoices" element={<Invoices />} />
+            <Route path="receipts" element={<Receipts />} />
+            <Route path="receipts/new" element={<ReceiptForm />} />
             <Route
               path="inventory/stock-management"
               element={<StockManagement />}
             />
+            <Route path="shops" element={<Shops />} />
           </Route>
         </Route>
       </Routes>

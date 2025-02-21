@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Form, Input, Button, Card, message, Typography } from 'antd';
+import { Form, Input, Button, message, Typography } from 'antd';
+import { Card } from '../components/common';
 import { Link, useNavigate } from 'react-router-dom';
 import { signIn } from '../apis';
 

@@ -104,3 +104,18 @@ export const getInvoices = async () => {
   const response = await getCallback('/sales');
   return response;
 };
+
+export const getShops = async () => {
+  const response = await getCallback('/shops');
+  return response;
+};
+
+export const createShop = async (data) => {
+  const response = await postCallback('/shops/new', data);
+  return response;
+};
+
+export const updateShop = async (id, data) => {
+  const response = await putCallback(`/shops/${id}/edit`, data);
+  return response;
+};
