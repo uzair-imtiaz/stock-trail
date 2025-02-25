@@ -64,7 +64,7 @@ const Shops = () => {
         const response = await updateShop(currentShop._id, values);
         if (response?.success) {
           message.success('Shop updated successfully');
-          fetchShops();
+          await fetchShops();
         } else {
           message.error(response?.message || 'Failed to update shop');
         }
@@ -72,7 +72,7 @@ const Shops = () => {
         const response = await createShop(values);
         if (response?.success) {
           message.success('Shop added successfully');
-          fetchShops();
+          await fetchShops();
         } else {
           message.error(response?.message || 'Failed to add shop');
         }
@@ -87,8 +87,8 @@ const Shops = () => {
   const columns = [
     {
       title: 'ID',
-      dataIndex: '_id',
-      key: '_id',
+      dataIndex: 'shopId',
+      key: 'shopId',
     },
     {
       title: 'Name',

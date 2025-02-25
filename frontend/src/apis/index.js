@@ -100,6 +100,11 @@ export const createSale = async (data) => {
   return response;
 };
 
+export const fetchSale = async (id) => {
+  const response = await getCallback(`/sales/${id}`);
+  return response;
+};
+
 export const getInvoices = async () => {
   const response = await getCallback('/sales');
   return response;
@@ -117,5 +122,45 @@ export const createShop = async (data) => {
 
 export const updateShop = async (id, data) => {
   const response = await putCallback(`/shops/${id}/edit`, data);
+  return response;
+};
+
+export const createReceipt = async (data) => {
+  const response = await postCallback('/receipts/new', data);
+  return response;
+};
+
+export const getReceipts = async () => {
+  const response = await getCallback('/receipts');
+  return response;
+};
+
+export const fetchReceipt = async (id) => {
+  const response = await getCallback(`/receipts/${id}`);
+  return response;
+};
+
+export const createAccount = async (data) => {
+  const response = await postCallback('/accounts/new', data);
+  return response;
+};
+
+export const getAccounts = async () => {
+  const response = await getCallback('/accounts');
+  return response;
+};
+
+export const fetchAccount = async (id) => {
+  const response = await getCallback(`/accounts/${id}`);
+  return response;
+};
+
+export const updateAccount = async (id, data) => {
+  const response = await putCallback(`/accounts/${id}/edit`, data);
+  return response;
+};
+
+export const deleteAccount = async (id) => {
+  const response = await deleteCallback(`/accounts/${id}/delete`);
   return response;
 };

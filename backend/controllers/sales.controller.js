@@ -70,6 +70,33 @@ export const createSale = async (req, res) => {
   }
 };
 
+export const getSale = async (req, res) => {
+  try {
+    const sale = await RouteActivity.findById(req.params.id)
+      .populate({
+        path: 'routeId',
+        select: 'name',
+      })
+      .lean();
+    if (!sale) {
+      return res.status(404).json({
+        success: false,
+        message: 'Sale not found',
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: 'Sale fetched successfully',
+      data: sale,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Internal Server Error',
+    });
+  }
+};
+
 export const getInvoices = async (req, res) => {
   try {
     const invoices = await RouteActivity.find({})

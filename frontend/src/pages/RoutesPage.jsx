@@ -91,7 +91,7 @@ const RoutesPage = () => {
       dataIndex: 'shops',
       key: 'shops',
       width: '55%',
-      render: (shops) => shops.join(', '),
+      render: (shops) => shops?.join(', '),
     },
     {
       title: 'Actions',
@@ -133,6 +133,7 @@ const RoutesPage = () => {
         columns={columns}
         loading={loading}
         rowKey="id"
+        bordered
       />
       <Modal
         title={selectedRoute ? 'Edit Route' : 'Add Route'}

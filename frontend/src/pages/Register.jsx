@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Form, Input, Button, Card, message, Typography } from 'antd';
+import { Form, Input, Button, message, Typography } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { signUp } from '../apis';
+import { Card } from '../components/common';
 
 const { Text } = Typography;
 

@@ -6,7 +6,6 @@ import {
   Select,
   Button,
   message,
-  Card,
   DatePicker,
   Row,
   Col,
@@ -14,6 +13,7 @@ import {
 import { createInventory, updateInventory } from '../apis';
 import { useNavigate, useLocation } from 'react-router-dom';
 import dayjs from 'dayjs';
+import { Card } from './common';
 
 const { Option } = Select;
 

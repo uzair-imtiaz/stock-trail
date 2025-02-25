@@ -33,6 +33,12 @@ const Invoices = () => {
       key: '_id',
     },
     {
+      title: 'Date',
+      dataIndex: 'date',
+      key: 'date',
+      render: (date) => new Date(date).toLocaleDateString(),
+    },
+    {
       title: 'Route Name',
       dataIndex: ['routeId', 'name'],
       key: 'routeName',

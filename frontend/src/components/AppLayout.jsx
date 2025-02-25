@@ -1,22 +1,22 @@
-import { Layout, Menu, Button } from 'antd';
 import {
-  HomeOutlined,
-  CompassOutlined,
-  InboxOutlined,
-  TableOutlined,
   BarChartOutlined,
-  UsergroupAddOutlined,
-  ShoppingCartOutlined,
-  LogoutOutlined,
+  CompassOutlined,
   FileAddOutlined,
   FileTextOutlined,
+  InboxOutlined,
+  LogoutOutlined,
+  ShoppingCartOutlined,
   ShoppingOutlined,
+  TableOutlined,
+  UsergroupAddOutlined,
 } from '@ant-design/icons';
+import { Button, Layout, Menu } from 'antd';
+import { useState } from 'react';
+import { BsBank } from 'react-icons/bs';
+import { GoGear } from 'react-icons/go';
 import { IoReceiptOutline } from 'react-icons/io5';
-import { LuReceipt } from 'react-icons/lu';
 import { Link, Outlet } from 'react-router-dom';
 import { getPermission } from '../utils';
-import { useState } from 'react';
 
 const { Header, Content, Sider } = Layout;
 
@@ -56,11 +56,11 @@ const AppLayout = ({ user, onLogout }) => {
           Stock Trail
         </div>
         <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
-          <Menu.Item key="1" icon={<HomeOutlined />}>
+          {/* <Menu.Item key="1" icon={<HomeOutlined />}>
             <Link to="/dashboard" style={{ textDecoration: 'none' }}>
               Dashboard
             </Link>
-          </Menu.Item>
+          </Menu.Item> */}
           {getPermission(user, 'routes') && (
             <Menu.Item key="2" icon={<CompassOutlined />}>
               <Link to="/routes" style={{ textDecoration: 'none' }}>
@@ -104,19 +104,26 @@ const AppLayout = ({ user, onLogout }) => {
               </Menu.Item>
             </Menu.SubMenu>
           )}
-          {getPermission(user, 'reports') && (
-            <Menu.Item key="5" icon={<ShoppingOutlined />}>
-              <Link to="/shops" style={{ textDecoration: 'none' }}>
-                Shops
-              </Link>
-            </Menu.Item>
-          )}
           {getPermission(user, 'users') && (
             <Menu.Item key="4" icon={<UsergroupAddOutlined />}>
               <Link to="/users" style={{ textDecoration: 'none' }}>
                 Users
               </Link>
             </Menu.Item>
+          )}
+          {getPermission(user, 'core') && (
+            <Menu.SubMenu key="7" icon={<GoGear />} title="Core">
+              <Menu.Item key="7-1" icon={<ShoppingOutlined />}>
+                <Link to="/core/shops" style={{ textDecoration: 'none' }}>
+                  Shops
+                </Link>
+              </Menu.Item>
+              <Menu.Item key="7-2" icon={<BsBank />}>
+                <Link to="/core/accounts" style={{ textDecoration: 'none' }}>
+                  Accounts
+                </Link>
+              </Menu.Item>
+            </Menu.SubMenu>
           )}
         </Menu>
       </Sider>

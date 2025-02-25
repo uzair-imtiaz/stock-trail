@@ -4,7 +4,7 @@ export const getShops = async (req, res) => {
   try {
     const shops = await Shop.find();
     if (!shops) {
-      res
+      return res
         .status(400)
         .json({ success: false, message: 'Unable to fetch shops' });
     }
@@ -22,9 +22,9 @@ export const getShops = async (req, res) => {
 export const createShop = async (req, res) => {
   try {
     const { name } = req.body;
-    const shop = await Shop.create({ name, address });
+    const shop = await Shop.create({ name });
     if (!shop) {
-      res
+      return res
         .status(400)
         .json({ success: false, message: 'Unable to create shop' });
     }
@@ -44,7 +44,7 @@ export const updateShop = async (req, res) => {
     const { name } = req.body;
     const shop = await Shop.findByIdAndUpdate(id, { name }, { new: true });
     if (!shop) {
-      res
+      return res
         .status(400)
         .json({ success: false, message: 'Unable to update shop' });
     }

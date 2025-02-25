@@ -1,14 +1,16 @@
+import { DollarOutlined } from '@ant-design/icons';
+import { Button, Input, InputNumber, message, Select, Table } from 'antd';
+import Title from 'antd/es/typography/Title';
 import { useEffect, useState } from 'react';
-import { Table, InputNumber, Select, Button, message, Input } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import {
   createSale,
   getGroupedInventory,
   getRoutes,
   getUsersByRole,
 } from '../apis';
-import ExpensesSection from '../components/Expenses';
-import Title from 'antd/es/typography/Title';
-import { useNavigate } from 'react-router-dom';
+import { default as DynamicListSection } from '../components/DynamicList';
+import { EXPENSE_OPTIONS } from '../constants';
 
 const { Option } = Select;
 
@@ -292,14 +294,19 @@ const SalesScreen = () => {
         />
       </div>
 
-      <ExpensesSection
-        expenses={expenses}
-        onExpenseChange={handleExpenseChange}
-        onAddExpense={addExpense}
-        onRemoveExpense={removeExpense}
+      <DynamicListSection
+        title="Expenses & Summary"
+        icon={<DollarOutlined />}
+        items={expenses}
+        setItems={setExpenses}
+        onItemChange={handleExpenseChange}
+        onAddItem={addExpense}
+        onRemoveItem={removeExpense}
         totalAmount={totalAmount}
+        selectOptions={EXPENSE_OPTIONS}
+        selectPlaceholder="Select Expense Type"
+        numberPlaceholder="Amount"
       />
-
       <Button
         type="primary"
         style={{ float: 'right', marginTop: '20px' }}

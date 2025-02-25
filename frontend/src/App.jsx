@@ -18,6 +18,7 @@ import Users from './pages/Users';
 import ReceiptForm from './pages/addReceipt';
 import Receipts from './pages/Receipts';
 import Shops from './pages/Shops';
+import Accounts from './pages/Accounts';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -84,7 +85,8 @@ const App = () => {
               path="inventory/stock-management"
               element={<StockManagement />}
             />
-            <Route path="shops" element={<Shops />} />
+            <Route path="core/shops" element={<Shops />} />
+            <Route path="core/accounts" element={<Accounts />} />
           </Route>
         </Route>
       </Routes>
