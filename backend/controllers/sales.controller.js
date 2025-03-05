@@ -108,6 +108,10 @@ export const getInvoices = async (req, res) => {
         path: 'salesman',
         select: 'name',
       })
+      .populate({
+        path: 'expenses.id',
+        select: 'name',
+      })
       .sort({ createdAt: -1 });
     if (!invoices) {
       return res.status(400).json({

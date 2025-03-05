@@ -19,6 +19,7 @@ import ReceiptForm from './pages/addReceipt';
 import Receipts from './pages/Receipts';
 import Shops from './pages/Shops';
 import Accounts from './pages/Accounts';
+import Expenses from './pages/Expenses';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -87,6 +88,7 @@ const App = () => {
             />
             <Route path="core/shops" element={<Shops />} />
             <Route path="core/accounts" element={<Accounts />} />
+            <Route path="core/expenses" element={<Expenses />} />
           </Route>
         </Route>
       </Routes>

@@ -17,6 +17,11 @@ const AdvanceSchema = new mongoose.Schema({
 
 const ReceiptSchema = new mongoose.Schema(
   {
+    account: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Account',
+      required: true,
+    },
     saleId: {
       type: Number,
       ref: 'RouteActivity',

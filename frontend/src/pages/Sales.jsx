@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   createSale,
+  getExpenses,
   getGroupedInventory,
   getRoutes,
   getUsersByRole,
@@ -38,6 +39,7 @@ const SalesScreen = () => {
   const [salesmen, setSalesmen] = useState([]);
   const [selectedSalesman, setSelectedSalesman] = useState(null);
   const [expenses, setExpenses] = useState([]);
+  const [expenseOptions, setExpenseOptions] = useState([]);
   const [driverName, setDriverName] = useState('');
   const [licensePlate, setLicensePlate] = useState('');
   const [loading, setLoading] = useState(false);
@@ -46,7 +48,27 @@ const SalesScreen = () => {
 
   useEffect(() => {
     fetchData();
+    fetchExpenseOptions();
   }, []);
+
+  const fetchExpenseOptions = async () => {
+    try {
+      const response = await getExpenses();
+      if (response.success) {
+        setExpenseOptions(
+          response.data.map((expense) => ({
+            label: expense.name,
+            value: expense.id,
+          }))
+        );
+      } else {
+        message.error(response.message || 'Failed to fetch expenses');
+      }
+    } catch (error) {
+      message.error(error.message || 'Failed to fetch expenses');
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -91,22 +113,6 @@ const SalesScreen = () => {
       item._id === record._id ? { ...item, [field]: value || 0 } : item
     );
     setInventory(updatedInventory);
-  };
-
-  const handleExpenseChange = (index, field, value) => {
-    const updatedExpenses = expenses.map((expense, i) =>
-      i === index ? { ...expense, [field]: value } : expense
-    );
-    setExpenses(updatedExpenses);
-  };
-
-  const addExpense = () => {
-    setExpenses([...expenses, { description: '', amount: 0 }]);
-  };
-
-  const removeExpense = (index) => {
-    const updatedExpenses = expenses.filter((_, i) => i !== index);
-    setExpenses(updatedExpenses);
   };
 
   const columns = [
@@ -245,6 +251,8 @@ const SalesScreen = () => {
     }
   };
 
+  console.log('expenses', expenses);
+
   return (
     <>
       <div className="mb-2">
@@ -299,11 +307,8 @@ const SalesScreen = () => {
         icon={<DollarOutlined />}
         items={expenses}
         setItems={setExpenses}
-        onItemChange={handleExpenseChange}
-        onAddItem={addExpense}
-        onRemoveItem={removeExpense}
         totalAmount={totalAmount}
-        selectOptions={EXPENSE_OPTIONS}
+        selectOptions={expenseOptions}
         selectPlaceholder="Select Expense Type"
         numberPlaceholder="Amount"
       />

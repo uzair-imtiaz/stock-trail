@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Flex, Table, Typography } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
+import { Button, Flex, Table, Typography } from 'antd';
+import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { getReceipts } from '../apis';
-import dayjs from 'dayjs';
 
 const Receipts = () => {
   const [receipts, setReceipts] = useState([]);
@@ -44,9 +44,9 @@ const Receipts = () => {
       render: (date) => dayjs(date).format('DD-MMMM-YYYY'),
     },
     {
-      title: 'Total Amount',
-      dataIndex: ['saleId', 'totalAmount'],
-      key: 'totalAmount',
+      title: 'Net Amount',
+      dataIndex: ['saleId', 'profit'],
+      key: 'netAmount',
     },
     {
       title: 'Expenses',
@@ -56,23 +56,22 @@ const Receipts = () => {
         expenses.reduce((total, expense) => total + expense.amount, 0),
     },
     {
-      title: 'Net Amount',
-      dataIndex: ['saleId', 'profit'],
-      key: 'netAmount',
+      title: 'Credits',
+      key: 'credits',
+      render: (_, record) =>
+        record.credits?.reduce(
+          (returnedSum, credit) => returnedSum + credit.creditAmount,
+          0
+        ) || 0,
     },
     {
-      title: 'Amount to be received',
-      key: 'amountToBeReceived',
+      title: 'Returned Credits',
+      key: 'returnedCredits',
       render: (_, record) =>
-        record.saleId?.profit -
-          (record.credits?.reduce(
-            (returnedSum, credit) => returnedSum + credit.creditAmount,
-            0
-          ) || 0) +
-          (record.credits?.reduce(
-            (returnedSum, credit) => returnedSum + credit.returnedAmount,
-            0
-          ) || 0) || 0,
+        record.credits?.reduce(
+          (returnedSum, credit) => returnedSum + credit.returnedAmount,
+          0
+        ) || 0,
     },
   ];
   return (

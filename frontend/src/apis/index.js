@@ -164,3 +164,18 @@ export const deleteAccount = async (id) => {
   const response = await deleteCallback(`/accounts/${id}/delete`);
   return response;
 };
+
+export const getExpenses = async () => {
+  const response = await getCallback('/expenses');
+  return response;
+};
+
+export const updateExpense = async (id, data) => {
+  const response = await putCallback(`/expenses/${id}/edit`, data);
+  return response;
+};
+
+export const createExpense = async (data) => {
+  const response = await postCallback('/expenses/new', data);
+  return response;
+};

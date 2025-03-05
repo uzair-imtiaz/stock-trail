@@ -18,7 +18,11 @@ const InventoryDroppedSchema = new mongoose.Schema({
 });
 
 const ExpenseSchema = new mongoose.Schema({
-  description: { type: String, required: true },
+  description: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Expense',
+    required: true,
+  },
   amount: { type: Number, required: true, default: 0 },
 });
 

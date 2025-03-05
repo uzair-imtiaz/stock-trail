@@ -1,6 +1,22 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Table, Button, Modal, Form, Input, Select, message, Flex } from 'antd';
-import { createRoute, deleteRoute, getRoutes, updateRoute } from '../apis';
+import {
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  Select,
+  message,
+  Flex,
+  Tag,
+} from 'antd';
+import {
+  createRoute,
+  deleteRoute,
+  getRoutes,
+  getShops,
+  updateRoute,
+} from '../apis';
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import Title from 'antd/es/typography/Title';
 
@@ -10,6 +26,7 @@ const RoutesPage = () => {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState(null);
+  const [shops, setShops] = useState([]);
   const [form] = Form.useForm();
 
   const fetchRoutes = useCallback(async () => {
@@ -28,8 +45,22 @@ const RoutesPage = () => {
     }
   }, []);
 
+  const fetchShops = async () => {
+    try {
+      const response = await getShops();
+      if (response?.success) {
+        setShops(response?.data);
+      } else {
+        message.error(response?.message || 'Failed to fetch shops');
+      }
+    } catch (error) {
+      message.error(error?.message || 'Failed to fetch shops');
+    }
+  };
+
   useEffect(() => {
     fetchRoutes();
+    fetchShops();
   }, [fetchRoutes]);
 
   const handleDelete = async (id) => {
@@ -88,10 +119,15 @@ const RoutesPage = () => {
     },
     {
       title: 'Shops',
-      dataIndex: 'shops',
+      dataIndex: ['shops'],
       key: 'shops',
       width: '55%',
-      render: (shops) => shops?.join(', '),
+      render: (shops) =>
+        shops?.length > 0 ? (
+          shops.map((shop) => <Tag key={shop._id}>{shop.name}</Tag>)
+        ) : (
+          <span>-</span>
+        ),
     },
     {
       title: 'Actions',
@@ -152,11 +188,17 @@ const RoutesPage = () => {
           </Form.Item>
           <Form.Item name="shops" label="Shops" rules={[{ required: true }]}>
             <Select
-              mode="tags"
+              mode="multiple"
               placeholder="Enter shop names"
-              showSearch={false}
-              open={false}
-              suffixIcon={null}
+              showSearch
+              allowClear
+              options={shops.map((shop) => ({
+                label: shop.name,
+                value: shop._id,
+              }))}
+              filterOption={(input, option) =>
+                option?.label?.toLowerCase().includes(input.toLowerCase())
+              }
             />
           </Form.Item>
           <Button type="primary" htmlType="submit" loading={saveLoading}>

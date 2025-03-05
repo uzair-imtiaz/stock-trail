@@ -25,6 +25,7 @@ const DynamicListSection = ({
   numberPlaceholder,
   showTotalAmount = true,
   width = '50%',
+  totalText = 'Total Amount',
 }) => {
   const handleItemChange = (index, field, value) => {
     const updatedExpenses = items.map((expense, i) =>
@@ -72,7 +73,7 @@ const DynamicListSection = ({
                     handleItemChange(index, 'description', value)
                   }
                   allowClear
-                  value={item?.description}
+                  value={item?.description || null}
                   className="flex-grow mb-1 w-100"
                   options={selectOptions}
                 />
@@ -104,7 +105,7 @@ const DynamicListSection = ({
         <>
           <Divider />
           <div className="flex justify-between items-center max-w-3xl">
-            <Text strong>Total Amount:</Text>
+            <Text strong>{totalText}:&nbsp;</Text>
             <Text strong className="text-xl">
               PKR {totalAmount.toFixed(2)}
             </Text>

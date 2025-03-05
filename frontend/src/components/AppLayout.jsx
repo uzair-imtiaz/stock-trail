@@ -5,6 +5,7 @@ import {
   FileTextOutlined,
   InboxOutlined,
   LogoutOutlined,
+  MoneyCollectOutlined,
   ShoppingCartOutlined,
   ShoppingOutlined,
   TableOutlined,
@@ -121,6 +122,11 @@ const AppLayout = ({ user, onLogout }) => {
               <Menu.Item key="7-2" icon={<BsBank />}>
                 <Link to="/core/accounts" style={{ textDecoration: 'none' }}>
                   Accounts
+                </Link>
+              </Menu.Item>
+              <Menu.Item key="7-3" icon={<MoneyCollectOutlined />}>
+                <Link to="/core/expenses" style={{ textDecoration: 'none' }}>
+                  Expenses
                 </Link>
               </Menu.Item>
             </Menu.SubMenu>

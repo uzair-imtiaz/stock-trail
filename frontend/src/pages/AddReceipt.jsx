@@ -94,7 +94,6 @@ const ReceiptForm = () => {
     try {
       setLoading(true);
       const saleId = form.getFieldValue('saleId');
-      const bank = form.getFieldValue('bank');
 
       const [saleRes, shopsRes, receiptRes] = await Promise.all([
         fetchSale(saleId),
@@ -134,8 +133,10 @@ const ReceiptForm = () => {
   const handleSave = async () => {
     let response;
     try {
+      const bank = form.getFieldValue('bank');
       setSumbitLoading(true);
       const payload = {
+        account: bank,
         saleId: saleData?.id,
         credits: creditSale,
         returnedCredits: creditReceived,
@@ -230,8 +231,12 @@ const ReceiptForm = () => {
                   selectOptions={shops}
                   selectPlaceholder="Select Shop"
                   numberPlaceholder="Credit Amount"
-                  showTotalAmount={false}
                   width={'100%'}
+                  totalText="Total Credit"
+                  totalAmount={creditSale.reduce(
+                    (total, credit) => total + credit.amount,
+                    0
+                  )}
                 />
 
                 <DynamicListSection
@@ -241,9 +246,14 @@ const ReceiptForm = () => {
                   setItems={setCreditReceived}
                   selectOptions={shops}
                   selectPlaceholder="Select Shop"
-                  numberPlaceholder="Credit Amount"
-                  showTotalAmount={false}
+                  numberPlaceholder="Amount"
+                  // showTotalAmount={false}
                   width={'100%'}
+                  totalText="Total Return"
+                  totalAmount={creditReceived.reduce(
+                    (total, credit) => total + credit.amount,
+                    0
+                  )}
                 />
               </div>
             </Row>
@@ -284,7 +294,7 @@ const ReceiptForm = () => {
                   </Descriptions.Item>
                   <Descriptions.Item label="Amount to be Received">
                     <Text strong>
-                      PKR{' '}
+                      PKR&nbsp;
                       {saleData.netAmount -
                         creditSale.reduce((a, b) => a + b.amount, 0) +
                         creditReceived.reduce((a, b) => a + b.amount, 0)}

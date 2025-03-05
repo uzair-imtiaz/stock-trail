@@ -1,5 +1,7 @@
+import mongoose from 'mongoose';
 import Receipt from '../models/receipt.model.js';
 import RouteActivity from '../models/routeActivity.model.js';
+import Account from '../models/account.model.js';
 
 const mergeCreditData = (creditData = [], returnedCredits = []) => {
   if (!Array.isArray(creditData) || !Array.isArray(returnedCredits)) {
@@ -35,9 +37,26 @@ const mergeCreditData = (creditData = [], returnedCredits = []) => {
   return Array.from(mergedData.values());
 };
 
-export const createReceipt = async (req, res) => {
+export const createOrUpdateReceipt = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
-    const { saleId, credits, returnedCredits, advances } = req.body;
+    const {
+      account,
+      saleId,
+      credits = [],
+      returnedCredits = [],
+      advances = [],
+    } = req.body;
+
+    const backAccount = await Account.findById(account);
+    if (!backAccount) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Account not found' });
+    }
+
     const sale = await RouteActivity.findById(saleId);
     if (!sale) {
       return res
@@ -46,7 +65,6 @@ export const createReceipt = async (req, res) => {
     }
 
     const _credits = mergeCreditData(credits, returnedCredits);
-
     const totalCreditAmount = _credits.reduce(
       (sum, item) => sum + item.creditAmount,
       0
@@ -70,17 +88,45 @@ export const createReceipt = async (req, res) => {
       });
     }
 
-    const receipt = await Receipt.create({
-      saleId,
-      credits: _credits,
-      advances,
-    });
+    const amountRecovered = totalCreditAmount - totalReturnedAmount;
 
-    if (!receipt) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Unable to create receipt' });
+    let receipt = await Receipt.findOne({ saleId }).session(session);
+    let isNewReceipt = false;
+    let previousAmountRecovered = 0;
+
+    if (receipt) {
+      previousAmountRecovered = receipt.credits.reduce(
+        (sum, item) => sum + (item.creditAmount - item.returnedAmount),
+        0
+      );
+
+      receipt.credits = _credits;
+      receipt.advances = advances;
+      await receipt.save({ session });
+    } else {
+      isNewReceipt = true;
+      receipt = await Receipt.create(
+        [{ account, saleId, credits: _credits, advances }],
+        { session }
+      );
+
+      if (!receipt || receipt.length === 0) {
+        await session.abortTransaction();
+        session.endSession();
+        return res
+          .status(400)
+          .json({ success: false, message: 'Unable to create receipt' });
+      }
+      receipt = receipt[0];
     }
+
+    const balanceAdjustment =
+      amountRecovered - (isNewReceipt ? 0 : previousAmountRecovered);
+    backAccount.balance += balanceAdjustment;
+    await backAccount.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
 
     res.status(201).json({
       success: true,
@@ -88,6 +134,10 @@ export const createReceipt = async (req, res) => {
       message: 'Receipt created successfully',
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+
+    console.error(error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };

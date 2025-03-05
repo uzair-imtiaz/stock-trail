@@ -19,7 +19,10 @@ export const createRoute = async (req, res) => {
 };
 
 export const getRoutes = async (_, res) => {
-  const routes = await Route.find();
+  const routes = await Route.find().populate({
+    path: 'shops',
+    select: 'name',
+  });
   if (!routes) {
     return res.status(400).json({
       success: false,
