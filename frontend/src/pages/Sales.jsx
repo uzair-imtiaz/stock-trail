@@ -251,8 +251,6 @@ const SalesScreen = () => {
     }
   };
 
-  console.log('expenses', expenses);
-
   return (
     <>
       <div className="mb-2">

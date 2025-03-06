@@ -20,6 +20,7 @@ import Receipts from './pages/Receipts';
 import Shops from './pages/Shops';
 import Accounts from './pages/Accounts';
 import Expenses from './pages/Expenses';
+import Purchase from './pages/Purchase';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -89,6 +90,8 @@ const App = () => {
             <Route path="core/shops" element={<Shops />} />
             <Route path="core/accounts" element={<Accounts />} />
             <Route path="core/expenses" element={<Expenses />} />
+            <Route path="purchase" element={<Purchase />} />
+            <Route path="*" element={<h1>404</h1>} />
           </Route>
         </Route>
       </Routes>

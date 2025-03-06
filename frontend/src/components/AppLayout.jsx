@@ -112,6 +112,13 @@ const AppLayout = ({ user, onLogout }) => {
               </Link>
             </Menu.Item>
           )}
+          {getPermission(user, 'purchase') && (
+            <Menu.Item key="5" icon={<ShoppingOutlined />}>
+              <Link to="/purchase" style={{ textDecoration: 'none' }}>
+                Purchase
+              </Link>
+            </Menu.Item>
+          )}
           {getPermission(user, 'core') && (
             <Menu.SubMenu key="7" icon={<GoGear />} title="Core">
               <Menu.Item key="7-1" icon={<ShoppingOutlined />}>
