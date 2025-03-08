@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { getReceipts } from '../apis';
+import { formatBalance } from '../utils';
 
 const Receipts = () => {
   const [receipts, setReceipts] = useState([]);
@@ -47,31 +48,43 @@ const Receipts = () => {
       title: 'Net Amount',
       dataIndex: ['saleId', 'profit'],
       key: 'netAmount',
+      render: (amount) => formatBalance(amount),
     },
     {
       title: 'Expenses',
       dataIndex: ['saleId', 'expenses'],
       key: 'expenses',
-      render: (expenses) =>
-        expenses.reduce((total, expense) => total + expense.amount, 0),
+      render: (expenses) => {
+        const totalExpenses = expenses?.reduce(
+          (total, expense) => total + expense.amount,
+          0
+        );
+        return formatBalance(totalExpenses);
+      },
     },
     {
       title: 'Credits',
       key: 'credits',
-      render: (_, record) =>
-        record.credits?.reduce(
-          (returnedSum, credit) => returnedSum + credit.creditAmount,
-          0
-        ) || 0,
+      render: (_, record) => {
+        const credits =
+          record.credits?.reduce(
+            (returnedSum, credit) => returnedSum + credit.creditAmount,
+            0
+          ) || 0;
+        return formatBalance(credits);
+      },
     },
     {
       title: 'Returned Credits',
       key: 'returnedCredits',
-      render: (_, record) =>
-        record.credits?.reduce(
-          (returnedSum, credit) => returnedSum + credit.returnedAmount,
-          0
-        ) || 0,
+      render: (_, record) => {
+        const returnedCredits =
+          record.credits?.reduce(
+            (returnedSum, credit) => returnedSum + credit.returnedAmount,
+            0
+          ) || 0;
+        return formatBalance(returnedCredits);
+      },
     },
   ];
   return (

@@ -15,12 +15,15 @@ import Sales from './pages/Sales';
 import SignIn from './pages/Signin';
 import StockManagement from './pages/StockManagement';
 import Users from './pages/Users';
-import ReceiptForm from './pages/addReceipt';
+import ReceiptForm from './pages/AddReceipt';
 import Receipts from './pages/Receipts';
 import Shops from './pages/Shops';
 import Accounts from './pages/Accounts';
 import Expenses from './pages/Expenses';
 import Purchase from './pages/Purchase';
+import Reports from './pages/Reports';
+import ExpenseReport from './components/reports/ExpenseReport';
+import CreditsReport from './components/reports/CreditsReport';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -91,6 +94,9 @@ const App = () => {
             <Route path="core/accounts" element={<Accounts />} />
             <Route path="core/expenses" element={<Expenses />} />
             <Route path="purchase" element={<Purchase />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="reports/expense" element={<ExpenseReport />} />
+            <Route path="reports/credits" element={<CreditsReport />} />
             <Route path="*" element={<h1>404</h1>} />
           </Route>
         </Route>

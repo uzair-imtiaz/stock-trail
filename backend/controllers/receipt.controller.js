@@ -3,18 +3,26 @@ import Receipt from '../models/receipt.model.js';
 import RouteActivity from '../models/routeActivity.model.js';
 import Account from '../models/account.model.js';
 
-const mergeCreditData = (creditData = [], returnedCredits = []) => {
-  if (!Array.isArray(creditData) || !Array.isArray(returnedCredits)) {
-    throw new Error('Both creditData and returnedCredits must be arrays');
+const mergeCreditData = (
+  existingCredits,
+  newCredits = [],
+  returnedCredits = []
+) => {
+  if (
+    !Array.isArray(existingCredits) ||
+    !Array.isArray(newCredits) ||
+    !Array.isArray(returnedCredits)
+  ) {
+    throw new Error(
+      'Existing credits, newCredits, and returnedCredits must be arrays'
+    );
   }
 
-  const mergedData = new Map();
+  const mergedData = [...existingCredits];
 
-  creditData.forEach(({ description: shopId, amount }) => {
-    if (mergedData.has(shopId)) {
-      mergedData.get(shopId).creditAmount += Math.max(0, amount);
-    } else {
-      mergedData.set(shopId, {
+  newCredits.forEach(({ description: shopId, amount }) => {
+    if (amount > 0) {
+      mergedData.push({
         shopId,
         creditAmount: Math.max(0, amount),
         returnedAmount: 0,
@@ -23,10 +31,8 @@ const mergeCreditData = (creditData = [], returnedCredits = []) => {
   });
 
   returnedCredits.forEach(({ description: shopId, amount }) => {
-    if (mergedData.has(shopId)) {
-      mergedData.get(shopId).returnedAmount += Math.max(0, amount);
-    } else {
-      mergedData.set(shopId, {
+    if (amount > 0) {
+      mergedData.push({
         shopId,
         creditAmount: 0,
         returnedAmount: Math.max(0, amount),
@@ -34,7 +40,7 @@ const mergeCreditData = (creditData = [], returnedCredits = []) => {
     }
   });
 
-  return Array.from(mergedData.values());
+  return mergedData;
 };
 
 export const createOrUpdateReceipt = async (req, res) => {
@@ -64,34 +70,7 @@ export const createOrUpdateReceipt = async (req, res) => {
         .json({ success: false, message: 'Sale not found' });
     }
 
-    const _credits = mergeCreditData(credits, returnedCredits);
-    const totalCreditAmount = _credits.reduce(
-      (sum, item) => sum + item.creditAmount,
-      0
-    );
-    const totalReturnedAmount = _credits.reduce(
-      (sum, item) => sum + item.returnedAmount,
-      0
-    );
-
-    if (totalCreditAmount > sale.profit) {
-      return res.status(400).json({
-        success: false,
-        message: 'Total credit amount cannot exceed profit amount',
-      });
-    }
-
-    if (totalReturnedAmount > totalCreditAmount) {
-      return res.status(400).json({
-        success: false,
-        message: 'Total returned amount cannot exceed total credit amount',
-      });
-    }
-
-    const amountRecovered = totalCreditAmount - totalReturnedAmount;
-
     let receipt = await Receipt.findOne({ saleId }).session(session);
-    let isNewReceipt = false;
     let previousAmountRecovered = 0;
 
     if (receipt) {
@@ -100,13 +79,25 @@ export const createOrUpdateReceipt = async (req, res) => {
         0
       );
 
-      receipt.credits = _credits;
-      receipt.advances = advances;
+      receipt.credits = mergeCreditData(
+        receipt.credits,
+        credits,
+        returnedCredits
+      );
+
+      receipt.advances.push(...advances);
+
       await receipt.save({ session });
     } else {
-      isNewReceipt = true;
       receipt = await Receipt.create(
-        [{ account, saleId, credits: _credits, advances }],
+        [
+          {
+            account,
+            saleId,
+            credits: mergeCreditData([], credits, returnedCredits),
+            advances,
+          },
+        ],
         { session }
       );
 
@@ -120,8 +111,35 @@ export const createOrUpdateReceipt = async (req, res) => {
       receipt = receipt[0];
     }
 
-    const balanceAdjustment =
-      amountRecovered - (isNewReceipt ? 0 : previousAmountRecovered);
+    const totalCreditAmount = receipt.credits.reduce(
+      (sum, item) => sum + item.creditAmount,
+      0
+    );
+    const totalReturnedAmount = receipt.credits.reduce(
+      (sum, item) => sum + item.returnedAmount,
+      0
+    );
+    const amountRecovered = totalCreditAmount - totalReturnedAmount;
+
+    if (totalCreditAmount > sale.profit) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({
+        success: false,
+        message: 'Total credit amount cannot exceed profit amount',
+      });
+    }
+
+    if (totalReturnedAmount > totalCreditAmount) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({
+        success: false,
+        message: 'Total returned amount cannot exceed total credit amount',
+      });
+    }
+
+    const balanceAdjustment = amountRecovered - previousAmountRecovered;
     backAccount.balance += balanceAdjustment;
     await backAccount.save({ session });
 
@@ -131,7 +149,7 @@ export const createOrUpdateReceipt = async (req, res) => {
     res.status(201).json({
       success: true,
       data: receipt,
-      message: 'Receipt created successfully',
+      message: 'Receipt updated successfully',
     });
   } catch (error) {
     await session.abortTransaction();
@@ -193,6 +211,88 @@ export const getReceipt = async (req, res) => {
       message: 'Receipt fetched successfully',
     });
   } catch (error) {
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
+export const generateCreditReport = async (req, res) => {
+  try {
+    const { salesmanId, routeId, shopId } = req.query;
+    const matchStage = {};
+
+    if (shopId) {
+      matchStage['credits.shopId'] = mongoose.ObjectId.createFromTime(shopId);
+    }
+
+    const pipeline = [
+      { $unwind: '$credits' },
+
+      {
+        $lookup: {
+          from: 'shops',
+          localField: 'credits.shopId',
+          foreignField: '_id',
+          as: 'shopDetails',
+        },
+      },
+      { $unwind: '$shopDetails' },
+
+      {
+        $lookup: {
+          from: 'routeactivities',
+          localField: 'saleId',
+          foreignField: '_id',
+          as: 'saleDetails',
+        },
+      },
+      { $unwind: '$saleDetails' },
+
+      ...(salesmanId
+        ? [
+            {
+              $match: {
+                'saleDetails.salesman':
+                  mongoose.ObjectId.createFromTime(salesmanId),
+              },
+            },
+          ]
+        : []),
+      ...(routeId
+        ? [
+            {
+              $match: {
+                'saleDetails.routeId':
+                  mongoose.ObjectId.createFromTime(routeId),
+              },
+            },
+          ]
+        : []),
+
+      {
+        $group: {
+          _id: {
+            date: {
+              $dateToString: { format: '%Y-%m-%d', date: '$credits.createdAt' },
+            },
+            shopName: '$shopDetails.name',
+          },
+          totalCredit: { $sum: '$credits.creditAmount' },
+          totalDebit: { $sum: '$credits.returnedAmount' },
+        },
+      },
+
+      { $sort: { '_id.date': 1 } },
+    ];
+
+    const report = await Receipt.aggregate(pipeline);
+    if (!report) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Report could not be generated' });
+    }
+    res.status(200).json({ success: true, data: report });
+  } catch (error) {
+    console.error('Error generating report:', error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };

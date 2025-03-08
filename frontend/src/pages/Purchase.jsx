@@ -17,6 +17,7 @@ import {
   getAccounts,
   getGroupedInventory,
 } from '../apis';
+import { formatBalance } from '../utils';
 
 const { Option } = Select;
 
@@ -37,20 +38,12 @@ const processRowSpan = (list) => {
   });
 };
 
-const formatBalance = (balance) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'PKR',
-  }).format(balance);
-};
-
 const Purchase = () => {
   const [inventory, setInventory] = useState([]);
   const [banks, setBanks] = useState([]);
   const [selectedBank, setSelectedBank] = useState(null);
   const [vendorName, setVendorName] = useState('Pepsico');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
@@ -80,14 +73,12 @@ const Purchase = () => {
       if (item._id === key) {
         const updatedItem = { ...item, [field]: value };
 
-        // Recalculate totalGST
         updatedItem.totalGST =
           updatedItem.gstAmount ||
           (updatedItem.gstPercent / 100) *
             (updatedItem.unitPrice * updatedItem.buyingQuantity) ||
           0;
 
-        // Recalculate amount
         updatedItem.amount =
           (updatedItem.unitPrice * updatedItem.buyingQuantity || 0) +
           updatedItem.totalGST;
@@ -129,6 +120,7 @@ const Purchase = () => {
       title: 'Unit Price',
       dataIndex: 'unitPrice',
       key: 'unitPrice',
+      render: (price) => formatBalance(price),
     },
     {
       title: 'Quantity (Cartons)',
@@ -181,13 +173,13 @@ const Purchase = () => {
       title: 'Total GST',
       dataIndex: 'totalGST',
       key: 'totalGST',
-      render: (_, record) => record?.totalGST || 0,
+      render: (_, record) => formatBalance(record?.totalGST || 0),
     },
     {
       title: 'Amount',
       dataIndex: 'amount',
       key: 'amount',
-      render: (_, record) => record?.amount || 0,
+      render: (_, record) => formatBalance(record?.amount || 0),
     },
   ];
 
@@ -211,7 +203,7 @@ const Purchase = () => {
       vendor: vendorName,
       items: inventoryItems,
     };
-    console.log('payload', payload);
+
     try {
       setLoading(true);
       const response = await createPurchase(payload);

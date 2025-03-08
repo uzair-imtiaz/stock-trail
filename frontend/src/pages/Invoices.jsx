@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, message } from 'antd';
 import { getInvoices } from '../apis';
 import Title from 'antd/es/typography/Title';
+import { formatBalance } from '../utils';
 
 const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
@@ -47,18 +48,22 @@ const Invoices = () => {
       title: 'Total Amount',
       dataIndex: 'totalAmount',
       key: 'totalAmount',
+      render: (amount) => formatBalance(amount),
     },
     {
       title: 'Total Expenses',
       dataIndex: 'expenses',
       key: 'expenses',
       render: (expenses) =>
-        expenses.reduce((total, expense) => total + expense.amount, 0),
+        formatBalance(
+          expenses.reduce((total, expense) => total + expense.amount, 0)
+        ),
     },
     {
       title: 'Net Amount',
       dataIndex: 'profit',
       key: 'profit',
+      render: (amount) => formatBalance(amount),
     },
   ];
 

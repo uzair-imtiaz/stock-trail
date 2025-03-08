@@ -11,7 +11,6 @@ import {
   getUsersByRole,
 } from '../apis';
 import { default as DynamicListSection } from '../components/DynamicList';
-import { EXPENSE_OPTIONS } from '../constants';
 
 const { Option } = Select;
 
@@ -58,7 +57,7 @@ const SalesScreen = () => {
         setExpenseOptions(
           response.data.map((expense) => ({
             label: expense.name,
-            value: expense.id,
+            value: expense._id,
           }))
         );
       } else {

@@ -109,7 +109,7 @@ export const getInvoices = async (req, res) => {
         select: 'name',
       })
       .populate({
-        path: 'expenses.id',
+        path: 'expenses._id',
         select: 'name',
       })
       .sort({ createdAt: -1 });
@@ -126,6 +126,70 @@ export const getInvoices = async (req, res) => {
     });
   } catch (error) {
     console.log(error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Internal Server Error',
+    });
+  }
+};
+
+export const getExpensesReport = async (req, res) => {
+  try {
+    const { startDate, endDate, routeId, salesman } = req.query;
+
+    const matchStage = {};
+    if (startDate && endDate) {
+      matchStage.date = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    }
+    if (routeId) matchStage.routeId = routeId;
+    if (salesman) matchStage.salesman = salesman;
+
+    const expenseReport = await RouteActivity.aggregate([
+      { $match: matchStage },
+      { $unwind: '$expenses' },
+      {
+        $lookup: {
+          from: 'expenses',
+          localField: 'expenses.description',
+          foreignField: '_id',
+          as: 'expenseInfo',
+        },
+      },
+
+      {
+        $group: {
+          _id: {
+            date: { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
+            expenseName: { $arrayElemAt: ['$expenseInfo.name', 0] },
+          },
+          amount: { $sum: '$expenses.amount' },
+        },
+      },
+
+      {
+        $project: {
+          _id: 0,
+          date: '$_id.date',
+          name: '$_id.expenseName',
+          amount: 1,
+        },
+      },
+
+      { $sort: { date: -1 } },
+    ]);
+
+    console.log('expenseReport', expenseReport);
+
+    res.status(200).json({
+      success: true,
+      message: 'Sales report fetched successfully',
+      data: expenseReport,
+    });
+  } catch (error) {
+    console.error('Error fetching sales report:', error);
     res.status(500).json({
       success: false,
       message: 'Internal Server Error',

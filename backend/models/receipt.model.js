@@ -1,14 +1,18 @@
 import mongoose from 'mongoose';
 
-const CreditSchema = new mongoose.Schema({
-  shopId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Shop',
-    required: true,
+const CreditSchema = new mongoose.Schema(
+  {
+    shopId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Shop',
+      required: true,
+      index: true,
+    },
+    creditAmount: { type: Number, required: true, default: 0 },
+    returnedAmount: { type: Number, required: true, default: 0 },
   },
-  creditAmount: { type: Number, required: true, default: 0 },
-  returnedAmount: { type: Number, required: true, default: 0 },
-});
+  { timestamps: true }
+);
 
 const AdvanceSchema = new mongoose.Schema({
   role: { type: String, required: true },
@@ -26,6 +30,7 @@ const ReceiptSchema = new mongoose.Schema(
       type: Number,
       ref: 'RouteActivity',
       required: true,
+      index: true,
     },
     credits: [CreditSchema],
     advances: [AdvanceSchema],

@@ -3,6 +3,7 @@ import {
   CompassOutlined,
   FileAddOutlined,
   FileTextOutlined,
+  FundViewOutlined,
   InboxOutlined,
   LogoutOutlined,
   MoneyCollectOutlined,
@@ -116,6 +117,13 @@ const AppLayout = ({ user, onLogout }) => {
             <Menu.Item key="5" icon={<ShoppingOutlined />}>
               <Link to="/purchase" style={{ textDecoration: 'none' }}>
                 Purchase
+              </Link>
+            </Menu.Item>
+          )}
+          {getPermission(user, 'reports') && (
+            <Menu.Item key="1" icon={<FundViewOutlined />}>
+              <Link to="/reports" style={{ textDecoration: 'none' }}>
+                Reports
               </Link>
             </Menu.Item>
           )}

@@ -184,3 +184,13 @@ export const createPurchase = async (data) => {
   const response = await postCallback('/purchases/new', data);
   return response;
 };
+
+export const getExpensesReport = async (query) => {
+  const response = await getCallback('/sales/report/expenses', query);
+  return response;
+};
+
+export const getCreditsReport = async (query) => {
+  const response = await getCallback('/receipts/report/credits', query);
+  return response;
+};
