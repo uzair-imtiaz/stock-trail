@@ -71,14 +71,24 @@ const CreditsReport = () => {
         message.error(response?.message || 'Something went wrong');
         return;
       }
-      //   setData(
-      //     response.data.map((expense) => ({
-      //       key: expense._id,
-      //       date: dayjs(expense.date).format('YYYY-MM-DD'),
-      //       name: expense.name,
-      //       amount: expense.amount,
-      //     }))
-      //   );
+      let runningBalance = 0;
+
+      const formattedData = response.data.map((item) => {
+        const credit = item?.totalCredit || 0;
+        const returned = item?.totalReturned || 0;
+        runningBalance += credit - returned;
+
+        return {
+          key: item._id?.shopName,
+          date: dayjs(item?._id?.date).format('YYYY-MM-DD'),
+          shopName: item._id?.shopName,
+          credit: credit,
+          returned: returned,
+          balance: runningBalance,
+        };
+      });
+
+      setData(formattedData);
     } catch (error) {
       message.error(error.message);
     } finally {
@@ -92,12 +102,24 @@ const CreditsReport = () => {
 
   const columns = [
     { title: 'Date', dataIndex: 'date', key: 'date' },
-    { title: 'Expense Name', dataIndex: 'name', key: 'name' },
+    { title: 'Shop', dataIndex: 'shopName', key: 'shopName' },
     {
-      title: 'Amount',
-      dataIndex: 'amount',
-      key: 'amount',
-      render: (amount) => formatBalance(amount),
+      title: 'Credit',
+      dataIndex: 'credit',
+      key: 'credit',
+      render: (value) => (value ? formatBalance(value) : '-'),
+    },
+    {
+      title: 'Returned',
+      dataIndex: 'returned',
+      key: 'returned',
+      render: (value) => (value ? formatBalance(value) : '-'),
+    },
+    {
+      title: 'Balance',
+      dataIndex: 'balance',
+      key: 'balance',
+      render: (value) => (value ? formatBalance(value) : '-'),
     },
   ];
 

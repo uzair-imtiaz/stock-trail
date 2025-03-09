@@ -277,7 +277,7 @@ export const generateCreditReport = async (req, res) => {
             shopName: '$shopDetails.name',
           },
           totalCredit: { $sum: '$credits.creditAmount' },
-          totalDebit: { $sum: '$credits.returnedAmount' },
+          totalReturned: { $sum: '$credits.returnedAmount' },
         },
       },
 
