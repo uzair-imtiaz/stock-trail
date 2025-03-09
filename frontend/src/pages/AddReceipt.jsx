@@ -142,9 +142,7 @@ const ReceiptForm = () => {
         returnedCredits: creditReceived,
       };
 
-      console.log('payload', payload);
-
-      // response = await createReceipt(payload);
+      response = await createReceipt(payload);
       if (response?.success) {
         message.success(response?.message);
         navigate('/receipts');
