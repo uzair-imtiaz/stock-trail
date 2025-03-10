@@ -210,7 +210,6 @@ const Purchase = () => {
 
       if (response?.success) {
         message.success(response?.message);
-        // navigate('/invoices');
       } else {
         message.error(response?.message || 'Submission failed');
       }

@@ -75,6 +75,7 @@ const DynamicListSection = ({
                   allowClear
                   value={item?.description || null}
                   className="flex-grow mb-1 w-100"
+                  disabled={item?.disabled}
                   options={selectOptions}
                 />
                 <Button
@@ -82,6 +83,7 @@ const DynamicListSection = ({
                   danger
                   icon={<DeleteOutlined />}
                   onClick={() => handleRemoveItem(index)}
+                  disabled={item?.disabled}
                   className="ml-1 flex-none"
                 />
               </Flex>
@@ -91,6 +93,7 @@ const DynamicListSection = ({
                 value={item.amount}
                 onChange={(value) => handleItemChange(index, 'amount', value)}
                 prefix="PKR"
+                disabled={item?.disabled}
                 className="w-75"
               />
             </div>

@@ -31,7 +31,9 @@ const ReceiptForm = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [submitLoading, setSumbitLoading] = useState(false);
+  const [initialCreditSale, setInitialCreditSale] = useState([]);
   const [creditSale, setCreditSale] = useState([]);
+  const [initialCreditReceived, setInitialCreditReceived] = useState([]);
   const [creditReceived, setCreditReceived] = useState([]);
   const [saleData, setSaleData] = useState(null);
   const [shops, setShops] = useState([]);
@@ -70,6 +72,7 @@ const ReceiptForm = () => {
           creditSummary[shopId] = {
             description: shopId,
             amount: 0,
+            disabled: true,
           };
         }
         creditSummary[shopId].amount += creditAmount;
@@ -78,16 +81,25 @@ const ReceiptForm = () => {
           returnSummary[shopId] = {
             description: shopId,
             amount: 0,
+            disabled: true,
           };
         }
         returnSummary[shopId].amount += returnedAmount;
       });
     });
 
-    setCreditSale(Object.values(creditSummary).filter((item) => item.amount));
-    setCreditReceived(
-      Object.values(returnSummary).filter((item) => item.amount)
+    const creditSaleArray = Object.values(creditSummary).filter(
+      (item) => item.amount
     );
+    const creditReceivedArray = Object.values(returnSummary).filter(
+      (item) => item.amount
+    );
+
+    setCreditSale(creditSaleArray);
+    setCreditReceived(creditReceivedArray);
+
+    setInitialCreditSale(creditSaleArray);
+    setInitialCreditReceived(creditReceivedArray);
   };
 
   const handleShowData = async () => {
@@ -138,13 +150,15 @@ const ReceiptForm = () => {
       const payload = {
         account: bank,
         saleId: saleData?.id,
-        credits: creditSale,
-        returnedCredits: creditReceived,
+        credits: creditSale.filter(
+          (item) => item.amount > 0 && item?.disabled !== true
+        ),
+        returnedCredits: creditReceived.filter(
+          (item) => item.amount > 0 && item?.disabled !== true
+        ),
       };
 
-      console.log('payload', payload);
-
-      // response = await createReceipt(payload);
+      response = await createReceipt(payload);
       if (response?.success) {
         message.success(response?.message);
         navigate('/receipts');
@@ -249,7 +263,6 @@ const ReceiptForm = () => {
                   selectOptions={shops}
                   selectPlaceholder="Select Shop"
                   numberPlaceholder="Amount"
-                  // showTotalAmount={false}
                   width={'100%'}
                   totalText="Total Return"
                   totalAmount={creditReceived.reduce(
