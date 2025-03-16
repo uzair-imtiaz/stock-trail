@@ -31,6 +31,7 @@ const siderStyle = {
   bottom: 0,
   scrollbarWidth: 'thin',
   scrollbarGutter: 'stable',
+  backgroundColor: '#F5F5F0',
 };
 
 const AppLayout = ({ user, onLogout }) => {
@@ -41,28 +42,35 @@ const AppLayout = ({ user, onLogout }) => {
       <Sider
         collapsible
         collapsed={collapsed}
+        theme="light"
         trigger={null}
         style={siderStyle}
         onMouseEnter={() => setCollapsed(false)}
         onMouseLeave={() => setCollapsed(true)}
       >
-        <div
-          className="logo"
-          style={{
-            color: 'white',
-            padding: '16px',
-            textAlign: 'center',
-            fontWeight: 'bold',
-          }}
-        >
-          Stock Trail
+        <div className="logo">
+          <img
+            src={
+              collapsed
+                ? 'src/assets/images/logo.png'
+                : 'src/assets/images/logo-expanded.png'
+            }
+            alt="logo"
+            style={{
+              margin: 'auto',
+              height: 40,
+              aspectRatio: '1/1',
+              // width: '100%',
+              objectFit: 'fill',
+            }}
+          />
         </div>
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
-          {/* <Menu.Item key="1" icon={<HomeOutlined />}>
-            <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-              Dashboard
-            </Link>
-          </Menu.Item> */}
+        <Menu
+          style={{ backgroundColor: '#F5F5F0' }}
+          theme="light"
+          mode="inline"
+          defaultSelectedKeys={['1']}
+        >
           {getPermission(user, 'routes') && (
             <Menu.Item key="2" icon={<CompassOutlined />}>
               <Link to="/routes" style={{ textDecoration: 'none' }}>
