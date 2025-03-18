@@ -104,7 +104,10 @@ const RoutesPage = () => {
     setSelectedRoute(route);
     setIsModalOpen(true);
     if (route) {
-      form.setFieldsValue(route);
+      form.setFieldsValue({
+        ...route,
+        shops: route.shops?.map((shop) => shop._id) || [], // Extract shop IDs
+      });
     } else {
       form.resetFields();
     }

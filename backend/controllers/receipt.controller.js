@@ -70,6 +70,9 @@ export const createOrUpdateReceipt = async (req, res) => {
         .json({ success: false, message: 'Sale not found' });
     }
 
+    sale.hasReceipt = true;
+    await sale.save({ session });
+
     let receipt = await Receipt.findOne({ saleId }).session(session);
     let previousAmountRecovered = 0;
 
@@ -281,7 +284,7 @@ export const generateCreditReport = async (req, res) => {
         },
       },
 
-      { $sort: { '_id.date': 1 } },
+      { $sort: { '_id.date': -1 } },
     ];
 
     const report = await Receipt.aggregate(pipeline);

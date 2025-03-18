@@ -22,6 +22,8 @@ const inventorySchema = new mongoose.Schema(
       enum: ['Cartons', 'Pieces'],
       default: 'Cartons',
     },
+    piecesPerCarton: { type: Number },
+    salePrice: { type: Number, required: true },
     vendor: {
       type: Object,
       required: true,

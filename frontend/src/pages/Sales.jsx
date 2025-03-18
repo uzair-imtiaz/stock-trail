@@ -1,10 +1,11 @@
 import { DollarOutlined } from '@ant-design/icons';
-import { Button, Input, InputNumber, message, Select, Table } from 'antd';
+import { Button, Input, InputNumber, message, Select, Spin, Table } from 'antd';
 import Title from 'antd/es/typography/Title';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   createSale,
+  fetchSale,
   getExpenses,
   getGroupedInventory,
   getRoutes,
@@ -42,13 +43,95 @@ const SalesScreen = () => {
   const [driverName, setDriverName] = useState('');
   const [licensePlate, setLicensePlate] = useState('');
   const [loading, setLoading] = useState(false);
+  const [fetchingExistingSale, setFetchingExistingSale] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
   const navigate = useNavigate();
 
+  const { id } = useParams();
+
   useEffect(() => {
-    fetchData();
-    fetchExpenseOptions();
+    fetch();
   }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      let total = 0;
+      inventory.forEach((item) => {
+        total += (item.dispatchQty || 0) * (item.unitPrice || 0);
+      });
+
+      expenses.forEach((expense) => {
+        total -= expense.amount || 0;
+      });
+
+      setTotalAmount(total);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [inventory, expenses]);
+
+  const fetch = async () => {
+    await fetchData();
+    await fetchExpenseOptions();
+    if (id) {
+      await fetchExistingSale(id);
+    }
+  };
+
+  const fetchExistingSale = async (saleId) => {
+    setFetchingExistingSale(true);
+    try {
+      const response = await fetchSale(saleId);
+      if (response.success) {
+        const saleData = response.data;
+
+        setSelectedRoute(saleData.routeId._id);
+        setSelectedSalesman(saleData.salesman);
+        setDriverName(saleData.driverName);
+        setLicensePlate(saleData.licenseNumber);
+
+        const mappedExpenses = saleData.expenses.map((expense) => ({
+          description: expense.description,
+          amount: expense.amount,
+          _id: expense._id,
+        }));
+        setExpenses(mappedExpenses);
+
+        if (inventory.length > 0 && saleData.inventoryDropped?.length > 0) {
+          console.log('inside');
+          const updatedInventory = [...inventory];
+
+          saleData.inventoryDropped.forEach((droppedItem) => {
+            const inventoryIndex = updatedInventory.findIndex(
+              (item) => item._id === droppedItem.itemId
+            );
+
+            if (inventoryIndex !== -1) {
+              updatedInventory[inventoryIndex] = {
+                ...updatedInventory[inventoryIndex],
+                dispatchQty: droppedItem.quantityDropped,
+                tpr: droppedItem.tpr || 0,
+                wastage: droppedItem.wastage || 0,
+              };
+            }
+          });
+
+          setInventory(updatedInventory);
+        }
+
+        setTotalAmount(saleData.totalAmount);
+      } else {
+        message.error(response.message || 'Failed to fetch sale details');
+      }
+    } catch (error) {
+      message.error(error.message || 'Failed to fetch sale details');
+      console.error(error);
+    } finally {
+      setFetchingExistingSale(false);
+    }
+  };
+
+  console.log('expenses', inventory);
 
   const fetchExpenseOptions = async () => {
     try {
@@ -68,23 +151,6 @@ const SalesScreen = () => {
       console.error(error);
     }
   };
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      let total = 0;
-      inventory.forEach((item) => {
-        total += (item.dispatchQty || 0) * (item.unitPrice || 0);
-      });
-
-      expenses.forEach((expense) => {
-        total -= expense.amount || 0;
-      });
-
-      setTotalAmount(total);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [inventory, expenses]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -163,7 +229,8 @@ const SalesScreen = () => {
       render: (_, record) => (
         <InputNumber
           min={0}
-          max={record.quantity}
+          max={record.dispatchQty ? null : record.quantity}
+          value={record.dispatchQty}
           placeholder="Enter Qty"
           defaultValue={0}
           onChange={(value) => handleValueChange(value, record, 'dispatchQty')}
@@ -177,8 +244,8 @@ const SalesScreen = () => {
       render: (_, record) => (
         <InputNumber
           min={0}
-          max={record.quantity}
           placeholder="Enter TPR"
+          value={record.tpr}
           defaultValue={0}
           onChange={(value) => handleValueChange(value, record, 'tpr')}
         />
@@ -191,8 +258,8 @@ const SalesScreen = () => {
       render: (_, record) => (
         <InputNumber
           min={0}
-          max={record.quantity}
           placeholder="Enter Wastage"
+          value={record.wastage}
           defaultValue={0}
           onChange={(value) => handleValueChange(value, record, 'wastage')}
         />
@@ -209,14 +276,10 @@ const SalesScreen = () => {
     const inventoryDropped = inventory
       .filter((item) => item.dispatchQty > 0)
       .map((item) => ({
-        items: [
-          {
-            itemId: item._id,
-            quantityDropped: item.dispatchQty,
-            tpr: item.tpr || 0,
-            wastage: item.wastage || 0,
-          },
-        ],
+        itemId: item._id,
+        quantityDropped: item.dispatchQty,
+        tpr: item.tpr || 0,
+        wastage: item.wastage || 0,
       }));
 
     const payload = {
@@ -249,6 +312,10 @@ const SalesScreen = () => {
       setLoading(false);
     }
   };
+
+  if (fetchingExistingSale && inventory.length === 0) {
+    return <Spin size="large" />;
+  }
 
   return (
     <>
@@ -314,7 +381,7 @@ const SalesScreen = () => {
         style={{ float: 'right', marginTop: '20px' }}
         onClick={handleSubmit}
       >
-        Submit Sales
+        {id ? 'Update Sale' : 'Submit Sale'}
       </Button>
     </>
   );

@@ -24,6 +24,9 @@ import Purchase from './pages/Purchase';
 import Reports from './pages/Reports';
 import ExpenseReport from './components/reports/ExpenseReport';
 import CreditsReport from './components/reports/CreditsReport';
+import SalesReport from './components/reports/SalesReport';
+import PurchaseReport from './components/reports/PurchaseReport';
+import Deductions from './pages/Deductions';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -83,6 +86,7 @@ const App = () => {
             <Route path="inventory/new" element={<InventoryForm />} />
             <Route path="inventory/:id/edit" element={<InventoryForm />} />
             <Route path="sales" element={<Sales />} />
+            <Route path="sales/:id" element={<Sales />} />
             <Route path="invoices" element={<Invoices />} />
             <Route path="receipts" element={<Receipts />} />
             <Route path="receipts/new" element={<ReceiptForm />} />
@@ -93,10 +97,13 @@ const App = () => {
             <Route path="core/shops" element={<Shops />} />
             <Route path="core/accounts" element={<Accounts />} />
             <Route path="core/expenses" element={<Expenses />} />
+            <Route path="core/deductions" element={<Deductions />} />
             <Route path="purchase" element={<Purchase />} />
             <Route path="reports" element={<Reports />} />
             <Route path="reports/expense" element={<ExpenseReport />} />
             <Route path="reports/credits" element={<CreditsReport />} />
+            <Route path="reports/sale" element={<SalesReport />} />
+            <Route path="reports/purchase" element={<PurchaseReport />} />
             <Route path="*" element={<h1>404</h1>} />
           </Route>
         </Route>

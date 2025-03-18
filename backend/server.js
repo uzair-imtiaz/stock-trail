@@ -29,7 +29,7 @@ app.get('/health-check', (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-const server = app.listen(port, () =>
+const server = app.listen(port, '::', () =>
   console.log(`Server started on port ${port}`)
 );
 

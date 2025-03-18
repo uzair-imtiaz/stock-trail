@@ -1,6 +1,20 @@
-export const EXPENSE_OPTIONS = [
-  { value: 'food', label: 'Food' },
-  { value: 'fuel', label: 'Fuel' },
-  { value: 'fine', label: 'Fine' },
-  { value: 'other', label: 'Other' },
+export const VENDORS = [
+  {
+    id: 1,
+    name: 'Pepsico',
+    value: 'Pepsico',
+  },
+];
+
+export const DEDUCTIONS = [
+  {
+    id: 1,
+    label: 'Charge',
+    value: 'Charge',
+  },
+  {
+    id: 2,
+    label: 'Deduction',
+    value: 'Deduction',
+  },
 ];

@@ -108,6 +108,20 @@ const InventoryForm = () => {
                   <Option value="Wastage">Wastage</Option>
                 </Select>
               </Form.Item>
+
+              <Form.Item
+                name="salePrice"
+                label="Sale Price (PKR)"
+                rules={[
+                  {
+                    required: true,
+                    type: 'number',
+                    message: 'Enter valid price',
+                  },
+                ]}
+              >
+                <InputNumber min={1} />
+              </Form.Item>
             </Col>
 
             <Col span={12}>
@@ -139,6 +153,17 @@ const InventoryForm = () => {
                     type: 'number',
                     message: 'Enter valid quantity',
                   },
+                ]}
+              >
+                <InputNumber min={1} />
+              </Form.Item>
+
+              <Form.Item
+                name="piecesPerCarton"
+                label="Pieces per Carton"
+                dependencies={['stockType']}
+                rules={[
+                  { required: true, message: 'Pieces per carton is required' },
                 ]}
               >
                 <InputNumber min={1} />
