@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: `${import.meta.env.VITE_APP_API_URL}/api`,
+  baseURL: `http://static.112.170.75.5.clients.your-server.de:3003/api`,
   timeout: 12000,
   withCredentials: true,
 });
@@ -18,14 +18,15 @@ axiosInstance.interceptors.response.use(
   (error) => {
     const { response } = error;
     if (response) {
-      if (response.status === 401) {
-        window.location.href = '/signin';
-      }
+      // if (response.status === 401) {
+      //   window.location.href = '/signin';
+      // }
       return Promise.resolve(response);
     }
     return Promise.reject(error);
   }
 );
+
 
 const getCallback = async (url, config = {}) => {
   const response = await axiosInstance.get(url, config);

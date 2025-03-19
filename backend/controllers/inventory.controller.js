@@ -1,4 +1,5 @@
 import Inventory from '../models/inventory.model.js';
+import inventoryService from '../services/inventory.services.js';
 import { asyncHandler } from '../utils/error.util.js';
 
 export const getInventory = async (req, res) => {
@@ -18,54 +19,8 @@ export const getInventory = async (req, res) => {
 
 export const createInventory = async (req, res) => {
   let data = req.body;
-
-  const existingItem = await Inventory.findOne({
-    product: new RegExp(`^${data.product.trim()}$`, 'i'),
-    flavor: new RegExp(`^${data.flavor.trim()}$`, 'i'),
-    grammage: data.grammage,
-  });
-
-  if (existingItem) {
-    let newQuantity;
-    let newUnitPrice;
-
-    // If existing item is in pieces, keep the unit in pieces
-    if (existingItem.stockType === 'Pieces') {
-      if (data.stockType === 'Cartons') {
-        // Convert cartons to pieces before updating
-        data.quantity = data.quantity * existingItem.piecesPerCarton;
-      }
-
-      newQuantity = existingItem.quantity + data.quantity;
-      newUnitPrice =
-        (existingItem.quantity * existingItem.unitPrice +
-          data.quantity * data.unitPrice) /
-        newQuantity;
-    } else {
-      // If existing item is in cartons, keep it in cartons
-      if (data.stockType === 'Pieces') {
-        // Convert pieces to cartons before updating
-        data.quantity = data.quantity / 10;
-      }
-
-      newQuantity = existingItem.quantity + data.quantity;
-      newUnitPrice =
-        (existingItem.quantity * existingItem.unitPrice +
-          data.quantity * data.unitPrice) /
-        newQuantity;
-    }
-
-    const updatedItem = await Inventory.findByIdAndUpdate(
-      existingItem._id,
-      { quantity: newQuantity, unitPrice: newUnitPrice },
-      { new: true }
-    );
-
-    return res.status(200).json({
-      success: true,
-      message: 'Inventory updated successfully',
-      data: updatedItem,
-    });
+  if (data.stockType === 'Pieces') {
+    data.quantity = data.quantity / data.piecesPerCarton;
   }
 
   const newItem = await Inventory.create({
@@ -120,28 +75,8 @@ export const deleteInventory = async (req, res) => {
   });
 };
 
-export const getGroupedInventory = asyncHandler(async (req, res) => {
-  const inventory = await Inventory.aggregate([
-    {
-      $sort: {
-        category: 1,
-        product: 1,
-      },
-    },
-
-    {
-      $project: {
-        _id: 1,
-        product: 1,
-        quantity: 1,
-        unitPrice: 1,
-        category: 1,
-        grammage: 1,
-        location: 1,
-      },
-    },
-  ]);
-
+export const getGroupedInventory = asyncHandler(async (_, res) => {
+  const inventory = await inventoryService.getGroupedInventory();
   if (!inventory) {
     return res.status(404).json({
       success: false,

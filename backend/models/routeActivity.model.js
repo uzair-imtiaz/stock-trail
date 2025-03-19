@@ -13,10 +13,6 @@ const ItemSchema = new mongoose.Schema({
   unitPrice: { type: Number },
 });
 
-const InventoryDroppedSchema = new mongoose.Schema({
-  items: [ItemSchema],
-});
-
 const ExpenseSchema = new mongoose.Schema({
   description: {
     type: mongoose.Schema.Types.ObjectId,
@@ -48,11 +44,10 @@ const RouteActivitySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    inventoryDropped: [InventoryDroppedSchema],
+    inventoryDropped: [ItemSchema],
     expenses: [ExpenseSchema],
     totalAmount: { type: Number, default: 0 },
     profit: { type: Number, default: 0 },
-    creditAmount: { type: Number, default: 0 },
   },
   { timestamps: true },
   { _id: false }
@@ -65,11 +60,9 @@ RouteActivitySchema.pre('save', async function (next) {
     const inventoryIds = new Set();
 
     if (this.inventoryDropped && this.inventoryDropped.length > 0) {
-      for (const drop of this.inventoryDropped) {
-        for (const item of drop.items) {
-          if (!item.unitPrice) {
-            inventoryIds.add(item.itemId.toString());
-          }
+      for (const item of this.inventoryDropped) {
+        if (!item.unitPrice) {
+          inventoryIds.add(item.itemId.toString());
         }
       }
     }
@@ -84,13 +77,11 @@ RouteActivitySchema.pre('save', async function (next) {
       inventoryMap[inv._id.toString()] = inv.unitPrice;
     });
 
-    for (const drop of this.inventoryDropped) {
-      for (const item of drop.items) {
-        if (!item.unitPrice) {
-          item.unitPrice = inventoryMap[item.itemId.toString()] || 0;
-        }
-        totalAmount += item.quantityDropped * item.unitPrice;
+    for (const item of this.inventoryDropped) {
+      if (!item.unitPrice) {
+        item.unitPrice = inventoryMap[item.itemId.toString()] || 0;
       }
+      totalAmount += item.quantityDropped * item.unitPrice;
     }
 
     if (this.expenses && this.expenses.length > 0) {
@@ -101,7 +92,7 @@ RouteActivitySchema.pre('save', async function (next) {
     }
 
     this.totalAmount = totalAmount;
-    this.profit = totalAmount - totalExpenses - this.creditAmount;
+    this.profit = totalAmount - totalExpenses;
 
     next();
   } catch (error) {

@@ -105,8 +105,8 @@ export const fetchSale = async (id) => {
   return response;
 };
 
-export const getInvoices = async () => {
-  const response = await getCallback('/sales');
+export const getInvoices = async (query) => {
+  const response = await getCallback('/sales', query);
   return response;
 };
 
@@ -192,5 +192,30 @@ export const getExpensesReport = async (query) => {
 
 export const getCreditsReport = async (query) => {
   const response = await getCallback('/receipts/report/credits', query);
+  return response;
+};
+
+export const getSalesReport = async (query) => {
+  const response = await getCallback('/sales/report/sales', query);
+  return response;
+};
+
+export const getDeductions = async () => {
+  const response = await getCallback('/deductions');
+  return response;
+};
+
+export const createDeduction = async (values) => {
+  const response = await postCallback('/deductions/new', values);
+  return response;
+};
+
+export const updateDeduction = async (id, values) => {
+  const response = await putCallback(`/deductions/${id}/edit`, values);
+  return response;
+};
+
+export const deleteDeduction = async (id) => {
+  const response = await deleteCallback(`/deductions/${id}/delete`);
   return response;
 };
