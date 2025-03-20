@@ -157,6 +157,11 @@ const AppLayout = ({ user, onLogout }) => {
                   Deductions/Charges
                 </Link>
               </Menu.Item>
+              <Menu.Item key="7-5">
+                <Link to="/core/vendors" style={{ textDecoration: 'none' }}>
+                  Vendors
+                </Link>
+              </Menu.Item>
             </Menu.SubMenu>
           )}
         </Menu>

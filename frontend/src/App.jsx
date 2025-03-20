@@ -27,6 +27,7 @@ import CreditsReport from './components/reports/CreditsReport';
 import SalesReport from './components/reports/SalesReport';
 import PurchaseReport from './components/reports/PurchaseReport';
 import Deductions from './pages/Deductions';
+import Vendors from './pages/Vendors';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -98,6 +99,7 @@ const App = () => {
             <Route path="core/accounts" element={<Accounts />} />
             <Route path="core/expenses" element={<Expenses />} />
             <Route path="core/deductions" element={<Deductions />} />
+            <Route path="core/vendors" element={<Vendors />} />
             <Route path="purchase" element={<Purchase />} />
             <Route path="reports" element={<Reports />} />
             <Route path="reports/expense" element={<ExpenseReport />} />
