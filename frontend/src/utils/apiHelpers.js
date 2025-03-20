@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: `http://localhost:3003/api`,
+  baseURL: `https://api.ds.algobricks.org/api`,
   timeout: 12000,
   withCredentials: true,
 });
