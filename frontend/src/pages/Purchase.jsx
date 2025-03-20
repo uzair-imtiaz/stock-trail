@@ -16,6 +16,7 @@ import {
   createSale,
   getAccounts,
   getGroupedInventory,
+  getVendors,
 } from '../apis';
 import { formatBalance } from '../utils';
 
@@ -41,8 +42,9 @@ const processRowSpan = (list) => {
 const Purchase = () => {
   const [inventory, setInventory] = useState([]);
   const [banks, setBanks] = useState([]);
+  const [vendors, setVendors] = useState([]);
   const [selectedBank, setSelectedBank] = useState(null);
-  const [vendorName, setVendorName] = useState('Pepsico');
+  const [selectedVendor, setSelectedVendor] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -52,14 +54,16 @@ const Purchase = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [AccountsRes, inventoryRes] = await Promise.all([
+      const [AccountsRes, inventoryRes, vendorsRes] = await Promise.all([
         getAccounts(),
         getGroupedInventory(),
+        getVendors(),
       ]);
-      if (inventoryRes.success && AccountsRes.success) {
+      if (inventoryRes.success && AccountsRes.success && vendorsRes.success) {
         const processedData = processRowSpan(inventoryRes.data);
         setInventory(processedData);
         setBanks(AccountsRes.data);
+        setVendors(vendorsRes.data);
       }
     } catch (error) {
       message.error(error.message || 'Failed to fetch data');
@@ -184,7 +188,7 @@ const Purchase = () => {
   ];
 
   const handleSubmit = async () => {
-    if (!selectedBank || !vendorName) {
+    if (!selectedBank || !selectedVendor) {
       message.error('Please fill in all required fields.');
       return;
     }
@@ -200,7 +204,7 @@ const Purchase = () => {
 
     const payload = {
       bank: selectedBank,
-      vendor: vendorName,
+      vendor: selectedVendor._id,
       items: inventoryItems,
     };
 
@@ -248,12 +252,24 @@ const Purchase = () => {
               </Option>
             ))}
           </Select>
-          <Input
-            placeholder="Supplier Name"
-            value={vendorName}
+          <Select
+            placeholder="Select Vendor"
+            value={selectedVendor.name}
             style={{ width: 200 }}
-            onChange={(e) => setVendorName(e.target.value)}
+            allowClear
+            onClear={() => setSelectedVendor(null)}
+            onChange={(value) => {
+              const vendorObj = vendors.find((vendor) => vendor._id === value);
+              setSelectedVendor(vendorObj);
+            }}
+            options={vendors.map((vendor) => ({
+              value: vendor._id, 
+              label: vendor.name,
+            }))}
           />
+          {selectedVendor && (
+            <Tag color="#108ee9">{formatBalance(selectedVendor?.balance)}</Tag>
+          )}
         </Flex>
 
         <Table

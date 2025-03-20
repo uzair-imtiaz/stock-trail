@@ -219,3 +219,18 @@ export const deleteDeduction = async (id) => {
   const response = await deleteCallback(`/deductions/${id}/delete`);
   return response;
 };
+
+export const getVendors = async () => {
+  const response = await getCallback('/vendors');
+  return response;
+};
+
+export const updateVendor = async (id, data) => {
+  const response = await putCallback(`/vendors/${id}/edit`, data);
+  return response;
+};
+
+export const createVendor = async (data) => {
+  const response = await postCallback('/vendors/new', data);
+  return response;
+};
