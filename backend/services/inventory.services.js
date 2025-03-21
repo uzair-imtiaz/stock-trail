@@ -16,6 +16,7 @@ const inventoryService = {
             product: 1,
             quantity: 1,
             unitPrice: 1,
+            salePrice: 1,
             category: 1,
             grammage: 1,
             location: 1,

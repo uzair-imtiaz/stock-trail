@@ -7,6 +7,8 @@ import {
   InboxOutlined,
   LogoutOutlined,
   MoneyCollectOutlined,
+  PercentageOutlined,
+  ShopOutlined,
   ShoppingCartOutlined,
   ShoppingOutlined,
   TableOutlined,
@@ -48,20 +50,23 @@ const AppLayout = ({ user, onLogout }) => {
         onMouseEnter={() => setCollapsed(false)}
         onMouseLeave={() => setCollapsed(true)}
       >
-        <div className="logo">
+        <div
+          className="logo"
+          style={{
+            backgroundColor: '#F5F5F0',
+          }}
+        >
           <img
             src={
               collapsed
-                ? 'src/assets/images/logo.png'
-                : 'src/assets/images/logo-expanded.png'
+                ? '/assets/images/logo.png'
+                : '/assets/images/logo-expanded.png'
             }
             alt="logo"
             style={{
-              margin: 'auto',
-              height: 40,
-              aspectRatio: '1/1',
-              // width: '100%',
-              objectFit: 'fill',
+              width: '100%',
+              maxHeight: 64,
+              objectFit: 'cover',
             }}
           />
         </div>
@@ -152,12 +157,12 @@ const AppLayout = ({ user, onLogout }) => {
                   Expenses
                 </Link>
               </Menu.Item>
-              <Menu.Item key="7-4">
+              <Menu.Item key="7-4" icon={<PercentageOutlined />}>
                 <Link to="/core/deductions" style={{ textDecoration: 'none' }}>
                   Deductions/Charges
                 </Link>
               </Menu.Item>
-              <Menu.Item key="7-5">
+              <Menu.Item key="7-5" icon={<ShopOutlined />}>
                 <Link to="/core/vendors" style={{ textDecoration: 'none' }}>
                   Vendors
                 </Link>

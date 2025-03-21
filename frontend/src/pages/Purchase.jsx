@@ -79,7 +79,7 @@ const Purchase = () => {
 
         updatedItem.totalGST =
           updatedItem.gstAmount ||
-          (updatedItem.gstPercent / 100) *
+          (updatedItem.gstPercent / item?.piecesPerCarton) *
             (updatedItem.unitPrice * updatedItem.buyingQuantity) ||
           0;
 

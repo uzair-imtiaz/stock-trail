@@ -31,9 +31,7 @@ const ReceiptForm = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [submitLoading, setSumbitLoading] = useState(false);
-  const [initialCreditSale, setInitialCreditSale] = useState([]);
   const [creditSale, setCreditSale] = useState([]);
-  const [initialCreditReceived, setInitialCreditReceived] = useState([]);
   const [creditReceived, setCreditReceived] = useState([]);
   const [saleData, setSaleData] = useState(null);
   const [shops, setShops] = useState([]);
@@ -64,28 +62,26 @@ const ReceiptForm = () => {
     const creditSummary = {};
     const returnSummary = {};
 
-    data.forEach((record) => {
-      record.credits.forEach((credit) => {
-        const { shopId, creditAmount, returnedAmount } = credit;
+    data.credits.forEach((credit) => {
+      const { shopId, creditAmount, returnedAmount } = credit;
 
-        if (!creditSummary[shopId]) {
-          creditSummary[shopId] = {
-            description: shopId,
-            amount: 0,
-            disabled: true,
-          };
-        }
-        creditSummary[shopId].amount += creditAmount;
+      if (!creditSummary[shopId?._id]) {
+        creditSummary[shopId?._id] = {
+          description: shopId?.name,
+          amount: 0,
+          disabled: true,
+        };
+      }
+      creditSummary[shopId?._id].amount += creditAmount;
 
-        if (!returnSummary[shopId]) {
-          returnSummary[shopId] = {
-            description: shopId,
-            amount: 0,
-            disabled: true,
-          };
-        }
-        returnSummary[shopId].amount += returnedAmount;
-      });
+      if (!returnSummary[shopId?._id]) {
+        returnSummary[shopId?._id] = {
+          description: shopId?.name,
+          amount: 0,
+          disabled: true,
+        };
+      }
+      returnSummary[shopId?._id].amount += returnedAmount;
     });
 
     const creditSaleArray = Object.values(creditSummary).filter(
@@ -97,9 +93,6 @@ const ReceiptForm = () => {
 
     setCreditSale(creditSaleArray);
     setCreditReceived(creditReceivedArray);
-
-    setInitialCreditSale(creditSaleArray);
-    setInitialCreditReceived(creditReceivedArray);
   };
 
   const handleShowData = async () => {
