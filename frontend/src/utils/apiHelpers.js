@@ -4,6 +4,11 @@ const axiosInstance = axios.create({
   baseURL: `https://api.ds.algobricks.org/api`,
   timeout: 12000,
   withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'Access-Control-Allow-Credentials': true
+  },
 });
 
 axiosInstance.interceptors.request.use(
