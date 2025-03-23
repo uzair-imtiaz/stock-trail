@@ -1,11 +1,24 @@
 import { DollarOutlined } from '@ant-design/icons';
-import { Button, Input, InputNumber, message, Select, Spin, Table } from 'antd';
+import {
+  Button,
+  Card,
+  Flex,
+  Input,
+  InputNumber,
+  message,
+  Select,
+  Space,
+  Spin,
+  Switch,
+  Table,
+} from 'antd';
 import Title from 'antd/es/typography/Title';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   createSale,
   fetchSale,
+  getDeductions,
   getExpenses,
   getGroupedInventory,
   getRoutes,
@@ -45,6 +58,7 @@ const SalesScreen = () => {
   const [loading, setLoading] = useState(false);
   const [fetchingExistingSale, setFetchingExistingSale] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [deductions, setDeductions] = useState([]);
   const navigate = useNavigate();
 
   const { id } = useParams();
@@ -57,9 +71,25 @@ const SalesScreen = () => {
     const timer = setTimeout(() => {
       let total = 0;
       inventory.forEach((item) => {
-        total += (item.dispatchQty || 0) * (item.unitPrice || 0);
+        let itemTotal = (item.dispatchQty || 0) * (item.salePrice || 0);
+        (item.unitDeductions || []).forEach((deduction) => {
+          itemTotal -= deduction.isPercentage
+            ? (itemTotal * (deduction.amount || 0)) / 100
+            : deduction.amount || 0;
+        });
+        total += itemTotal;
       });
 
+      const totalDeductions = deductions.reduce((sum, deduction) => {
+        return (
+          sum +
+          (deduction.isPercentage
+            ? (total * (deduction.amount || 0)) / 100
+            : deduction.amount || 0)
+        );
+      }, 0);
+
+      total -= totalDeductions;
       expenses.forEach((expense) => {
         total -= expense.amount || 0;
       });
@@ -68,11 +98,15 @@ const SalesScreen = () => {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [inventory, expenses]);
+  }, [inventory, expenses, deductions]);
 
   const fetch = async () => {
     await fetchData();
     await fetchExpenseOptions();
+    const response = await getDeductions();
+    if (response?.success) {
+      setDeductions(response?.data);
+    }
     if (id) {
       await fetchExistingSale(id);
     }
@@ -98,7 +132,6 @@ const SalesScreen = () => {
         setExpenses(mappedExpenses);
 
         if (inventory.length > 0 && saleData.inventoryDropped?.length > 0) {
-          console.log('inside');
           const updatedInventory = [...inventory];
 
           saleData.inventoryDropped.forEach((droppedItem) => {
@@ -131,8 +164,6 @@ const SalesScreen = () => {
     }
   };
 
-  console.log('expenses', inventory);
-
   const fetchExpenseOptions = async () => {
     try {
       const response = await getExpenses();
@@ -161,7 +192,10 @@ const SalesScreen = () => {
         getUsersByRole('salesman'),
       ]);
       if (inventoryRes.success && routesRes.success) {
-        const processedData = processRowSpan(inventoryRes.data);
+        const processedData = processRowSpan(inventoryRes.data).map((item) => ({
+          ...item,
+          unitDeductions: deductions.map((d) => ({ ...d, amount: 0, isPercentage: false })),
+        }));
         setInventory(processedData);
         setRoutes(routesRes.data);
         setSalesmen(salesManRes.data);
@@ -177,6 +211,21 @@ const SalesScreen = () => {
     const updatedInventory = inventory.map((item) =>
       item._id === record._id ? { ...item, [field]: value || 0 } : item
     );
+    setInventory(updatedInventory);
+  };
+
+  const handleDeductionChange = (value, record, deductionId, field) => {
+    const updatedInventory = inventory.map((item) => {
+      if (item._id === record._id) {
+        const updatedDeductions = item.unitDeductions.map((d) =>
+          d._id === deductionId
+            ? { ...d, [field]: field === 'amount' ? value || 0 : value }
+            : d
+        );
+        return { ...item, unitDeductions: updatedDeductions };
+      }
+      return item;
+    });
     setInventory(updatedInventory);
   };
 
@@ -265,7 +314,49 @@ const SalesScreen = () => {
         />
       ),
     },
+    ...deductions.map((deduction) => ({
+      title: deduction.name,
+      key: deduction._id,
+      render: (_, record) => {
+        const deductionForItem = record.unitDeductions.find(
+          (d) => d._id === deduction._id
+        ) || {
+          amount: 0,
+          isPercentage: false,
+        };
+        return (
+          <Space>
+            <InputNumber
+              value={deductionForItem.amount}
+              placeholder={deduction.name}
+              onChange={(value) =>
+                handleDeductionChange(value, record, deduction._id, 'amount')
+              }
+              parser={(value) =>
+                value.replace(deductionForItem.isPercentage ? '%' : 'PKR ', '')
+              }
+            />
+            <Switch
+            size='small'
+              checkedChildren="%"
+              unCheckedChildren="PKR"
+              checked={deductionForItem.isPercentage}
+              onChange={(checked) =>
+                handleDeductionChange(
+                  checked,
+                  record,
+                  deduction._id,
+                  'isPercentage'
+                )
+              }
+            />
+          </Space>
+        );
+      },
+    })),
   ];
+
+  console.log('inventory', inventory)
 
   const handleSubmit = async () => {
     if (!selectedRoute || !selectedSalesman || !driverName || !licensePlate) {
@@ -280,6 +371,7 @@ const SalesScreen = () => {
         quantityDropped: item.dispatchQty,
         tpr: item.tpr || 0,
         wastage: item.wastage || 0,
+        unitDeductions: [],
       }));
 
     const payload = {
@@ -293,6 +385,7 @@ const SalesScreen = () => {
       totalAmount,
       profit: 0,
       creditAmount: 0,
+      totalDeductions: deductions,
     };
 
     try {
@@ -363,26 +456,74 @@ const SalesScreen = () => {
           loading={loading}
           pagination={false}
           bordered
+          scroll={{ x: 'max-content' }}
         />
       </div>
+      <Flex gap={12} align="start">
+        <div style={{ width: '100%' }}>
+          <DynamicListSection
+            title="Expenses"
+            icon={<DollarOutlined />}
+            items={expenses}
+            setItems={setExpenses}
+            totalAmount={totalAmount}
+            selectOptions={expenseOptions}
+            selectPlaceholder="Select Expense Type"
+            numberPlaceholder="Amount"
+          />
+        </div>
 
-      <DynamicListSection
-        title="Expenses & Summary"
-        icon={<DollarOutlined />}
-        items={expenses}
-        setItems={setExpenses}
-        totalAmount={totalAmount}
-        selectOptions={expenseOptions}
-        selectPlaceholder="Select Expense Type"
-        numberPlaceholder="Amount"
-      />
-      <Button
-        type="primary"
-        style={{ float: 'right', marginTop: '20px' }}
-        onClick={handleSubmit}
-      >
-        {id ? 'Update Sale' : 'Submit Sale'}
-      </Button>
+        <Flex vertical gap={12}>
+          <Card title="Deductions" style={{ width: 400 }}>
+            {deductions.map((deduction) => (
+              <Space
+                key={deduction._id}
+                style={{ display: 'flex', marginBottom: 8 }}
+              >
+                <InputNumber
+                  addonBefore={deduction.name}
+                  placeholder={deduction.name}
+                  value={deduction.amount}
+                  onChange={(value) =>
+                    setDeductions((prev) =>
+                      prev.map((d) =>
+                        d._id === deduction._id ? { ...d, amount: value } : d
+                      )
+                    )
+                  }
+                  formatter={(value) =>
+                    deduction.isPercentage ? `${value}%` : `PKR ${value}`
+                  }
+                  parser={(value) =>
+                    value.replace(deduction.isPercentage ? '%' : 'PKR', '')
+                  }
+                />
+                <Switch
+                  checkedChildren="%"
+                  unCheckedChildren="PKR"
+                  checked={deduction.isPercentage}
+                  onChange={(checked) =>
+                    setDeductions((prev) =>
+                      prev.map((d) =>
+                        d._id === deduction._id
+                          ? { ...d, isPercentage: checked }
+                          : d
+                      )
+                    )
+                  }
+                />
+              </Space>
+            ))}
+          </Card>
+          <Button
+            type="primary"
+            onClick={handleSubmit}
+            style={{ width: '40%' }}
+          >
+            {id ? 'Update Sale' : 'Submit Sale'}
+          </Button>
+        </Flex>
+      </Flex>
     </>
   );
 };

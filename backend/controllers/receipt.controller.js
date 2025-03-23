@@ -74,6 +74,7 @@ export const createOrUpdateReceipt = async (req, res) => {
     await sale.save({ session });
 
     let receipt = await Receipt.findOne({ saleId }).session(session);
+    console.log('receipt', receipt)
     let previousAmountRecovered = 0;
 
     if (receipt) {
@@ -188,7 +189,7 @@ export const getReceipts = async (req, res) => {
 
 export const getReceipt = async (req, res) => {
   try {
-    const { saleId } = req.params;
+    const { id: saleId } = req.params;
 
     if (!saleId) {
       return res.status(400).json({
@@ -198,7 +199,8 @@ export const getReceipt = async (req, res) => {
     }
 
     const receipt = await Receipt.findOne({ saleId }).populate({
-      path: 'shop',
+      path: 'credits.shopId',
+      select: 'name'
     });
 
     if (!receipt) {
@@ -214,6 +216,7 @@ export const getReceipt = async (req, res) => {
       message: 'Receipt fetched successfully',
     });
   } catch (error) {
+    console.log('error', error)
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };

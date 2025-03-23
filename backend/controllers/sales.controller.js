@@ -47,7 +47,7 @@ export const createSale = async (req, res) => {
         }
       }
       inventoryItem.quantity -=
-        item.quantityDropped + (item.tpr / 10 || 0) + item.wastage;
+        item.quantityDropped + (item.tpr / inventoryItem?.piecesPerCarton || 0) + item.wastage;
       await inventoryItem.save();
     }
     await session.commitTransaction();

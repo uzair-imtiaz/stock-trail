@@ -22,7 +22,8 @@ const PurchaseSchema = new mongoose.Schema(
       required: true,
     },
     vendor: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Vendor',
       required: true,
     },
   },

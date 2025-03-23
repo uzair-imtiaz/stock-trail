@@ -183,14 +183,6 @@ const Deductions = () => {
               defaultValue={null}
             />
           </Form.Item>
-
-          <Form.Item
-            name="amount"
-            label="Amount"
-            rules={[{ required: true, message: 'Please enter amount' }]}
-          >
-            <Input type="number" placeholder="Enter amount %" />
-          </Form.Item>
         </Form>
       </Modal>
     </div>

@@ -11,6 +11,18 @@ const ItemSchema = new mongoose.Schema({
   wastage: { type: Number, default: 0, required: true },
   tpr: { type: Number, default: 0, required: true },
   unitPrice: { type: Number },
+  unitDeductions: [
+    {
+      deductionId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Deduction',
+        required: true,
+      },
+      amount: { type: Number, required: true },
+      isPercentage: { type: Boolean, required: true },
+    },
+  ],
+  netTotal: { type: Number },
 });
 
 const ExpenseSchema = new mongoose.Schema({
@@ -36,27 +48,41 @@ const RouteActivitySchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
-    driverName: {
-      type: String,
-      required: true,
-    },
-    licenseNumber: {
-      type: String,
-      required: true,
-    },
+    driverName: { type: String, required: true },
+    licenseNumber: { type: String, required: true },
     inventoryDropped: [ItemSchema],
     expenses: [ExpenseSchema],
     totalAmount: { type: Number, default: 0 },
     profit: { type: Number, default: 0 },
+    hasReceipt: { type: Boolean, default: false },
+    totalDeductions: [
+      {
+        deductionId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Deduction',
+          required: true,
+        },
+        amount: { type: Number, required: true },
+        isPercentage: { type: Boolean, required: true },
+      },
+    ],
   },
   { timestamps: true },
   { _id: false }
 );
 
+/**
+ * Pre-save hook to calculate totalAmount, considering:
+ * - Inventory items' prices
+ * - Item-level deductions/charges
+ * - Global deductions/charges
+ * - Expenses
+ */
 RouteActivitySchema.pre('save', async function (next) {
   try {
     let totalAmount = 0;
     let totalExpenses = 0;
+
     const inventoryIds = new Set();
 
     if (this.inventoryDropped && this.inventoryDropped.length > 0) {
@@ -81,7 +107,30 @@ RouteActivitySchema.pre('save', async function (next) {
       if (!item.unitPrice) {
         item.unitPrice = inventoryMap[item.itemId.toString()] || 0;
       }
-      totalAmount += item.quantityDropped * item.unitPrice;
+
+      let itemTotal = item.quantityDropped * item.unitPrice;
+
+      if (item.unitDeductions.length > 0) {
+        for (const deduction of item.unitDeductions) {
+          if (deduction.type === 'Charge') {
+            itemTotal += deduction.isPercentage ? itemTotal * deduction.amount : deduction.amount;
+          } else if (deduction.type === 'Deduction') {
+            itemTotal -= deduction.isPercentage ? itemTotal * deduction.amount : deduction.amount;
+          }
+        }
+      }
+      item.netTotal = itemTotal;
+      totalAmount += itemTotal;
+    }
+
+    if (this.totalDeductions && this.totalDeductions.length > 0) {
+      for (const deduction of this.totalDeductions) {
+        if (deduction.type === 'Charge') {
+          totalAmount += deduction.isPercentage ? totalAmount * deduction.amount : deduction.amount;
+        } else if (deduction.type === 'Deduction') {
+          totalAmount -= deduction.isPercentage ? totalAmount * deduction.amount : deduction.amount;
+        }
+      }
     }
 
     if (this.expenses && this.expenses.length > 0) {
