@@ -34,6 +34,7 @@ const App = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('in useeffect')
     const fetchUser = async () => {
       try {
         console.log("api call to be made");
@@ -44,6 +45,7 @@ const App = () => {
           message.error(response?.message || 'Something went wrong');
         }
       } catch (error) {
+        console.log(error);
         message.error(error.message);
       } finally {
         setLoading(false);
@@ -51,8 +53,11 @@ const App = () => {
     };
 
     const token = Cookies.get('token');
+    console.log(`token: ${token}`)
     if (token) {
       fetchUser();
+    } else {
+      setLoading(false);
     }
   }, []);
 
