@@ -1,12 +1,12 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import connectDB from './config/db.js';
-import { notFound, errorHandler } from './middlewares/error.middleware.js';
-import routes from './routes/index.js';
-import mongoose from 'mongoose';
-import cors from 'cors';
-import { corsOptions } from './utils/cors.utils.js';
-import cookieParser from 'cookie-parser';
+const express = require('express');
+const dotenv = require('dotenv');
+const connectDB = require('./config/db');
+const { notFound, errorHandler } = require('./middlewares/error.middleware');
+const routes = require('./routes/index');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const { corsOptions } = require('./utils/cors.utils');
+const cookieParser = require('cookie-parser');
 
 dotenv.config();
 

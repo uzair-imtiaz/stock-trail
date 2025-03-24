@@ -1,4 +1,4 @@
-import Inventory from '../models/inventory.model.js';
+const Inventory = require('../models/inventory.model');
 
 const inventoryService = {
   async getGroupedInventory() {
@@ -34,4 +34,4 @@ const inventoryService = {
   },
 };
 
-export default inventoryService;
+module.exports = inventoryService;

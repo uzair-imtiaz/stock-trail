@@ -1,12 +1,12 @@
-import {
+const {
   createSale,
   getInvoices,
   getSale,
   getExpensesReport,
   getSalesReport,
-} from '../controllers/sales.controller.js';
-import express from 'express';
-import { authMiddleware } from '../middlewares/auth.middleware.js';
+} = require('../controllers/sales.controller');
+const express = require('express');
+const { authMiddleware } = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
@@ -18,4 +18,4 @@ router.get('/:id', getSale);
 router.get('/report/expenses', getExpensesReport);
 router.get('/report/sales', getSalesReport);
 
-export default router;
+module.exports = router;

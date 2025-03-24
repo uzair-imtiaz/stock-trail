@@ -1,7 +1,7 @@
-import Account from '../models/account.model.js';
-import { asyncHandler } from '../utils/error.util.js';
+const Account = require('../models/account.model');
+const { asyncHandler } = require('../utils/error.util');
 
-export const createAccount = asyncHandler(async (req, res) => {
+const createAccount = asyncHandler(async (req, res) => {
   const { name, type, balance } = req.body;
 
   const existingAccount = await Account.findOne({ name });
@@ -22,7 +22,7 @@ export const createAccount = asyncHandler(async (req, res) => {
   });
 });
 
-export const getAccounts = asyncHandler(async (req, res) => {
+const getAccounts = asyncHandler(async (req, res) => {
   const accounts = await Account.find();
   if (!accounts) {
     return res.status(400).json({
@@ -37,7 +37,7 @@ export const getAccounts = asyncHandler(async (req, res) => {
   });
 });
 
-export const getAccount = asyncHandler(async (req, res) => {
+const getAccount = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const account = await Account.findById(id);
   if (!account) {
@@ -53,7 +53,7 @@ export const getAccount = asyncHandler(async (req, res) => {
   });
 });
 
-export const updateAccount = asyncHandler(async (req, res) => {
+const updateAccount = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { name, balance } = req.body;
   const account = await Account.findByIdAndUpdate(
@@ -74,7 +74,7 @@ export const updateAccount = asyncHandler(async (req, res) => {
   });
 });
 
-export const deleteAccount = asyncHandler(async (req, res) => {
+const deleteAccount = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const account = await Account.findByIdAndDelete(id);
   if (!account) {
@@ -89,3 +89,5 @@ export const deleteAccount = asyncHandler(async (req, res) => {
     message: 'Account deleted successfully',
   });
 });
+
+module.exports = { updateAccount, deleteAccount, getAccount, getAccounts, createAccount };

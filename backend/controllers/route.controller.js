@@ -1,6 +1,6 @@
-import Route from '../models/route.model.js';
+const Route = require('../models/route.model');
 
-export const createRoute = async (req, res) => {
+const createRoute = async (req, res) => {
   const { name, shops } = req.body;
 
   const route = await Route.create({ name, shops });
@@ -18,7 +18,7 @@ export const createRoute = async (req, res) => {
   });
 };
 
-export const getRoutes = async (_, res) => {
+const getRoutes = async (_, res) => {
   const routes = await Route.find().populate({
     path: 'shops',
     select: 'name',
@@ -37,7 +37,7 @@ export const getRoutes = async (_, res) => {
   });
 };
 
-export const updateRoute = async (req, res) => {
+const updateRoute = async (req, res) => {
   const { id } = req.params;
   const { name, shops } = req.body;
 
@@ -61,7 +61,7 @@ export const updateRoute = async (req, res) => {
   });
 };
 
-export const deleteRoute = async (req, res) => {
+const deleteRoute = async (req, res) => {
   const { id } = req.params;
   const route = await Route.findByIdAndDelete(id);
 
@@ -77,3 +77,10 @@ export const deleteRoute = async (req, res) => {
     message: 'Route deleted successfully',
   });
 };
+
+module.exports = {
+  createRoute,
+  getRoutes,
+  updateRoute,
+  deleteRoute,
+}

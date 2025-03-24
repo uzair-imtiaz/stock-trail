@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import AutoIncrement from 'mongoose-sequence';
+const mongoose = require('mongoose');
+const AutoIncrement = require('mongoose-sequence');
 
 const ItemSchema = new mongoose.Schema({
   itemId: {
@@ -153,4 +153,4 @@ RouteActivitySchema.plugin(AutoIncrement(mongoose));
 
 const RouteActivity = mongoose.model('RouteActivity', RouteActivitySchema);
 
-export default RouteActivity;
+module.exports = RouteActivity;

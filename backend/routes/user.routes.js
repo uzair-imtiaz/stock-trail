@@ -1,10 +1,10 @@
-import express from 'express';
-import {
+const express = require('express');
+const {
   getUsers,
   updateUserAccess,
   getSingleUSer,
-} from '../controllers/user.controller.js';
-import { authMiddleware, isAdmin } from '../middlewares/auth.middleware.js';
+} = require('../controllers/user.controller');
+const { authMiddleware, isAdmin } = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
@@ -14,4 +14,4 @@ router.get('/', getUsers);
 router.put('/:userId/update-access', updateUserAccess);
 router.get('/:role', getSingleUSer);
 
-export default router;
+module.exports = router;

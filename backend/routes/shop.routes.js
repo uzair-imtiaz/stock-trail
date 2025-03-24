@@ -1,10 +1,10 @@
-import express from 'express';
-import {
+const express = require('express');
+const {
   createShop,
   getShops,
   updateShop,
-} from '../controllers/shop.controller.js';
-import { authMiddleware, isAdmin } from '../middlewares/auth.middleware.js';
+} = require('../controllers/shop.controller');
+const { authMiddleware, isAdmin } = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
@@ -14,4 +14,4 @@ router.get('/', getShops);
 router.post('/new', isAdmin, createShop);
 router.put('/:id/edit', isAdmin, updateShop);
 
-export default router;
+module.exports = router;

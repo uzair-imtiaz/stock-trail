@@ -1,7 +1,7 @@
-import Expense from '../models/expense.model.js';
-import { asyncHandler } from '../utils/error.util.js';
+const Expense = require('../models/expense.model');
+const { asyncHandler } = require('../utils/error.util');
 
-export const createExpense = asyncHandler(async (req, res) => {
+const createExpense = asyncHandler(async (req, res) => {
   const { name } = req.body;
   const expense = await Expense.create({ name });
   if (!expense) {
@@ -17,7 +17,7 @@ export const createExpense = asyncHandler(async (req, res) => {
   });
 });
 
-export const getExpenses = asyncHandler(async (req, res) => {
+const getExpenses = asyncHandler(async (req, res) => {
   const expenses = await Expense.find();
   if (!expenses) {
     return res.status(400).json({
@@ -32,7 +32,7 @@ export const getExpenses = asyncHandler(async (req, res) => {
   });
 });
 
-export const updateExpense = asyncHandler(async (req, res) => {
+const updateExpense = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
   const expense = await Expense.findById(id);
@@ -50,3 +50,9 @@ export const updateExpense = asyncHandler(async (req, res) => {
     data: expense,
   });
 });
+
+module.exports = {
+  createExpense,
+  getExpenses,
+  updateExpense,
+}

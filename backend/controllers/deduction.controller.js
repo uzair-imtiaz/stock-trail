@@ -1,6 +1,6 @@
-import Deduction from '../models/deductions.model.js';
+const Deduction = require('../models/deductions.model');
 
-export const createDeduction = async (req, res) => {
+const createDeduction = async (req, res) => {
   try {
     const values = req.body;
     const deduction = await Deduction.create(values);
@@ -24,7 +24,7 @@ export const createDeduction = async (req, res) => {
   }
 };
 
-export const getDeductions = async (req, res) => {
+const getDeductions = async (req, res) => {
   try {
     const deductions = await Deduction.find().lean();
     if (!deductions) {
@@ -47,7 +47,7 @@ export const getDeductions = async (req, res) => {
   }
 };
 
-export const updateDeduction = async (req, res) => {
+const updateDeduction = async (req, res) => {
   try {
     const { id } = req.params;
     const values = req.body;
@@ -78,7 +78,7 @@ export const updateDeduction = async (req, res) => {
   }
 };
 
-export const deleteDeduction = async (req, res) => {
+const deleteDeduction = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -102,4 +102,11 @@ export const deleteDeduction = async (req, res) => {
       message: 'Internal Server Error',
     });
   }
+};
+
+module.exports = {
+  deleteDeduction,
+  updateDeduction,
+  getDeductions,
+  createDeduction,
 };

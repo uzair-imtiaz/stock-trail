@@ -1,6 +1,6 @@
-import { Shop } from '../models/shop.model.js';
+const { Shop } = require('../models/shop.model');
 
-export const getShops = async (req, res) => {
+const getShops = async (req, res) => {
   try {
     const shops = await Shop.find();
     if (!shops) {
@@ -19,7 +19,7 @@ export const getShops = async (req, res) => {
   }
 };
 
-export const createShop = async (req, res) => {
+const createShop = async (req, res) => {
   try {
     const { name } = req.body;
     const shop = await Shop.create({ name });
@@ -38,7 +38,7 @@ export const createShop = async (req, res) => {
   }
 };
 
-export const updateShop = async (req, res) => {
+const updateShop = async (req, res) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
@@ -56,4 +56,10 @@ export const updateShop = async (req, res) => {
   } catch {
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
+};
+
+module.exports = {
+  getShops,
+  createShop,
+  updateShop,
 };

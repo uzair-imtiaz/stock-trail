@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken';
+const jwt = require('jsonwebtoken');
 
-export const authMiddleware = async (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   try {
     const token = req.cookies?.token;
 
@@ -30,7 +30,7 @@ export const authMiddleware = async (req, res, next) => {
   }
 };
 
-export const isAdmin = (req, res, next) => {
+const isAdmin = (req, res, next) => {
   if (req.user && req.user?.role === 'admin') {
     next();
   } else {
@@ -39,4 +39,9 @@ export const isAdmin = (req, res, next) => {
       message: 'Access denied. Admin privileges required.',
     });
   }
+};
+
+module.exports = {
+  authMiddleware,
+  isAdmin,
 };

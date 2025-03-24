@@ -1,11 +1,11 @@
-import express from 'express';
-import {
+const express = require('express');
+const {
   createOrUpdateReceipt,
   getReceipts,
   generateCreditReport,
   getReceipt,
-} from '../controllers/receipt.controller.js';
-import { authMiddleware } from '../middlewares/auth.middleware.js';
+} = require('../controllers/receipt.controller');
+const { authMiddleware } = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
@@ -16,4 +16,4 @@ router.get('/', getReceipts);
 router.get('/:id', getReceipt);
 router.get('/report/credits', generateCreditReport);
 
-export default router;
+module.exports = router;

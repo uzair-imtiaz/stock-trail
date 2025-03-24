@@ -1,13 +1,13 @@
-import express from 'express';
-import { authMiddleware } from '../middlewares/auth.middleware.js';
-import {
+const express = require('express');
+const { authMiddleware } = require('../middlewares/auth.middleware');
+const {
   createInventory,
   deleteInventory,
   getGroupedInventory,
   getInventory,
   transferStock,
   updateInventory,
-} from '../controllers/inventory.controller.js';
+} = require('../controllers/inventory.controller');
 
 const router = express.Router();
 
@@ -20,4 +20,4 @@ router.delete('/:id/delete', deleteInventory);
 router.get('/grouped', getGroupedInventory);
 router.post('/transfer-stock', transferStock);
 
-export default router;
+module.exports = router;

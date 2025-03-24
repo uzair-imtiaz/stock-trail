@@ -1,10 +1,10 @@
-import mongoose from 'mongoose';
-import RouteActivity from '../models/routeActivity.model.js';
-import Inventory from '../models/inventory.model.js';
-import inventoryService from '../services/inventory.services.js';
-import Receipt from '../models/receipt.model.js';
+const mongoose = require('mongoose');
+const RouteActivity = require('../models/routeActivity.model');
+const Inventory = require('../models/inventory.model');
+const inventoryService = require('../services/inventory.services');
+const Receipt = require('../models/receipt.model');
 
-export const createSale = async (req, res) => {
+const createSale = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
@@ -47,7 +47,9 @@ export const createSale = async (req, res) => {
         }
       }
       inventoryItem.quantity -=
-        item.quantityDropped + (item.tpr / inventoryItem?.piecesPerCarton || 0) + item.wastage;
+        item.quantityDropped +
+        (item.tpr / inventoryItem?.piecesPerCarton || 0) +
+        item.wastage;
       await inventoryItem.save();
     }
     await session.commitTransaction();
@@ -70,7 +72,7 @@ export const createSale = async (req, res) => {
   }
 };
 
-export const getSale = async (req, res) => {
+const getSale = async (req, res) => {
   try {
     const sale = await RouteActivity.findById(req.params.id)
       .populate({
@@ -97,7 +99,7 @@ export const getSale = async (req, res) => {
   }
 };
 
-export const getInvoices = async (req, res) => {
+const getInvoices = async (req, res) => {
   try {
     let { page, limit: pageSize } = req.query;
     page = parseInt(page, 10) || 1;
@@ -145,7 +147,7 @@ export const getInvoices = async (req, res) => {
   }
 };
 
-export const getExpensesReport = async (req, res) => {
+const getExpensesReport = async (req, res) => {
   try {
     const { startDate, endDate, routeId, salesman } = req.query;
 
@@ -207,7 +209,7 @@ export const getExpensesReport = async (req, res) => {
   }
 };
 
-export const getSalesReport = async (req, res) => {
+const getSalesReport = async (req, res) => {
   try {
     const { startDate, endDate, routeId, salesman } = req.query;
 
@@ -309,4 +311,12 @@ const transformInventoryData = (report, inventoryList) => {
       })
       .filter((item) => item !== null),
   }));
+};
+
+module.exports = {
+  createSale,
+  getSalesReport,
+  getInvoices,
+  getSale,
+  getExpensesReport,
 };

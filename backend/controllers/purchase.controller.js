@@ -1,10 +1,10 @@
-import Purchase from '../models/purchase.model.js';
-import Account from '../models/account.model.js';
-import mongoose from 'mongoose';
-import Inventory from '../models/inventory.model.js';
-import inventoryService from '../services/inventory.services.js';
+const Purchase = require('../models/purchase.model');
+const Account = require('../models/account.model');
+const mongoose = require('mongoose');
+const Inventory = require('../models/inventory.model');
+const inventoryService = require('../services/inventory.services');
 
-export const createPurchase = async (req, res) => {
+const createPurchase = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -83,7 +83,7 @@ export const createPurchase = async (req, res) => {
   }
 };
 
-export const getPurchaseReport = async (req, res) => {
+const getPurchaseReport = async (req, res) => {
   try {
     const { startDate, endDate, vendor } = req.query;
 
@@ -187,3 +187,8 @@ const transformInventoryData = (report, inventoryItem) => {
       .filter((item) => item !== null),
   }));
 };
+
+module.exports = {
+  createPurchase,
+  getPurchaseReport,
+}

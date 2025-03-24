@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import AutoIncrement from 'mongoose-sequence';
+const mongoose = require('mongoose');
+const AutoIncrement = require('mongoose-sequence');
 
 const ItemSchema = new mongoose.Schema({
   itemId: {
@@ -35,4 +35,4 @@ PurchaseSchema.plugin(AutoIncrement(mongoose), { inc_field: 'purchaseId' });
 
 const Purchase = mongoose.model('Purchase', PurchaseSchema);
 
-export default Purchase;
+module.exports = Purchase;
