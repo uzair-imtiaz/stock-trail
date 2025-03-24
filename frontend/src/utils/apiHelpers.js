@@ -4,11 +4,6 @@ const axiosInstance = axios.create({
   baseURL: `https://api.ds.algobricks.org/api`,
   timeout: 12000,
   withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'Access-Control-Allow-Credentials': true
-  },
 });
 
 axiosInstance.interceptors.request.use(
@@ -32,23 +27,28 @@ axiosInstance.interceptors.response.use(
   }
 );
 
+const _config = {
+  headers: {
+    'Content-Type': 'application/json',
+  },
+};
 
-const getCallback = async (url, config = {}) => {
+const getCallback = async (url, config = _config) => {
   const response = await axiosInstance.get(url, config);
   return response.data;
 };
 
-const postCallback = async (url, data, config = {}) => {
+const postCallback = async (url, data, config = _config) => {
   const response = await axiosInstance.post(url, data, config);
   return response.data;
 };
 
-const putCallback = async (url, data, config = {}) => {
+const putCallback = async (url, data, config = _config) => {
   const response = await axiosInstance.put(url, data, config);
   return response.data;
 };
 
-const deleteCallback = async (url, config = {}) => {
+const deleteCallback = async (url, config = _config) => {
   const response = await axiosInstance.delete(url, config);
   return response.data;
 };
