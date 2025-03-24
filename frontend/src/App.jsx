@@ -55,6 +55,8 @@ const App = () => {
     console.log(`token: ${token}`)
     if (token) {
       fetchUser();
+    } else {
+      setLoading(false);
     }
   }, []);
 
