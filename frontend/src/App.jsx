@@ -37,6 +37,7 @@ const App = () => {
     console.log('in useeffect')
     const fetchUser = async () => {
       try {
+        console.log("api call to be made");
         const response = await getUser();
         if (response?.success) {
           setUser(response.data);
