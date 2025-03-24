@@ -1,7 +1,7 @@
-import mongoose from 'mongoose';
-import Receipt from '../models/receipt.model.js';
-import RouteActivity from '../models/routeActivity.model.js';
-import Account from '../models/account.model.js';
+const mongoose = require('mongoose');
+const Receipt = require('../models/receipt.model');
+const RouteActivity = require('../models/routeActivity.model');
+const Account = require('../models/account.model');
 
 const mergeCreditData = (
   existingCredits,
@@ -43,7 +43,7 @@ const mergeCreditData = (
   return mergedData;
 };
 
-export const createOrUpdateReceipt = async (req, res) => {
+const createOrUpdateReceipt = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -164,7 +164,7 @@ export const createOrUpdateReceipt = async (req, res) => {
   }
 };
 
-export const getReceipts = async (req, res) => {
+const getReceipts = async (req, res) => {
   try {
     const receipts = await Receipt.find()
       .populate({
@@ -187,7 +187,7 @@ export const getReceipts = async (req, res) => {
   }
 };
 
-export const getReceipt = async (req, res) => {
+const getReceipt = async (req, res) => {
   try {
     const { id: saleId } = req.params;
 
@@ -221,7 +221,7 @@ export const getReceipt = async (req, res) => {
   }
 };
 
-export const generateCreditReport = async (req, res) => {
+const generateCreditReport = async (req, res) => {
   try {
     const { salesmanId, routeId, shopId } = req.query;
     const matchStage = {};
@@ -302,3 +302,11 @@ export const generateCreditReport = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
+
+
+module.exports = {
+  createOrUpdateReceipt,
+  getReceipts,
+  getReceipt,
+  generateCreditReport
+}

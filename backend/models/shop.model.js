@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import AutoIncrementFactory from 'mongoose-sequence';
+const mongoose = require('mongoose');
+const AutoIncrementFactory = require('mongoose-sequence');
 
 const AutoIncrement = AutoIncrementFactory(mongoose);
 
@@ -10,4 +10,6 @@ const shopSchema = new mongoose.Schema({
 
 shopSchema.plugin(AutoIncrement, { inc_field: 'shopId' });
 
-export const Shop = mongoose.model('Shop', shopSchema);
+const Shop = mongoose.model('Shop', shopSchema);
+
+module.exports = Shop;

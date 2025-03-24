@@ -1,7 +1,7 @@
-import User from '../models/user.model.js';
-import { asyncHandler } from '../utils/error.util.js';
+const User = require('../models/user.model');
+const { asyncHandler } = require('../utils/error.util');
 
-export const getUsers = async (req, res) => {
+const getUsers = async (req, res) => {
   const users = await User.find();
   if (!users) {
     return res.status(404).json({ success: false, message: 'Users not found' });
@@ -19,7 +19,7 @@ export const getUsers = async (req, res) => {
   });
 };
 
-export const updateUserAccess = async (req, res) => {
+const updateUserAccess = async (req, res) => {
   const { userId } = req.params;
   const { modules } = req.body;
   const user = await User.findById(userId);
@@ -41,7 +41,7 @@ export const updateUserAccess = async (req, res) => {
   });
 };
 
-export const getSingleUSer = asyncHandler(async (req, res) => {
+const getSingleUSer = asyncHandler(async (req, res) => {
   const { role } = req.params;
   const users = await User.find({ role });
 
@@ -60,3 +60,9 @@ export const getSingleUSer = asyncHandler(async (req, res) => {
     message: 'User fetched successfully',
   });
 });
+
+module.exports = {
+  getUsers,
+  updateUserAccess,
+  getSingleUSer,
+};

@@ -1,11 +1,11 @@
-import express from 'express';
-import {
+const express = require('express');
+const {
   createVendor,
   getVendors,
   getVendor,
   updateVendor,
-} from '../controllers/vendor.controller.js';
-import { authMiddleware } from '../middlewares/auth.middleware.js';
+} = require('../controllers/vendor.controller');
+const { authMiddleware } = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
@@ -16,4 +16,4 @@ router.get('/', getVendors);
 router.get('/:id', getVendor);
 router.put('/:id/edit', updateVendor);
 
-export default router;
+module.exports = router;

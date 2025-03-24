@@ -1,7 +1,7 @@
-import User from '../models/user.model.js';
-import { generateToken } from '../utils/auth.util.js';
+const User = require('../models/user.model');
+const { generateToken } = require('../utils/auth.util');
 
-export const register = async (req, res) => {
+const register = async (req, res) => {
   const { name, email, password, role } = req.body;
 
   const userExists = await User.findOne({ email });
@@ -32,7 +32,7 @@ export const register = async (req, res) => {
   }
 };
 
-export const login = async (req, res) => {
+const login = async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
@@ -76,7 +76,7 @@ export const login = async (req, res) => {
     });
 };
 
-export const logout = async (req, res) => {
+const logout = async (req, res) => {
   res.clearCookie('token');
   res.status(200).json({
     success: true,
@@ -84,9 +84,11 @@ export const logout = async (req, res) => {
   });
 };
 
-export const me = async (req, res) => {
+const me = async (req, res) => {
   res.status(200).json({
     success: true,
     data: req.user,
   });
 };
+
+module.exports = {login, register, me, logout};

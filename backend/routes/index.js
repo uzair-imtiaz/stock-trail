@@ -1,16 +1,16 @@
-import express from 'express';
-import authRoutes from './auth.routes.js';
-import routeRoutes from './route.routes.js';
-import userRoutes from './user.routes.js';
-import inventoryRoutes from './inventory.routes.js';
-import salesRoutes from './sales.routes.js';
-import shopRoutes from './shop.routes.js';
-import receiptRoutes from './receipt.routes.js';
-import accountRoutes from './account.routes.js';
-import expenseRoutes from './expense.routes.js';
-import purchaseRoutes from './purchase.routes.js';
-import deductionRoutes from './deduction.routes.js';
-import vendorRoutes from './vendor.routes.js';
+const express = require('express');
+const authRoutes = require('./auth.routes');
+const routeRoutes = require('./route.routes');
+const userRoutes = require('./user.routes');
+const inventoryRoutes = require('./inventory.routes');
+const salesRoutes = require('./sales.routes');
+const shopRoutes = require('./shop.routes');
+const receiptRoutes = require('./receipt.routes');
+const accountRoutes = require('./account.routes');
+const expenseRoutes = require('./expense.routes');
+const purchaseRoutes = require('./purchase.routes');
+const deductionRoutes = require('./deduction.routes');
+const vendorRoutes = require('./vendor.routes');
 
 const router = express.Router();
 
@@ -26,4 +26,4 @@ router.use('/expenses', expenseRoutes);
 router.use('/purchases', purchaseRoutes);
 router.use('/deductions', deductionRoutes);
 router.use('/vendors', vendorRoutes);
-export default router;
+module.exports = router;

@@ -1,8 +1,8 @@
-import Inventory from '../models/inventory.model.js';
-import inventoryService from '../services/inventory.services.js';
-import { asyncHandler } from '../utils/error.util.js';
+const Inventory = require('../models/inventory.model');
+const inventoryService = require('../services/inventory.services');
+const { asyncHandler } = require('../utils/error.util');
 
-export const getInventory = async (req, res) => {
+const getInventory = async (req, res) => {
   const inventory = await Inventory.find();
   if (!inventory) {
     res.status(400).json({
@@ -17,7 +17,7 @@ export const getInventory = async (req, res) => {
   });
 };
 
-export const createInventory = async (req, res) => {
+const createInventory = async (req, res) => {
   let data = req.body;
   if (data.stockType === 'Pieces') {
     data.quantity = data.quantity / data.piecesPerCarton;
@@ -43,7 +43,7 @@ export const createInventory = async (req, res) => {
   });
 };
 
-export const updateInventory = async (req, res) => {
+const updateInventory = async (req, res) => {
   const { id } = req.params;
   const data = req.body;
   const item = await Inventory.findByIdAndUpdate(id, data, { new: true });
@@ -60,7 +60,7 @@ export const updateInventory = async (req, res) => {
   });
 };
 
-export const deleteInventory = async (req, res) => {
+const deleteInventory = async (req, res) => {
   const { id } = req.params;
   const item = await Inventory.findByIdAndDelete(id);
   if (!item) {
@@ -75,7 +75,7 @@ export const deleteInventory = async (req, res) => {
   });
 };
 
-export const getGroupedInventory = asyncHandler(async (_, res) => {
+const getGroupedInventory = asyncHandler(async (_, res) => {
   const inventory = await inventoryService.getGroupedInventory();
   if (!inventory) {
     return res.status(404).json({
@@ -91,7 +91,7 @@ export const getGroupedInventory = asyncHandler(async (_, res) => {
   });
 });
 
-export const transferStock = asyncHandler(async (req, res) => {
+const transferStock = asyncHandler(async (req, res) => {
   const { id, quantity, from, to } = req.body;
   const inventoryItem = await Inventory.findById(id);
 
@@ -140,3 +140,12 @@ export const transferStock = asyncHandler(async (req, res) => {
     data: transferredInventoryItem,
   });
 });
+
+module.exports = {
+  getInventory,
+  createInventory,
+  updateInventory,
+  deleteInventory,
+  getGroupedInventory,
+  transferStock
+}

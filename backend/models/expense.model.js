@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import AutoIncrementFactory from 'mongoose-sequence';
+const mongoose = require('mongoose');
+const AutoIncrementFactory = require('mongoose-sequence');
 
 const AutoIncrement = AutoIncrementFactory(mongoose);
 
@@ -11,4 +11,4 @@ const expenseSchema = new mongoose.Schema({
 expenseSchema.plugin(AutoIncrement, { inc_field: 'id' });
 
 const Expense = mongoose.model('Expense', expenseSchema);
-export default Expense;
+module.exports = Expense;

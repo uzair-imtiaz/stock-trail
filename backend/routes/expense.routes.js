@@ -1,10 +1,10 @@
-import { authMiddleware } from '../middlewares/auth.middleware.js';
-import express from 'express';
-import {
+const { authMiddleware } = require('../middlewares/auth.middleware');
+const express = require('express');
+const {
   createExpense,
   getExpenses,
   updateExpense,
-} from '../controllers/expense.controller.js';
+} = require('../controllers/expense.controller');
 
 const router = express.Router();
 
@@ -14,4 +14,4 @@ router.post('/new', createExpense);
 router.get('/', getExpenses);
 router.put('/:id/edit', updateExpense);
 
-export default router;
+module.exports = router;

@@ -1,11 +1,11 @@
-import express from 'express';
-import {
+const express = require('express');
+const {
   createDeduction,
   getDeductions,
   updateDeduction,
   deleteDeduction,
-} from '../controllers/deduction.controller.js';
-import { authMiddleware } from '../middlewares/auth.middleware.js';
+} = require('../controllers/deduction.controller');
+const { authMiddleware } = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
@@ -15,4 +15,4 @@ router.get('/', getDeductions);
 router.put('/:id/edit', updateDeduction);
 router.delete('/:id/delete', deleteDeduction);
 
-export default router;
+module.exports = router;

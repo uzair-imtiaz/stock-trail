@@ -1,6 +1,6 @@
-import Vendor from '../models/vendor.model.js';
+const Vendor = require('../models/vendor.model');
 
-export const getVendors = async (req, res) => {
+const getVendors = async (req, res) => {
   try {
     const vendors = await Vendor.find();
     if (!vendors) {
@@ -18,7 +18,7 @@ export const getVendors = async (req, res) => {
   }
 };
 
-export const getVendor = async (req, res) => {
+const getVendor = async (req, res) => {
   try {
     const vendor = await Vendor.findById(req.params.id);
     if (!vendor) {
@@ -37,7 +37,7 @@ export const getVendor = async (req, res) => {
   }
 };
 
-export const createVendor = async (req, res) => {
+const createVendor = async (req, res) => {
   try {
     const vendor = await Vendor.create(req.body);
     if (!vendor) {
@@ -56,7 +56,7 @@ export const createVendor = async (req, res) => {
   }
 };
 
-export const updateVendor = async (req, res) => {
+const updateVendor = async (req, res) => {
   try {
     const vendor = await Vendor.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -76,7 +76,7 @@ export const updateVendor = async (req, res) => {
   }
 };
 
-export const deleteVendor = async (req, res) => {
+const deleteVendor = async (req, res) => {
   try {
     const vendor = await Vendor.findByIdAndDelete(req.params.id);
     if (!vendor) {
@@ -93,3 +93,11 @@ export const deleteVendor = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error', success: false });
   }
 };
+
+module.exports = {
+  getVendors,
+  getVendor,
+  createVendor,
+  updateVendor,
+  deleteVendor
+}

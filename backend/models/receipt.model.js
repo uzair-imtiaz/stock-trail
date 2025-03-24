@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const CreditSchema = new mongoose.Schema(
   {
@@ -40,4 +40,4 @@ const ReceiptSchema = new mongoose.Schema(
 
 const Receipt = mongoose.model('Receipt', ReceiptSchema);
 
-export default Receipt;
+module.exports = Receipt;
