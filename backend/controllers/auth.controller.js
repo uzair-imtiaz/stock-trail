@@ -61,7 +61,7 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email }).populate('tenantId');
+    const user = await User.findOne({ email }).populate('tenant');
     if (!user) {
       return res
         .status(400)
@@ -92,7 +92,7 @@ const login = async (req, res) => {
           name: user.name,
           email: user.email,
           role: user.role,
-          tenant: user.tenantId,
+          tenant: user.tenant,
           token,
         },
       });
