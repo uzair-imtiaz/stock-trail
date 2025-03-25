@@ -4,8 +4,11 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 function ProtectedRoute({ user, loading }) {
   const location = useLocation();
   const hasAccess = user?.modules?.some((module) =>
-    location.pathname?.startsWith(`/${module}`)
+    location.pathname === `/${module}`
   );
+  console.log('user?.modules', user?.modules)
+  console.log('location', location)
+  console.log('hasAccess', hasAccess)
   if (user?.role === 'admin') {
     return <Outlet />;
   }
@@ -18,7 +21,7 @@ function ProtectedRoute({ user, loading }) {
 
   if (!hasAccess) {
     message.error('You are not authorized to access this page');
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/sales" replace />;
   }
 
   return <Outlet />;

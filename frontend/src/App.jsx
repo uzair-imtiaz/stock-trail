@@ -91,9 +91,9 @@ const App = () => {
             <Route path="inventory/:id/edit" element={<InventoryForm />} />
             <Route path="sales" element={<Sales />} />
             <Route path="sales/:id" element={<Sales />} />
-            <Route path="invoices" element={<Invoices />} />
-            <Route path="receipts" element={<Receipts />} />
-            <Route path="receipts/new" element={<ReceiptForm />} />
+            <Route path="sales/invoices" element={<Invoices />} />
+            <Route path="sales/receipts" element={<Receipts />} />
+            <Route path="sales/receipts/new" element={<ReceiptForm />} />
             <Route
               path="inventory/stock-management"
               element={<StockManagement />}

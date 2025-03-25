@@ -103,23 +103,16 @@ const AppLayout = ({ user, onLogout }) => {
                 </Link>
               </Menu.Item>
               <Menu.Item key="6-2" icon={<FileTextOutlined />}>
-                <Link to="/invoices" style={{ textDecoration: 'none' }}>
+                <Link to="/sales/invoices" style={{ textDecoration: 'none' }}>
                   Invoices
                 </Link>
               </Menu.Item>
               <Menu.Item key="6-3" icon={<IoReceiptOutline />}>
-                <Link to="/receipts" style={{ textDecoration: 'none' }}>
+                <Link to="/sales/receipts" style={{ textDecoration: 'none' }}>
                   Receipts
                 </Link>
               </Menu.Item>
             </Menu.SubMenu>
-          )}
-          {getPermission(user, 'users') && (
-            <Menu.Item key="4" icon={<UsergroupAddOutlined />}>
-              <Link to="/users" style={{ textDecoration: 'none' }}>
-                Users
-              </Link>
-            </Menu.Item>
           )}
           {getPermission(user, 'purchase') && (
             <Menu.Item key="5" icon={<ShoppingOutlined />}>
@@ -163,6 +156,13 @@ const AppLayout = ({ user, onLogout }) => {
                 </Link>
               </Menu.Item>
             </Menu.SubMenu>
+          )}
+          {getPermission(user, 'users') && (
+            <Menu.Item key="4" icon={<UsergroupAddOutlined />}>
+              <Link to="/users" style={{ textDecoration: 'none' }}>
+                Users
+              </Link>
+            </Menu.Item>
           )}
         </Menu>
       </Sider>
