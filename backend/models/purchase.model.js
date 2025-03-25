@@ -8,8 +8,18 @@ const ItemSchema = new mongoose.Schema({
     required: true,
   },
   quantity: { type: Number, required: true },
-  gst: { type: Number, required: true },
   total: { type: Number, required: true },
+  unitDeductions: [
+    {
+      _id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Deduction',
+        required: true,
+      },
+      amount: { type: Number, required: true },
+      isPercentage: { type: Boolean, default: false },
+    },
+  ],
 });
 
 const PurchaseSchema = new mongoose.Schema(
@@ -26,6 +36,18 @@ const PurchaseSchema = new mongoose.Schema(
       ref: 'Vendor',
       required: true,
     },
+    totalDeductions: [
+      {
+        _id: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Deduction',
+          required: true,
+        },
+        amount: { type: Number, required: true },
+        isPercentage: { type: Boolean, default: false },
+      },
+    ],
+    total: { type: Number },
   },
   { timestamps: true },
   { _id: false }

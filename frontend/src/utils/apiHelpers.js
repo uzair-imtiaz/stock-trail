@@ -1,7 +1,10 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: `https://api.ds.algobricks.org/api`,
+  baseURL:
+    process.env.NODE_ENV === 'production'
+      ? `https://api.ds.algobricks.org/api`
+      : 'http://localhost:3003/api',
   timeout: 12000,
   withCredentials: true,
 });

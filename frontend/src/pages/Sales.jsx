@@ -145,12 +145,25 @@ const SalesScreen = () => {
                 dispatchQty: droppedItem.quantityDropped,
                 tpr: droppedItem.tpr || 0,
                 wastage: droppedItem.wastage || 0,
+                unitDeductions: droppedItem.unitDeductions || [],
               };
             }
           });
 
           setInventory(updatedInventory);
         }
+
+        const updatedDeductions = deductions.map((deduction) => {
+          const matchingDeduction = saleData.totalDeductions.find(
+            (totalDeduction) => totalDeduction._id === deduction._id
+          );
+          console.log('matchingDeduction', matchingDeduction);
+          return matchingDeduction
+            ? { ...deduction, ...matchingDeduction }
+            : deduction;
+        });
+
+        if (updatedDeductions.length > 0) setDeductions(updatedDeductions);
 
         setTotalAmount(saleData.totalAmount);
       } else {
@@ -194,7 +207,11 @@ const SalesScreen = () => {
       if (inventoryRes.success && routesRes.success) {
         const processedData = processRowSpan(inventoryRes.data).map((item) => ({
           ...item,
-          unitDeductions: deductions.map((d) => ({ ...d, amount: 0, isPercentage: false })),
+          unitDeductions: deductions.map((d) => ({
+            ...d,
+            amount: 0,
+            isPercentage: false,
+          })),
         }));
         setInventory(processedData);
         setRoutes(routesRes.data);
@@ -217,15 +234,29 @@ const SalesScreen = () => {
   const handleDeductionChange = (value, record, deductionId, field) => {
     const updatedInventory = inventory.map((item) => {
       if (item._id === record._id) {
-        const updatedDeductions = item.unitDeductions.map((d) =>
-          d._id === deductionId
-            ? { ...d, [field]: field === 'amount' ? value || 0 : value }
-            : d
+        let updatedDeductions = [...item.unitDeductions];
+
+        const deductionIndex = updatedDeductions.findIndex(
+          (d) => d._id === deductionId
         );
+
+        if (deductionIndex !== -1) {
+          updatedDeductions[deductionIndex] = {
+            ...updatedDeductions[deductionIndex],
+            [field]: field === 'amount' ? value || 0 : value,
+          };
+        } else {
+          updatedDeductions.push({
+            _id: deductionId,
+            [field]: field === 'amount' ? value || 0 : value,
+          });
+        }
+
         return { ...item, unitDeductions: updatedDeductions };
       }
       return item;
     });
+
     setInventory(updatedInventory);
   };
 
@@ -265,6 +296,11 @@ const SalesScreen = () => {
       title: 'Unit Price',
       dataIndex: 'unitPrice',
       key: 'unitPrice',
+    },
+    {
+      title: 'Sale Price',
+      dataIndex: 'salePrice',
+      key: 'salePrice',
     },
     {
       title: 'Available Qty',
@@ -337,7 +373,7 @@ const SalesScreen = () => {
               }
             />
             <Switch
-            size='small'
+              size="small"
               checkedChildren="%"
               unCheckedChildren="PKR"
               checked={deductionForItem.isPercentage}
@@ -356,8 +392,6 @@ const SalesScreen = () => {
     })),
   ];
 
-  console.log('inventory', inventory)
-
   const handleSubmit = async () => {
     if (!selectedRoute || !selectedSalesman || !driverName || !licensePlate) {
       message.error('Please fill in all required fields.');
@@ -371,7 +405,7 @@ const SalesScreen = () => {
         quantityDropped: item.dispatchQty,
         tpr: item.tpr || 0,
         wastage: item.wastage || 0,
-        unitDeductions: [],
+        unitDeductions: item.unitDeductions.filter((d) => d?.amount > 0),
       }));
 
     const payload = {

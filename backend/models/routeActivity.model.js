@@ -13,13 +13,13 @@ const ItemSchema = new mongoose.Schema({
   unitPrice: { type: Number },
   unitDeductions: [
     {
-      deductionId: {
+      _id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Deduction',
         required: true,
       },
       amount: { type: Number, required: true },
-      isPercentage: { type: Boolean, required: true },
+      isPercentage: { type: Boolean, default: false },
     },
   ],
   netTotal: { type: Number },
@@ -57,13 +57,13 @@ const RouteActivitySchema = new mongoose.Schema(
     hasReceipt: { type: Boolean, default: false },
     totalDeductions: [
       {
-        deductionId: {
+        _id: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'Deduction',
           required: true,
         },
         amount: { type: Number, required: true },
-        isPercentage: { type: Boolean, required: true },
+        isPercentage: { type: Boolean, default: false },
       },
     ],
   },
