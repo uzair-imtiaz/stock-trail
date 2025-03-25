@@ -18,6 +18,7 @@ const Vendors = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentVendor, setCurrentVendor] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
 
   const { Title } = Typography;
@@ -28,6 +29,7 @@ const Vendors = () => {
 
   const fetchVendors = async () => {
     try {
+      setLoading(true);
       const response = await getVendors();
       if (response?.success) {
         setVendors(response?.data);
@@ -36,6 +38,8 @@ const Vendors = () => {
       }
     } catch (error) {
       message.error(error?.message || 'An error occurred');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -133,6 +137,7 @@ const Vendors = () => {
           bordered
           style={{ width: '100%' }}
           rowKey="_id"
+          loading={loading}
         />
       </Flex>
 

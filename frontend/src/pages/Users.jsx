@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Table, message } from 'antd';
+import { Modal, Table, message, Button } from 'antd';
 import { getUsers, updateUserAccess } from '../apis';
 import AccessModulesColumn from '../components/AccessModulesColumn';
 import Title from 'antd/es/typography/Title';
+import UserForm from '../components/common/forms/user-form/user-form';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -25,6 +27,17 @@ const Users = () => {
       message.error(error?.message || 'Failed to fetch users');
     }
     setLoading(false);
+  };
+
+  const handleAddUser = async (values) => {
+    const response = await addUser(values);
+    if (response?.success) {
+      message.success('User added successfully!');
+      setModalVisible(false);
+      fetchUsers();
+    } else {
+      throw new Error(response?.message || 'Failed to add user');
+    }
   };
 
   const columns = [
@@ -67,6 +80,9 @@ const Users = () => {
   return (
     <div>
       <Title level={3}>User Access Management</Title>
+      <Button type="primary" onClick={() => setModalVisible(true)} style={{ marginBottom: 16, float: 'right' }}>
+        Add User
+      </Button>
       <Table
         columns={columns}
         dataSource={users}
@@ -75,6 +91,15 @@ const Users = () => {
         bordered
         scroll={{ x: true }}
       />
+      {modalVisible && (
+        <Modal
+          open={modalVisible}
+          onCancel={() => setModalVisible(false)}
+          footer={null}
+        >
+          <UserForm title="Add User" onSubmit={handleAddUser} style={{ margin: "30px"}} />
+        </Modal>
+      )}
     </div>
   );
 };

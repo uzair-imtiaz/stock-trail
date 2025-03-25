@@ -3,12 +3,17 @@ import { Form, Input, Button, message, Typography } from 'antd';
 import { Card } from '../components/common';
 import { Link, useNavigate } from 'react-router-dom';
 import { signIn } from '../apis';
+import cookies from 'js-cookie';
 
 const { Text } = Typography;
 
 const SignIn = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const token = cookies.get('token');
+  if (token) {
+    navigate('/');
+  }
   const handleFinish = async (values) => {
     setLoading(true);
     try {

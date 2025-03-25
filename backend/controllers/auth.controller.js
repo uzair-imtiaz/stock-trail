@@ -1,79 +1,108 @@
 const User = require('../models/user.model');
+const Tenant = require('../models/tenant.model');
 const { generateToken } = require('../utils/auth.util');
+const bcrypt = require('bcryptjs');
 
 const register = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  try {
+    const { name, email, password, businessName } = req.body;
 
-  const userExists = await User.findOne({ email });
-  if (userExists) {
-    res.status(400).json({ message: 'User already exists' });
-    return;
-  }
-  const user = await User.create({ name, email, password, role });
-  if (user) {
-    const token = await generateToken(user._id);
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'User already exists' });
+    }
+
+    let tenant = await Tenant.findOne({ name: businessName });
+    if (tenant) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Business name already taken' });
+    }
+
+    tenant = await Tenant.create({
+      name: businessName,
+      slug: businessName.toLowerCase().replace(/\s+/g, '-'),
+      owner: null,
+    });
+
+    const user = await User.create({
+      name,
+      email,
+      password,
+      role: 'admin',
+      tenant: tenant._id,
+    });
+
+    tenant.owner = user._id;
+    await tenant.save();
+
+    const token = await generateToken(user);
     res.status(201).json({
       success: true,
-      message: 'User created successfully',
+      message: 'Business registered successfully',
       data: {
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
-        modules: user.modules,
+        tenant: tenant._id,
         token,
       },
     });
-  } else {
-    res.status(400).json({
-      success: false,
-      message: 'Invalid user data',
-    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
 
 const login = async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
-  if (!user) {
-    res.status(400).json({
+    const user = await User.findOne({ email }).populate('tenantId');
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'User not found' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Wrong Password' });
+    }
+
+    const token = await generateToken(user, user.tenantId);
+    return res
+      .cookie('token', token, {
+        httpOnly: false,
+        sameSite: 'None',
+        secure: true,
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+      })
+      .status(200)
+      .json({
+        success: true,
+        message: 'Login successful',
+        data: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          tenant: user.tenantId,
+          token,
+        },
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
       success: false,
-      message: 'Invalid email or password',
+      message: 'Internal server error',
     });
-    return;
   }
-
-  const isMatch = await user.matchPassword(password);
-  if (!isMatch) {
-    res.status(400).json({
-      success: false,
-      message: 'Invalid email or password',
-    });
-    return;
-  }
-
-  const token = await generateToken(user);
-  return res
-    .cookie('token', token, {
-      httpOnly: false,
-      sameSite: 'None',
-      secure: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    })
-    .status(200)
-    .json({
-      success: true,
-      message: 'Login successful',
-      data: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        modules: user.modules,
-        token,
-      },
-    });
 };
 
 const logout = async (req, res) => {
@@ -91,4 +120,4 @@ const me = async (req, res) => {
   });
 };
 
-module.exports = {login, register, me, logout};
+module.exports = { login, register, me, logout };

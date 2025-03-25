@@ -7,7 +7,8 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: { type: String, required: true },
   modules: { type: [String], default: [] },
-});
+  tenant: { type: mongoose.Schema.Types.ObjectId, ref: 'Tenant' },
+}, { timestamps: true });
 
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {

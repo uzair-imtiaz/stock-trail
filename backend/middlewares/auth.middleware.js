@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken');
+const { verifyToken } = require('../utils/auth.util');
+const User = require('../models/user.model');
 
 const authMiddleware = async (req, res, next) => {
   try {
@@ -13,12 +15,20 @@ const authMiddleware = async (req, res, next) => {
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = decoded;
+      req.user = await User.findById(decoded.id)
+        .populate('tenant')
+        .select('-password');
+      if (!req.user) {
+        return res
+          .status(401)
+          .json({ success: false, message: 'User not found' });
+      }
       next();
     } catch (error) {
-      return res.status(401).json({
+      console.log('error', error)
+      return res.status(500).json({
         success: false,
-        message: 'Invalid or expired token.',
+        message: 'Internal Server Error',
       });
     }
   } catch (error) {

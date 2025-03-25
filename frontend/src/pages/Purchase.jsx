@@ -378,7 +378,7 @@ const Purchase = () => {
         />
       </div>
       <Flex vertical gap={12} align="end">
-        <Card title="Deductions" style={{ width: 500 }}>
+        <Card title="Deductions" style={{ width: 500 }} loading={loading}>
           {deductions.map((deduction) => (
             <Space
               key={deduction._id}

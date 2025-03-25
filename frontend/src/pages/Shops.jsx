@@ -18,6 +18,8 @@ const Shops = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentShop, setCurrentShop] = useState(null);
+  const [loading, setLoading] = useState(false);
+
   const [form] = Form.useForm();
 
   const { Title } = Typography;
@@ -28,6 +30,7 @@ const Shops = () => {
 
   const fetchShops = async () => {
     try {
+      setLoading(true);
       const response = await getShops();
       if (response?.success) {
         setShops(response?.data);
@@ -36,6 +39,8 @@ const Shops = () => {
       }
     } catch (error) {
       message.error(error?.message || 'An error occurred');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -132,6 +137,7 @@ const Shops = () => {
           bordered
           style={{ width: '100%' }}
           rowKey="_id"
+          loading={loading}
         />
       </Flex>
 
