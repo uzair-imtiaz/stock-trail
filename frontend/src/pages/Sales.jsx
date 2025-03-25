@@ -508,7 +508,7 @@ const SalesScreen = () => {
         </div>
 
         <Flex vertical gap={12}>
-          <Card title="Deductions" style={{ width: 400 }}>
+          <Card title="Deductions" style={{ width: 400 }} loading={loading}>
             {deductions.map((deduction) => (
               <Space
                 key={deduction._id}
