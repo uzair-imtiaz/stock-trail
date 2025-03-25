@@ -12,7 +12,7 @@ const SignIn = ({ onLogin }) => {
   const navigate = useNavigate();
   const token = cookies.get('token');
   if (token) {
-    navigate('/');
+    navigate('/sales');
   }
   const handleFinish = async (values) => {
     setLoading(true);
@@ -21,7 +21,7 @@ const SignIn = ({ onLogin }) => {
       if (response?.success) {
         message.success('Login successful!');
         onLogin(response.data);
-        navigate('/');
+        navigate('/sales');
       } else {
         message.error(response?.message || 'Something went wrong');
       }

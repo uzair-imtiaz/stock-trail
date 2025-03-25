@@ -12,36 +12,38 @@ const AccessModulesColumn = ({
 
   const moduleOptions = [
     {
-      title: 'Dashboard',
-      value: 'dashboard',
+      title: 'Routes',
+      value: '/routes',
     },
     {
       title: 'Inventory',
-      value: 'inventory',
+      value: 'inventory_',
       children: [
-        { title: 'Create Inventory', value: 'inventory.create' },
-        { title: 'Edit Inventory', value: 'inventory.edit' },
-        { title: 'Delete Inventory', value: 'inventory.delete' },
+        { title: 'Listing', value: 'inventory' },
+        { title: 'Stock Management', value: 'inventory/stock-management' },
       ],
     },
     {
-      title: 'Routes',
-      value: 'routes',
+      title: 'Sales',
+      value: 'sales_',
       children: [
-        { title: 'Create Route', value: 'routes.create' },
-        { title: 'Edit Route', value: 'routes.edit' },
-        { title: 'Delete Route', value: 'routes.delete' },
+        { title: 'Add Sale', value: 'sales' },
+        { title: 'Invoices', value: 'sales/invoices' },
+        { title: 'Receipts', value: 'sales/receipts' },
       ],
     },
     {
-      title: 'Users',
-      value: 'users',
-      children: [
-        { title: 'Create User', value: 'users.create' },
-        { title: 'Edit User', value: 'users.edit' },
-        { title: 'Delete User', value: 'users.delete' },
-      ],
+      title: 'Purchase',
+      value: 'purchase',
     },
+    {
+      title: 'Reports',
+      value: 'reports',
+    },
+    {
+      title: 'Core',
+      value: 'core',
+    }
   ];
 
   const handleSave = async () => {

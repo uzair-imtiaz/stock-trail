@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, required: true },
-  modules: { type: [String], default: [] },
+  modules: { type: [String], default: ["sales"] },
   tenant: { type: mongoose.Schema.Types.ObjectId, ref: 'Tenant' },
 }, { timestamps: true });
 

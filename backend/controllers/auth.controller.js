@@ -93,6 +93,7 @@ const login = async (req, res) => {
           email: user.email,
           role: user.role,
           tenant: user.tenant,
+          modules: user.modules,
           token,
         },
       });
