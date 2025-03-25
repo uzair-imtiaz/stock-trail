@@ -23,6 +23,7 @@ const Accounts = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [editingAccount, setEditingAccount] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const { Title } = Typography;
 
@@ -32,6 +33,7 @@ const Accounts = () => {
 
   const fetchAccounts = async () => {
     try {
+      setLoading(true);
       const response = await getAccounts();
       if (response?.success) {
         setAccounts(response?.data);
@@ -40,6 +42,8 @@ const Accounts = () => {
       }
     } catch (error) {
       message.error(error?.message || 'Failed to fetch accounts');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -143,7 +147,12 @@ const Accounts = () => {
           />
         </Flex>
 
-        <Table dataSource={accounts} columns={columns} rowKey="_id" />
+        <Table
+          dataSource={accounts}
+          columns={columns}
+          rowKey="_id"
+          loading={loading}
+        />
       </Flex>
 
       <Modal

@@ -25,6 +25,7 @@ const Deductions = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [editingDeduction, setEditingDeduction] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const { Title } = Typography;
 
@@ -34,6 +35,7 @@ const Deductions = () => {
 
   const fetchDeductions = async () => {
     try {
+      setLoading(true);
       const response = await getDeductions();
       if (response?.success) {
         setDeductions(response?.data);
@@ -42,6 +44,9 @@ const Deductions = () => {
       }
     } catch (error) {
       message.error(error?.message || 'Failed to fetch deductions');
+    }
+    finally {
+      setLoading(false);
     }
   };
 
@@ -151,7 +156,7 @@ const Deductions = () => {
           />
         </Flex>
 
-        <Table dataSource={deductions} columns={columns} rowKey="_id" />
+        <Table dataSource={deductions} columns={columns} rowKey="_id" loading={loading} />
       </Flex>
 
       <Modal

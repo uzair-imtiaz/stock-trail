@@ -234,3 +234,8 @@ export const createVendor = async (data) => {
   const response = await postCallback('/vendors/new', data);
   return response;
 };
+
+export const addUser = async (data) => {
+  const response = await postCallback('/users/new', data);
+  return response;
+}

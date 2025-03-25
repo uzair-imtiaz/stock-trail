@@ -18,6 +18,7 @@ const Expenses = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentExpense, setCurrentExpense] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
 
   const { Title } = Typography;
@@ -28,6 +29,7 @@ const Expenses = () => {
 
   const fetchExpenses = async () => {
     try {
+      setLoading(true);
       const response = await getExpenses();
       if (response?.success) {
         setExpenses(response?.data);
@@ -36,6 +38,8 @@ const Expenses = () => {
       }
     } catch (error) {
       message.error(error?.message || 'An error occurred');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -132,6 +136,7 @@ const Expenses = () => {
           bordered
           style={{ width: '100%' }}
           rowKey="_id"
+          loading={loading}
         />
       </Flex>
 

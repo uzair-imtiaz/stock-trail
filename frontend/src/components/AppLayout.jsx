@@ -14,7 +14,7 @@ import {
   TableOutlined,
   UsergroupAddOutlined,
 } from '@ant-design/icons';
-import { Button, Layout, Menu } from 'antd';
+import { Avatar, Button, Layout, Menu } from 'antd';
 import { useState } from 'react';
 import { BsBank } from 'react-icons/bs';
 import { GoGear } from 'react-icons/go';
@@ -180,7 +180,14 @@ const AppLayout = ({ user, onLogout }) => {
             alignItems: 'center',
           }}
         >
-          <span>Welcome, {user?.name}</span>
+          <section>
+            <Avatar style={{ backgroundColor: '#0f4741' }}>
+              {user?.tenant?.name?.toUpperCase()?.[0]}
+            </Avatar>
+            <span style={{marginLeft: '10px'}}>
+              Welcome {user?.name}
+            </span>
+          </section>
           <Button type="link" icon={<LogoutOutlined />} onClick={onLogout}>
             Logout
           </Button>

@@ -61,8 +61,53 @@ const getSingleUSer = asyncHandler(async (req, res) => {
   });
 });
 
+const createUser = async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+    const admin = req.user;
+
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'User already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role,
+      tenantId: admin.tenantId,
+    });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'User not created' });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'User created successfully',
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        tenantId: user.tenantId,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: 'Internal Servwer Error' });
+  }
+};
+
 module.exports = {
   getUsers,
   updateUserAccess,
   getSingleUSer,
+  createUser,
 };
