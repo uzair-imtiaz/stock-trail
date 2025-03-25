@@ -50,12 +50,7 @@ const AppLayout = ({ user, onLogout }) => {
         onMouseEnter={() => setCollapsed(false)}
         onMouseLeave={() => setCollapsed(true)}
       >
-        <div
-          className="logo"
-          style={{
-            backgroundColor: '#F5F5F0',
-          }}
-        >
+        <div className="logo" style={{ backgroundColor: '#F5F5F0' }}>
           <img
             src={
               collapsed

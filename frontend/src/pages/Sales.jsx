@@ -133,7 +133,6 @@ const SalesScreen = () => {
 
         if (inventory.length > 0 && saleData.inventoryDropped?.length > 0) {
           const updatedInventory = [...inventory];
-          debugger;
 
           saleData.inventoryDropped.forEach((droppedItem) => {
             const inventoryIndex = updatedInventory.findIndex(
@@ -177,8 +176,6 @@ const SalesScreen = () => {
       setFetchingExistingSale(false);
     }
   };
-
-  console.log('deductions', deductions);
 
   const fetchExpenseOptions = async () => {
     try {
@@ -234,25 +231,21 @@ const SalesScreen = () => {
     setInventory(updatedInventory);
   };
 
-  console.log(inventory);
   const handleDeductionChange = (value, record, deductionId, field) => {
     const updatedInventory = inventory.map((item) => {
       if (item._id === record._id) {
         let updatedDeductions = [...item.unitDeductions];
 
-        // Check if deduction with deductionId exists
         const deductionIndex = updatedDeductions.findIndex(
           (d) => d._id === deductionId
         );
 
         if (deductionIndex !== -1) {
-          // If deduction exists, update its value
           updatedDeductions[deductionIndex] = {
             ...updatedDeductions[deductionIndex],
             [field]: field === 'amount' ? value || 0 : value,
           };
         } else {
-          // If deduction doesn't exist, add a new entry
           updatedDeductions.push({
             _id: deductionId,
             [field]: field === 'amount' ? value || 0 : value,
@@ -303,6 +296,11 @@ const SalesScreen = () => {
       title: 'Unit Price',
       dataIndex: 'unitPrice',
       key: 'unitPrice',
+    },
+    {
+      title: 'Sale Price',
+      dataIndex: 'salePrice',
+      key: 'salePrice',
     },
     {
       title: 'Available Qty',

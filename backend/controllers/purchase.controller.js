@@ -9,60 +9,61 @@ const createPurchase = async (req, res) => {
   session.startTransaction();
 
   try {
-    const { items, bank, vendor } = req.body;
+    const { items, bank, vendor, totalDeductions = [] } = req.body;
 
-    const purchase = await Purchase.create([{ items, bank, vendor }], {
+    let totalPurchaseAmount = items.reduce((acc, item) => acc + item.total, 0);
+
+    if (totalDeductions?.length > 0) {
+      totalDeductions.forEach((deduction) => {
+        const deductionAmount = deduction.isPercentage
+          ? (totalPurchaseAmount * deduction.amount) / 100
+          : deduction.amount;
+        totalPurchaseAmount -= deductionAmount;
+      });
+    }
+
+    const purchase = await Purchase.create([{ items, bank, vendor, totalDeductions, total: totalPurchaseAmount }], {
       session,
     });
 
     if (!purchase) {
       await session.abortTransaction();
       session.endSession();
-      return res
-        .status(400)
-        .json({ success: false, message: 'Unable to create purchase' });
+      return res.status(400).json({ success: false, message: 'Unable to create purchase' });
     }
 
+    // 4️⃣ Check & Deduct from Bank Account
     const bankAccount = await Account.findById(bank).session(session);
     if (!bankAccount) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(404).json({
-        success: false,
-        message: 'Bank account not found',
-      });
+      return res.status(404).json({ success: false, message: 'Bank account not found' });
     }
-    const total = items.reduce((acc, item) => acc + item.total, 0);
-    if (bankAccount.balance < total) {
+
+    if (bankAccount.balance < totalPurchaseAmount) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(400).json({
-        success: false,
-        message: 'Insufficient balance in bank account',
-      });
+      return res.status(400).json({ success: false, message: 'Insufficient balance in bank account' });
     }
 
-    bankAccount.balance -= total;
+    bankAccount.balance -= totalPurchaseAmount;
     await bankAccount.save({ session });
 
+    // 5️⃣ Update Inventory Quantities
     for (const item of items) {
-      const inventoryItem = await Inventory.findOne({
-        _id: item.itemId,
-      }).session(session);
+      const inventoryItem = await Inventory.findOne({ _id: item.itemId }).session(session);
 
       if (!inventoryItem) {
         await session.abortTransaction();
         session.endSession();
-        return res.status(400).json({
-          success: false,
-          message: `Item not found in inventory`,
-        });
+        return res.status(400).json({ success: false, message: `Item not found in inventory` });
       }
 
       inventoryItem.quantity += item.quantity;
       await inventoryItem.save({ session });
     }
 
+    // 6️⃣ Commit the Transaction
     await session.commitTransaction();
     session.endSession();
 
