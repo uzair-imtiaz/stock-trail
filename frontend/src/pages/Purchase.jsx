@@ -56,7 +56,7 @@ const Purchase = () => {
 
   useEffect(() => {
     calculateTotalAmount(inventory);
-  },[deductions])
+  }, [deductions]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -377,49 +377,51 @@ const Purchase = () => {
           )}
         />
       </div>
-      <Flex vertical gap={12} align="end">
-        <Card title="Deductions" style={{ width: 500 }} loading={loading}>
-          {deductions.map((deduction) => (
-            <Space
-              key={deduction._id}
-              style={{ display: 'flex', marginBottom: 8 }}
-            >
-              <InputNumber
-                addonBefore={deduction?.name}
-                placeholder={deduction?.name}
-                value={deduction?.amount}
-                onChange={(value) =>
-                  setDeductions((prev) =>
-                    prev.map((d) =>
-                      d._id === deduction._id ? { ...d, amount: value } : d
+      {deductions?.length > 0 && (
+        <Flex vertical gap={12} align="end">
+          <Card title="Deductions" style={{ width: 500 }} loading={loading}>
+            {deductions.map((deduction) => (
+              <Space
+                key={deduction._id}
+                style={{ display: 'flex', marginBottom: 8 }}
+              >
+                <InputNumber
+                  addonBefore={deduction?.name}
+                  placeholder={deduction?.name}
+                  value={deduction?.amount}
+                  onChange={(value) =>
+                    setDeductions((prev) =>
+                      prev.map((d) =>
+                        d._id === deduction._id ? { ...d, amount: value } : d
+                      )
                     )
-                  )
-                }
-                formatter={(value) =>
-                  deduction.isPercentage ? `${value}%` : `PKR ${value}`
-                }
-                parser={(value) =>
-                  value.replace(deduction.isPercentage ? '%' : 'PKR', '')
-                }
-              />
-              <Switch
-                checkedChildren="%"
-                unCheckedChildren="PKR"
-                checked={deduction.isPercentage}
-                onChange={(checked) =>
-                  setDeductions((prev) =>
-                    prev.map((d) =>
-                      d._id === deduction._id
-                        ? { ...d, isPercentage: checked }
-                        : d
+                  }
+                  formatter={(value) =>
+                    deduction.isPercentage ? `${value}%` : `PKR ${value}`
+                  }
+                  parser={(value) =>
+                    value.replace(deduction.isPercentage ? '%' : 'PKR', '')
+                  }
+                />
+                <Switch
+                  checkedChildren="%"
+                  unCheckedChildren="PKR"
+                  checked={deduction.isPercentage}
+                  onChange={(checked) =>
+                    setDeductions((prev) =>
+                      prev.map((d) =>
+                        d._id === deduction._id
+                          ? { ...d, isPercentage: checked }
+                          : d
+                      )
                     )
-                  )
-                }
-              />
-            </Space>
-          ))}
-        </Card>
-      </Flex>
+                  }
+                />
+              </Space>
+            ))}
+          </Card>
+        </Flex>
+      )}
       <Button
         type="primary"
         style={{ float: 'right', marginTop: '20px' }}

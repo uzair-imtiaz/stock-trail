@@ -507,56 +507,54 @@ const SalesScreen = () => {
           />
         </div>
 
-        <Flex vertical gap={12}>
-          <Card title="Deductions" style={{ width: 400 }} loading={loading}>
-            {deductions.map((deduction) => (
-              <Space
-                key={deduction._id}
-                style={{ display: 'flex', marginBottom: 8 }}
-              >
-                <InputNumber
-                  addonBefore={deduction.name}
-                  placeholder={deduction.name}
-                  value={deduction.amount}
-                  onChange={(value) =>
-                    setDeductions((prev) =>
-                      prev.map((d) =>
-                        d._id === deduction._id ? { ...d, amount: value } : d
+        {deductions?.length > 0 && (
+          <Flex vertical gap={12}>
+            <Card title="Deductions" style={{ width: 400 }} loading={loading}>
+              {deductions.map((deduction) => (
+                <Space
+                  key={deduction._id}
+                  style={{ display: 'flex', marginBottom: 8 }}
+                >
+                  <InputNumber
+                    addonBefore={deduction.name}
+                    placeholder={deduction.name}
+                    value={deduction.amount}
+                    onChange={(value) =>
+                      setDeductions((prev) =>
+                        prev.map((d) =>
+                          d._id === deduction._id ? { ...d, amount: value } : d
+                        )
                       )
-                    )
-                  }
-                  formatter={(value) =>
-                    deduction.isPercentage ? `${value}%` : `PKR ${value}`
-                  }
-                  parser={(value) =>
-                    value.replace(deduction.isPercentage ? '%' : 'PKR', '')
-                  }
-                />
-                <Switch
-                  checkedChildren="%"
-                  unCheckedChildren="PKR"
-                  checked={deduction.isPercentage}
-                  onChange={(checked) =>
-                    setDeductions((prev) =>
-                      prev.map((d) =>
-                        d._id === deduction._id
-                          ? { ...d, isPercentage: checked }
-                          : d
+                    }
+                    formatter={(value) =>
+                      deduction.isPercentage ? `${value}%` : `PKR ${value}`
+                    }
+                    parser={(value) =>
+                      value.replace(deduction.isPercentage ? '%' : 'PKR', '')
+                    }
+                  />
+                  <Switch
+                    checkedChildren="%"
+                    unCheckedChildren="PKR"
+                    checked={deduction.isPercentage}
+                    onChange={(checked) =>
+                      setDeductions((prev) =>
+                        prev.map((d) =>
+                          d._id === deduction._id
+                            ? { ...d, isPercentage: checked }
+                            : d
+                        )
                       )
-                    )
-                  }
-                />
-              </Space>
-            ))}
-          </Card>
-          <Button
-            type="primary"
-            onClick={handleSubmit}
-            style={{ width: '40%' }}
-          >
-            {id ? 'Update Sale' : 'Submit Sale'}
-          </Button>
-        </Flex>
+                    }
+                  />
+                </Space>
+              ))}
+            </Card>
+          </Flex>
+        )}
+        <Button type="primary" onClick={handleSubmit} style={{ width: '10%' }}>
+          {id ? 'Update Sale' : 'Submit Sale'}
+        </Button>
       </Flex>
     </>
   );

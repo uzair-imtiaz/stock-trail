@@ -18,7 +18,7 @@ const createRoute = async (req, res) => {
   });
 };
 
-const getRoutes = async (_, res) => {
+const getRoutes = async (req, res) => {
   const routes = await Route.find({ tenant: req.tenantId }).populate({
     path: 'shops',
     select: 'name',
