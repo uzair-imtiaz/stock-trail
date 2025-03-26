@@ -7,7 +7,7 @@ const UserForm = ({
   initialValues = {},
   onSubmit,
   isRegisterForm,
-  style = { maxWidth: 400, margin: 'auto', marginTop: '100px' },
+  style,
 }) => {
   const [loading, setLoading] = useState(false);
 

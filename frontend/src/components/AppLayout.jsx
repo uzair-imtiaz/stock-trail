@@ -69,58 +69,7 @@ const AppLayout = ({ user, onLogout }) => {
           style={{ backgroundColor: '#F5F5F0' }}
           theme="light"
           mode="inline"
-          defaultSelectedKeys={['1']}
         >
-          {getPermission(user, 'routes') && (
-            <Menu.Item key="2" icon={<CompassOutlined />}>
-              <Link to="/routes" style={{ textDecoration: 'none' }}>
-                Routes
-              </Link>
-            </Menu.Item>
-          )}
-          {getPermission(user, 'inventory') && (
-            <Menu.SubMenu key="3" icon={<InboxOutlined />} title="Inventory">
-              <Menu.Item key="3-1" icon={<TableOutlined />}>
-                <Link to="/inventory" style={{ textDecoration: 'none' }}>
-                  Listing
-                </Link>
-              </Menu.Item>
-              <Menu.Item key="3-2" icon={<BarChartOutlined />}>
-                <Link
-                  to="/inventory/stock-management"
-                  style={{ textDecoration: 'none' }}
-                >
-                  Stock Management
-                </Link>
-              </Menu.Item>
-            </Menu.SubMenu>
-          )}
-          {getPermission(user, 'sales') && (
-            <Menu.SubMenu key="6" icon={<ShoppingCartOutlined />} title="Sales">
-              <Menu.Item key="6-1" icon={<FileAddOutlined />}>
-                <Link to="/sales" style={{ textDecoration: 'none' }}>
-                  Add Sale
-                </Link>
-              </Menu.Item>
-              <Menu.Item key="6-2" icon={<FileTextOutlined />}>
-                <Link to="/sales/invoices" style={{ textDecoration: 'none' }}>
-                  Invoices
-                </Link>
-              </Menu.Item>
-              <Menu.Item key="6-3" icon={<IoReceiptOutline />}>
-                <Link to="/sales/receipts" style={{ textDecoration: 'none' }}>
-                  Receipts
-                </Link>
-              </Menu.Item>
-            </Menu.SubMenu>
-          )}
-          {getPermission(user, 'purchase') && (
-            <Menu.Item key="5" icon={<ShoppingOutlined />}>
-              <Link to="/purchase" style={{ textDecoration: 'none' }}>
-                Purchase
-              </Link>
-            </Menu.Item>
-          )}
           {getPermission(user, 'reports') && (
             <Menu.Item key="1" icon={<FundViewOutlined />}>
               <Link to="/reports" style={{ textDecoration: 'none' }}>
@@ -128,41 +77,120 @@ const AppLayout = ({ user, onLogout }) => {
               </Link>
             </Menu.Item>
           )}
-          {getPermission(user, 'core') && (
-            <Menu.SubMenu key="7" icon={<GoGear />} title="Core">
-              <Menu.Item key="7-1" icon={<ShoppingOutlined />}>
-                <Link to="/core/shops" style={{ textDecoration: 'none' }}>
-                  Shops
-                </Link>
-              </Menu.Item>
-              <Menu.Item key="7-2" icon={<BsBank />}>
-                <Link to="/core/accounts" style={{ textDecoration: 'none' }}>
-                  Accounts
-                </Link>
-              </Menu.Item>
-              <Menu.Item key="7-3" icon={<MoneyCollectOutlined />}>
-                <Link to="/core/expenses" style={{ textDecoration: 'none' }}>
-                  Expenses
-                </Link>
-              </Menu.Item>
-              <Menu.Item key="7-4" icon={<PercentageOutlined />}>
-                <Link to="/core/deductions" style={{ textDecoration: 'none' }}>
-                  Deductions/Charges
-                </Link>
-              </Menu.Item>
-              <Menu.Item key="7-5" icon={<ShopOutlined />}>
-                <Link to="/core/vendors" style={{ textDecoration: 'none' }}>
-                  Vendors
-                </Link>
-              </Menu.Item>
+
+          {getPermission(user, 'routes') && (
+            <Menu.Item key="2" icon={<CompassOutlined />}>
+              <Link to="/routes" style={{ textDecoration: 'none' }}>
+                Routes
+              </Link>
+            </Menu.Item>
+          )}
+
+          {getPermission(user, 'inventory') && (
+            <Menu.SubMenu key="3" icon={<InboxOutlined />} title="Inventory">
+              {getPermission(user, 'inventory') && (
+                <Menu.Item key="3-1" icon={<TableOutlined />}>
+                  <Link to="/inventory" style={{ textDecoration: 'none' }}>
+                    Listing
+                  </Link>
+                </Menu.Item>
+              )}
+              {getPermission(user, 'inventory') && (
+                <Menu.Item key="3-2" icon={<BarChartOutlined />}>
+                  <Link
+                    to="/inventory/stock-management"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    Stock Management
+                  </Link>
+                </Menu.Item>
+              )}
             </Menu.SubMenu>
           )}
+
           {getPermission(user, 'users') && (
             <Menu.Item key="4" icon={<UsergroupAddOutlined />}>
               <Link to="/users" style={{ textDecoration: 'none' }}>
                 Users
               </Link>
             </Menu.Item>
+          )}
+
+          {getPermission(user, 'purchase') && (
+            <Menu.Item key="5" icon={<ShoppingOutlined />}>
+              <Link to="/purchase" style={{ textDecoration: 'none' }}>
+                Purchase
+              </Link>
+            </Menu.Item>
+          )}
+
+          {getPermission(user, 'sales') && (
+            <Menu.SubMenu key="6" icon={<ShoppingCartOutlined />} title="Sales">
+              {getPermission(user, 'sales') && (
+                <Menu.Item key="6-1" icon={<FileAddOutlined />}>
+                  <Link to="/sales" style={{ textDecoration: 'none' }}>
+                    Add Sale
+                  </Link>
+                </Menu.Item>
+              )}
+              {getPermission(user, 'sales') && (
+                <Menu.Item key="6-2" icon={<FileTextOutlined />}>
+                  <Link to="/sales/invoices" style={{ textDecoration: 'none' }}>
+                    Invoices
+                  </Link>
+                </Menu.Item>
+              )}
+              {getPermission(user, 'sales') && (
+                <Menu.Item key="6-3" icon={<IoReceiptOutline />}>
+                  <Link to="/sales/receipts" style={{ textDecoration: 'none' }}>
+                    Receipts
+                  </Link>
+                </Menu.Item>
+              )}
+            </Menu.SubMenu>
+          )}
+
+          {getPermission(user, 'core') && (
+            <Menu.SubMenu key="7" icon={<GoGear />} title="Core">
+              {getPermission(user, 'core') && (
+                <Menu.Item key="7-1" icon={<ShoppingOutlined />}>
+                  <Link to="/core/shops" style={{ textDecoration: 'none' }}>
+                    Shops
+                  </Link>
+                </Menu.Item>
+              )}
+              {getPermission(user, 'core') && (
+                <Menu.Item key="7-2" icon={<BsBank />}>
+                  <Link to="/core/accounts" style={{ textDecoration: 'none' }}>
+                    Accounts
+                  </Link>
+                </Menu.Item>
+              )}
+              {getPermission(user, 'core') && (
+                <Menu.Item key="7-3" icon={<MoneyCollectOutlined />}>
+                  <Link to="/core/expenses" style={{ textDecoration: 'none' }}>
+                    Expenses
+                  </Link>
+                </Menu.Item>
+              )}
+              {getPermission(user, 'core') && (
+                <Menu.Item key="7-4" icon={<PercentageOutlined />}>
+                  <Link
+                    to="/core/deductions"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    Deductions/Charges
+                  </Link>
+                </Menu.Item>
+              )}
+              {getPermission(user, 'core') && (
+                <Menu.Item key="7-5" icon={<ShopOutlined />}>
+                  <Link to="/core/vendors" style={{ textDecoration: 'none' }}>
+                    Vendors
+                  </Link>
+                </Menu.Item>
+              )}
+            </Menu.SubMenu>
           )}
         </Menu>
       </Sider>
@@ -184,9 +212,7 @@ const AppLayout = ({ user, onLogout }) => {
             <Avatar style={{ backgroundColor: '#0f4741' }}>
               {user?.tenant?.name?.toUpperCase()?.[0]}
             </Avatar>
-            <span style={{marginLeft: '10px'}}>
-              Welcome {user?.name}
-            </span>
+            <span style={{ marginLeft: '10px' }}>Welcome {user?.name}</span>
           </section>
           <Button type="link" icon={<LogoutOutlined />} onClick={onLogout}>
             Logout

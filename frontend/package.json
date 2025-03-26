@@ -10,11 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@lottiefiles/dotlottie-react": "^0.13.2",
     "antd": "^5.23.3",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
     "dayjs": "^1.11.13",
     "js-cookie": "^3.0.5",
+    "lottie-react": "^2.4.1",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.8",
     "react-dom": "^18.3.1",

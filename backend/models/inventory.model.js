@@ -34,6 +34,11 @@ const inventorySchema = new mongoose.Schema(
     unitPrice: { type: Number, required: true },
     quantity: { type: Number, required: true },
     openingDate: { type: Date, required: true },
+    tenant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Tenant',
+      required: true,
+    },
   },
   { timestamps: true }
 );

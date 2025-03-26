@@ -1,10 +1,9 @@
-import { message, Typography } from 'antd';
-import { useState } from 'react';
+import { message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { signUp } from '../apis';
 import UserForm from '../components/common/forms/user-form/user-form';
-
-const { Text } = Typography;
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import './register.css';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -22,7 +21,22 @@ const Register = () => {
     }
   };
 
-  return <UserForm title="Sign Up" onSubmit={handleFinish} isRegisterForm />;
+  return (
+    <div className="signup-container">
+      <div className="signup-animation">
+        <DotLottieReact
+          loop
+          autoplay
+          src="/assets/lotties/OnBoardingAnimation.lottie"
+          style={{ width: '100%', height: '100%' }}
+        />
+      </div>
+
+      <div className="signup-form-container">
+        <UserForm title="Register your business" onSubmit={handleFinish} isRegisterForm style={{width: 480}} />
+      </div>
+    </div>
+  );
 };
 
 export default Register;

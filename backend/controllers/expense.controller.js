@@ -3,7 +3,7 @@ const { asyncHandler } = require('../utils/error.util');
 
 const createExpense = asyncHandler(async (req, res) => {
   const { name } = req.body;
-  const expense = await Expense.create({ name });
+  const expense = await Expense.create({ name, tenant: req.tenantId });
   if (!expense) {
     return res.status(400).json({
       success: false,
@@ -18,7 +18,7 @@ const createExpense = asyncHandler(async (req, res) => {
 });
 
 const getExpenses = asyncHandler(async (req, res) => {
-  const expenses = await Expense.find();
+  const expenses = await Expense.find({ tenant: req.tenantId });
   if (!expenses) {
     return res.status(400).json({
       success: false,
@@ -35,7 +35,7 @@ const getExpenses = asyncHandler(async (req, res) => {
 const updateExpense = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
-  const expense = await Expense.findById(id);
+  const expense = await Expense.findOne({ _id: id, tenant: req.tenantId });
   if (!expense) {
     return res.status(400).json({
       success: false,
@@ -55,4 +55,4 @@ module.exports = {
   createExpense,
   getExpenses,
   updateExpense,
-}
+};

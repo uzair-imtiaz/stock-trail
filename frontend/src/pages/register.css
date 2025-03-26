@@ -1,0 +1,27 @@
+.signup-container {
+    display: flex;
+    align-items: center; /* Vertically center */
+    justify-content: center; /* Horizontally center */
+    height: 100vh;
+    background: #F5F5F0; 
+    padding: 0 5%;
+    gap: 0px; /* Space between animation and form */
+  }
+  
+  .signup-animation {
+    flex: 1; /* Animation takes available space */
+    /* max-width: 50%; Prevents animation from getting too large */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+  }
+  
+  .signup-form-container {
+    flex: 1; 
+    max-width: 480px;
+    /* background: white; */
+    padding: 24px;
+    border-radius: 10px;
+  }
+  

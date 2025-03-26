@@ -11,6 +11,7 @@ const generateToken = async (user) => {
       email: user.email,
       role: user.role,
       modules: user.modules,
+      tenant: user.tenant,
     },
     process.env.JWT_SECRET,
     {

@@ -22,28 +22,50 @@ const createPurchase = async (req, res) => {
       });
     }
 
-    const purchase = await Purchase.create([{ items, bank, vendor, totalDeductions, total: totalPurchaseAmount }], {
-      session,
-    });
+    const purchase = await Purchase.create(
+      [
+        {
+          items,
+          bank,
+          vendor,
+          totalDeductions,
+          total: totalPurchaseAmount,
+          tenant: req.tenantId,
+        },
+      ],
+      {
+        session,
+      }
+    );
 
     if (!purchase) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(400).json({ success: false, message: 'Unable to create purchase' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Unable to create purchase' });
     }
 
     // 4️⃣ Check & Deduct from Bank Account
-    const bankAccount = await Account.findById(bank).session(session);
+    const bankAccount = await Account.findOne({
+      _id: bank,
+      tenant: req.tenantId,
+    }).session(session);
     if (!bankAccount) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(404).json({ success: false, message: 'Bank account not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Bank account not found' });
     }
 
     if (bankAccount.balance < totalPurchaseAmount) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(400).json({ success: false, message: 'Insufficient balance in bank account' });
+      return res.status(400).json({
+        success: false,
+        message: 'Insufficient balance in bank account',
+      });
     }
 
     bankAccount.balance -= totalPurchaseAmount;
@@ -51,12 +73,17 @@ const createPurchase = async (req, res) => {
 
     // 5️⃣ Update Inventory Quantities
     for (const item of items) {
-      const inventoryItem = await Inventory.findOne({ _id: item.itemId }).session(session);
+      const inventoryItem = await Inventory.findOne({
+        _id: item.itemId,
+        tenant: req.tenantId,
+      }).session(session);
 
       if (!inventoryItem) {
         await session.abortTransaction();
         session.endSession();
-        return res.status(400).json({ success: false, message: `Item not found in inventory` });
+        return res
+          .status(400)
+          .json({ success: false, message: `Item not found in inventory` });
       }
 
       inventoryItem.quantity += item.quantity;
@@ -84,6 +111,7 @@ const createPurchase = async (req, res) => {
   }
 };
 
+// Needs to be looked at
 const getPurchaseReport = async (req, res) => {
   try {
     const { startDate, endDate, vendor } = req.query;
@@ -192,4 +220,4 @@ const transformInventoryData = (report, inventoryItem) => {
 module.exports = {
   createPurchase,
   getPurchaseReport,
-}
+};

@@ -2,7 +2,7 @@ const Vendor = require('../models/vendor.model');
 
 const getVendors = async (req, res) => {
   try {
-    const vendors = await Vendor.find();
+    const vendors = await Vendor.find({ tenant: req.tenantId });
     if (!vendors) {
       return res
         .status(400)
@@ -20,7 +20,8 @@ const getVendors = async (req, res) => {
 
 const getVendor = async (req, res) => {
   try {
-    const vendor = await Vendor.findById(req.params.id);
+    const { id: vendorId } = req.params;
+    const vendor = await Vendor.findOne({ vendorId, tenant: req.tenantId });
     if (!vendor) {
       return res.status(404).json({
         message: 'Vendor not found',
@@ -39,7 +40,7 @@ const getVendor = async (req, res) => {
 
 const createVendor = async (req, res) => {
   try {
-    const vendor = await Vendor.create(req.body);
+    const vendor = await Vendor.create({ ...req.body, tenant: req.tenantId });
     if (!vendor) {
       return res
         .status(400)
@@ -58,9 +59,14 @@ const createVendor = async (req, res) => {
 
 const updateVendor = async (req, res) => {
   try {
-    const vendor = await Vendor.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const { id: vendorId } = req.params;
+    const vendor = await Vendor.findOneAndUpdate(
+      { vendorId, tenant: req.tenantId },
+      req.body,
+      {
+        new: true,
+      }
+    );
     if (!vendor) {
       return res
         .status(404)
@@ -78,7 +84,11 @@ const updateVendor = async (req, res) => {
 
 const deleteVendor = async (req, res) => {
   try {
-    const vendor = await Vendor.findByIdAndDelete(req.params.id);
+    const { id: vendorId } = req.params;
+    const vendor = await Vendor.findOneAndDelete({
+      vendorId,
+      tenant: req.tenantId,
+    });
     if (!vendor) {
       return res
         .status(404)
@@ -99,5 +109,5 @@ module.exports = {
   getVendor,
   createVendor,
   updateVendor,
-  deleteVendor
-}
+  deleteVendor,
+};

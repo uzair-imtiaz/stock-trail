@@ -6,6 +6,11 @@ const AutoIncrement = AutoIncrementFactory(mongoose);
 const shopSchema = new mongoose.Schema({
   shopId: { type: Number, unique: true },
   name: { type: String, required: true },
+  tenant: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Tenant',
+    required: true,
+  },
 });
 
 shopSchema.plugin(AutoIncrement, { inc_field: 'shopId' });

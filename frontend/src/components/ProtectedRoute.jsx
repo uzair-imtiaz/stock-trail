@@ -1,14 +1,11 @@
 import { message, Spin } from 'antd';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { getPermission } from '../utils';
 
 function ProtectedRoute({ user, loading }) {
   const location = useLocation();
-  const hasAccess = user?.modules?.some((module) =>
-    location.pathname === `/${module}`
-  );
-  console.log('user?.modules', user?.modules)
-  console.log('location', location)
-  console.log('hasAccess', hasAccess)
+  const hasAccess = getPermission(user, location.pathname);
+
   if (user?.role === 'admin') {
     return <Outlet />;
   }

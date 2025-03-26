@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const { corsOptions } = require('./utils/cors.utils');
 const cookieParser = require('cookie-parser');
+const tenantMiddleware = require('./middlewares/tenant.middleware');
 
 dotenv.config();
 

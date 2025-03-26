@@ -2,7 +2,7 @@ const Shop = require('../models/shop.model');
 
 const getShops = async (req, res) => {
   try {
-    const shops = await Shop.find();
+    const shops = await Shop.find({ tenant: req.tenantId });
     if (!shops) {
       return res
         .status(400)
@@ -14,8 +14,8 @@ const getShops = async (req, res) => {
       message: 'Shops fetched successfully',
       data: shops,
     });
-  } catch(error) {
-    console.log('error', error)
+  } catch (error) {
+    console.log('error', error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
@@ -23,7 +23,7 @@ const getShops = async (req, res) => {
 const createShop = async (req, res) => {
   try {
     const { name } = req.body;
-    const shop = await Shop.create({ name });
+    const shop = await Shop.create({ name, tenant: req.tenantId });
     if (!shop) {
       return res
         .status(400)
@@ -41,9 +41,13 @@ const createShop = async (req, res) => {
 
 const updateShop = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id: shopId } = req.params;
     const { name } = req.body;
-    const shop = await Shop.findByIdAndUpdate(id, { name }, { new: true });
+    const shop = await Shop.findOneAndUpdate(
+      { shopId, tenant: req.tenantId },
+      { name },
+      { new: true }
+    );
     if (!shop) {
       return res
         .status(400)

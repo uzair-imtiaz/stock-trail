@@ -3,7 +3,7 @@ const inventoryService = require('../services/inventory.services');
 const { asyncHandler } = require('../utils/error.util');
 
 const getInventory = async (req, res) => {
-  const inventory = await Inventory.find();
+  const inventory = await Inventory.find({ tenant: req.tenantId });
   if (!inventory) {
     res.status(400).json({
       success: false,
@@ -27,6 +27,7 @@ const createInventory = async (req, res) => {
     ...data,
     product: data.product.trim(),
     flavor: data.flavor.trim(),
+    tenant: req.tenantId,
   });
 
   if (!newItem) {
@@ -46,7 +47,11 @@ const createInventory = async (req, res) => {
 const updateInventory = async (req, res) => {
   const { id } = req.params;
   const data = req.body;
-  const item = await Inventory.findByIdAndUpdate(id, data, { new: true });
+  const item = await Inventory.findOneAndUpdate(
+    { _id: id, tenant: req.tenantId },
+    data,
+    { new: true }
+  );
   if (!item) {
     res.status(404).json({
       success: false,
@@ -62,7 +67,7 @@ const updateInventory = async (req, res) => {
 
 const deleteInventory = async (req, res) => {
   const { id } = req.params;
-  const item = await Inventory.findByIdAndDelete(id);
+  const item = await Inventory.findOneAndDelete({_id: id, tenant: req.tenantId});
   if (!item) {
     res.status(404).json({
       success: false,
@@ -76,7 +81,7 @@ const deleteInventory = async (req, res) => {
 };
 
 const getGroupedInventory = asyncHandler(async (_, res) => {
-  const inventory = await inventoryService.getGroupedInventory();
+  const inventory = await inventoryService.getGroupedInventory(req.tenantId);
   if (!inventory) {
     return res.status(404).json({
       success: false,
@@ -93,7 +98,7 @@ const getGroupedInventory = asyncHandler(async (_, res) => {
 
 const transferStock = asyncHandler(async (req, res) => {
   const { id, quantity, from, to } = req.body;
-  const inventoryItem = await Inventory.findById(id);
+  const inventoryItem = await Inventory.findOne({_id: id, tenant: req.tenantId});
 
   if (!inventoryItem) {
     return res.status(404).json({
@@ -147,5 +152,5 @@ module.exports = {
   updateInventory,
   deleteInventory,
   getGroupedInventory,
-  transferStock
-}
+  transferStock,
+};

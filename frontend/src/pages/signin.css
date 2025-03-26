@@ -1,0 +1,28 @@
+.login-container {
+    display: flex;
+    align-items: center;  /* Vertically center the card */
+    justify-content: space-between; /* Push animation and card apart */
+    height: 100vh; /* Full viewport height */
+    padding: 0 10%; /* Add spacing from the sides */
+    background-color: #0f4741;
+    position: relative;
+  }
+  
+  .login-illustration {
+    flex: 1; /* Let the animation take up all the space */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+  
+  .login-card {
+    width: 450px;
+    position: absolute;
+    right: 8%; /* Adjust position */
+    background: rgba(255, 255, 255, 0.9); /* Slight transparency for better effect */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 24px;
+  }
+  

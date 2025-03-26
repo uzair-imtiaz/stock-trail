@@ -48,6 +48,11 @@ const PurchaseSchema = new mongoose.Schema(
       },
     ],
     total: { type: Number },
+    tenant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Tenant',
+      required: true,
+    },
   },
   { timestamps: true },
   { _id: false }

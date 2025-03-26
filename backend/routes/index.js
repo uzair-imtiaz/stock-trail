@@ -11,10 +11,12 @@ const expenseRoutes = require('./expense.routes');
 const purchaseRoutes = require('./purchase.routes');
 const deductionRoutes = require('./deduction.routes');
 const vendorRoutes = require('./vendor.routes');
+const tenantMiddleware = require('../middlewares/tenant.middleware');
 
 const router = express.Router();
 
 router.use('/auth', authRoutes);
+router.use(tenantMiddleware);
 router.use('/routes', routeRoutes);
 router.use('/users', userRoutes);
 router.use('/inventory', inventoryRoutes);
