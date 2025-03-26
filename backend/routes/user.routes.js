@@ -2,7 +2,7 @@ const express = require('express');
 const {
   getUsers,
   updateUserAccess,
-  getSingleUSer,
+  getSingleUser,
   createUser,
 } = require('../controllers/user.controller');
 const { authMiddleware, isAdmin } = require('../middlewares/auth.middleware');
@@ -13,7 +13,7 @@ router.use(authMiddleware);
 
 router.get('/', isAdmin, getUsers);
 router.put('/:userId/update-access', isAdmin, updateUserAccess);
-router.get('/:role', getSingleUSer);
+router.get('/:role', getSingleUser);
 router.post('/new', isAdmin, createUser);
 
 module.exports = router;

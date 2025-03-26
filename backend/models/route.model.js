@@ -6,6 +6,11 @@ const routeSchema = new mongoose.Schema(
     shops: [
       { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true },
     ],
+    tenant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Tenant',
+      required: true,
+    },
   },
   { timestamps: true }
 );

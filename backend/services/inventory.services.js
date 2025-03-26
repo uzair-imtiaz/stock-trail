@@ -1,9 +1,14 @@
 const Inventory = require('../models/inventory.model');
 
 const inventoryService = {
-  async getGroupedInventory() {
+  async getGroupedInventory(tenant) {
     try {
       const inventory = await Inventory.aggregate([
+        {
+          $match: {
+            tenant,
+          },
+        },
         {
           $sort: {
             category: 1,

@@ -3,7 +3,7 @@ const Route = require('../models/route.model');
 const createRoute = async (req, res) => {
   const { name, shops } = req.body;
 
-  const route = await Route.create({ name, shops });
+  const route = await Route.create({ name, shops, tenant: req.tenantId });
   if (!route) {
     return res.status(400).json({
       success: false,
@@ -19,7 +19,7 @@ const createRoute = async (req, res) => {
 };
 
 const getRoutes = async (_, res) => {
-  const routes = await Route.find().populate({
+  const routes = await Route.find({ tenant: req.tenantId }).populate({
     path: 'shops',
     select: 'name',
   });
@@ -41,8 +41,8 @@ const updateRoute = async (req, res) => {
   const { id } = req.params;
   const { name, shops } = req.body;
 
-  const route = await Route.findByIdAndUpdate(
-    id,
+  const route = await Route.findOneAndUpdate(
+    { _id: id, tenant: req.tenantId },
     { name, shops },
     { new: true }
   );
@@ -63,7 +63,7 @@ const updateRoute = async (req, res) => {
 
 const deleteRoute = async (req, res) => {
   const { id } = req.params;
-  const route = await Route.findByIdAndDelete(id);
+  const route = await Route.findOneAndDelete({ _id: id, tenant: req.tenantId });
 
   if (!route) {
     return res.status(400).json({
@@ -83,4 +83,4 @@ module.exports = {
   getRoutes,
   updateRoute,
   deleteRoute,
-}
+};

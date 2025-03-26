@@ -55,6 +55,11 @@ const RouteActivitySchema = new mongoose.Schema(
     totalAmount: { type: Number, default: 0 },
     profit: { type: Number, default: 0 },
     hasReceipt: { type: Boolean, default: false },
+    tenant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Tenant',
+      required: true,
+    },
     totalDeductions: [
       {
         _id: {
@@ -113,9 +118,13 @@ RouteActivitySchema.pre('save', async function (next) {
       if (item.unitDeductions.length > 0) {
         for (const deduction of item.unitDeductions) {
           if (deduction.type === 'Charge') {
-            itemTotal += deduction.isPercentage ? itemTotal * deduction.amount : deduction.amount;
+            itemTotal += deduction.isPercentage
+              ? itemTotal * deduction.amount
+              : deduction.amount;
           } else if (deduction.type === 'Deduction') {
-            itemTotal -= deduction.isPercentage ? itemTotal * deduction.amount : deduction.amount;
+            itemTotal -= deduction.isPercentage
+              ? itemTotal * deduction.amount
+              : deduction.amount;
           }
         }
       }
@@ -126,9 +135,13 @@ RouteActivitySchema.pre('save', async function (next) {
     if (this.totalDeductions && this.totalDeductions.length > 0) {
       for (const deduction of this.totalDeductions) {
         if (deduction.type === 'Charge') {
-          totalAmount += deduction.isPercentage ? totalAmount * deduction.amount : deduction.amount;
+          totalAmount += deduction.isPercentage
+            ? totalAmount * deduction.amount
+            : deduction.amount;
         } else if (deduction.type === 'Deduction') {
-          totalAmount -= deduction.isPercentage ? totalAmount * deduction.amount : deduction.amount;
+          totalAmount -= deduction.isPercentage
+            ? totalAmount * deduction.amount
+            : deduction.amount;
         }
       }
     }

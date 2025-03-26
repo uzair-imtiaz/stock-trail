@@ -2,34 +2,52 @@ const Account = require('../models/account.model');
 const { asyncHandler } = require('../utils/error.util');
 
 const createAccount = asyncHandler(async (req, res) => {
-  const { name, type, balance } = req.body;
+  try {
+    const { name, type, balance } = req.body;
 
-  const existingAccount = await Account.findOne({ name });
-  if (existingAccount) {
-    return res.status(400).json({
+    const existingAccount = await Account.findOne({
+      name,
+      tenant: req.tenantId,
+    });
+    if (existingAccount) {
+      return res.status(400).json({
+        success: false,
+        message: 'Account with this name already exists',
+      });
+    }
+
+    const account = new Account({
+      name,
+      type,
+      balance: balance || 0,
+      tenant: req.tenantId,
+    });
+    await account.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Account created successfully',
+      data: account,
+    });
+  } catch (error) {
+    console.log('error', error);
+    res.status(500).json({
       success: false,
-      message: 'Account with this name already exists',
+      message: 'Internal Server Error',
     });
   }
-
-  const account = new Account({ name, type, balance: balance || 0 });
-  await account.save();
-
-  res.status(201).json({
-    success: true,
-    message: 'Account created successfully',
-    data: account,
-  });
 });
 
 const getAccounts = asyncHandler(async (req, res) => {
-  const accounts = await Account.find();
+  const accounts = await Account.find({ tenant: req.tenantId });
+
   if (!accounts) {
     return res.status(400).json({
       success: false,
-      message: 'Failed to fetch accounts',
+      message: 'Could not fetch accounts',
     });
   }
+
   res.status(200).json({
     success: true,
     data: accounts,
@@ -39,13 +57,15 @@ const getAccounts = asyncHandler(async (req, res) => {
 
 const getAccount = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const account = await Account.findById(id);
+  const account = await Account.findOne({ _id: id, tenant: req.tenantId });
+
   if (!account) {
     return res.status(404).json({
       success: false,
       message: 'Account not found',
     });
   }
+
   res.status(200).json({
     success: true,
     data: account,
@@ -56,17 +76,20 @@ const getAccount = asyncHandler(async (req, res) => {
 const updateAccount = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { name, balance } = req.body;
-  const account = await Account.findByIdAndUpdate(
-    id,
+
+  const account = await Account.findOneAndUpdate(
+    { _id: id, tenant: req.tenantId },
     { name, balance },
     { new: true }
   );
+
   if (!account) {
     return res.status(404).json({
       success: false,
       message: 'Account not found',
     });
   }
+
   res.status(200).json({
     success: true,
     data: account,
@@ -76,13 +99,18 @@ const updateAccount = asyncHandler(async (req, res) => {
 
 const deleteAccount = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const account = await Account.findByIdAndDelete(id);
+  const account = await Account.findOneAndDelete({
+    _id: id,
+    tenant: req.tenantId,
+  });
+
   if (!account) {
     return res.status(404).json({
       success: false,
       message: 'Account not found',
     });
   }
+
   res.status(200).json({
     success: true,
     data: account,
@@ -90,4 +118,10 @@ const deleteAccount = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { updateAccount, deleteAccount, getAccount, getAccounts, createAccount };
+module.exports = {
+  updateAccount,
+  deleteAccount,
+  getAccount,
+  getAccounts,
+  createAccount,
+};

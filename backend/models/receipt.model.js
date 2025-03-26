@@ -34,6 +34,11 @@ const ReceiptSchema = new mongoose.Schema(
     },
     credits: [CreditSchema],
     advances: [AdvanceSchema],
+    tenant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Tenant',
+      required: true,
+    },
   },
   { timestamps: true }
 );

@@ -6,6 +6,11 @@ const AutoIncrement = AutoIncrementFactory(mongoose);
 const expenseSchema = new mongoose.Schema({
   id: { type: Number, unique: true },
   name: { type: String, required: true },
+  tenant: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Tenant',
+    required: true,
+  },
 });
 
 expenseSchema.plugin(AutoIncrement, { inc_field: 'id' });

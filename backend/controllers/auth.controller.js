@@ -75,7 +75,7 @@ const login = async (req, res) => {
         .json({ success: false, message: 'Wrong Password' });
     }
 
-    const token = await generateToken(user, user.tenantId);
+    const token = await generateToken(user);
     return res
       .cookie('token', token, {
         httpOnly: false,

@@ -2,13 +2,12 @@ const mongoose = require('mongoose');
 const RouteActivity = require('../models/routeActivity.model');
 const Inventory = require('../models/inventory.model');
 const inventoryService = require('../services/inventory.services');
-const Receipt = require('../models/receipt.model');
 
 const createSale = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const sale = new RouteActivity(req.body);
+    const sale = new RouteActivity({ ...req.body, tenant: req.tenantId });
     const savedSale = await sale.save();
     if (!savedSale) {
       return res.status(400).json({
@@ -17,9 +16,10 @@ const createSale = async (req, res) => {
       });
     }
     for (const item of savedSale.inventoryDropped) {
-      const inventoryItem = await Inventory.findById(item.itemId).session(
-        session
-      );
+      const inventoryItem = await Inventory.findOne({
+        _id: item.itemId,
+        tenant: req.tenantId,
+      }).session(session);
       if (!inventoryItem) {
         await session.abortTransaction();
         return res.status(404).json({
@@ -34,6 +34,7 @@ const createSale = async (req, res) => {
           quantity: item.wastage,
           location: 'Wastage',
           _id: new mongoose.Types.ObjectId(),
+          tenant: req.tenantId,
         });
 
         if (!wastageItem) {
@@ -74,7 +75,10 @@ const createSale = async (req, res) => {
 
 const getSale = async (req, res) => {
   try {
-    const sale = await RouteActivity.findById(req.params.id)
+    const sale = await RouteActivity.findOne({
+      _id: req.params.id,
+      tenant: req.tenantId,
+    })
       .populate({
         path: 'routeId',
         select: 'name',
@@ -104,7 +108,7 @@ const getInvoices = async (req, res) => {
     let { page, limit: pageSize } = req.query;
     page = parseInt(page, 10) || 1;
     pageSize = parseInt(pageSize, 10) || 50;
-    const invoices = await RouteActivity.find({})
+    const invoices = await RouteActivity.find({ tenant: req.tenantId })
       .populate({
         path: 'routeId',
         select: 'name',
@@ -135,7 +139,7 @@ const getInvoices = async (req, res) => {
       pagination: {
         page,
         pageSize,
-        total: await RouteActivity.countDocuments(),
+        total: await RouteActivity.countDocuments({ tenant: req.tenantId }),
       },
     });
   } catch (error) {
@@ -151,7 +155,7 @@ const getExpensesReport = async (req, res) => {
   try {
     const { startDate, endDate, routeId, salesman } = req.query;
 
-    const matchStage = {};
+    const matchStage = { tenant: req.tenantId };
     if (startDate && endDate) {
       matchStage.date = {
         $gte: new Date(startDate),
@@ -213,7 +217,7 @@ const getSalesReport = async (req, res) => {
   try {
     const { startDate, endDate, routeId, salesman } = req.query;
 
-    const matchStage = {};
+    const matchStage = { tenant: req.tenantId };
     if (startDate && endDate) {
       matchStage.date = {
         $gte: new Date(startDate),
@@ -260,7 +264,9 @@ const getSalesReport = async (req, res) => {
     ];
 
     const salesReport = await RouteActivity.aggregate(pipeline);
-    const groupedInventory = await inventoryService.getGroupedInventory();
+    const groupedInventory = await inventoryService.getGroupedInventory(
+      req.tenantId
+    );
 
     const report = transformInventoryData(salesReport, groupedInventory);
 

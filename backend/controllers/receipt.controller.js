@@ -56,14 +56,17 @@ const createOrUpdateReceipt = async (req, res) => {
       advances = [],
     } = req.body;
 
-    const backAccount = await Account.findById(account);
+    const backAccount = await Account.findOne({
+      _id: account,
+      tenant: req.tenantId,
+    });
     if (!backAccount) {
       return res
         .status(404)
         .json({ success: false, message: 'Account not found' });
     }
 
-    const sale = await RouteActivity.findById(saleId);
+    const sale = await RouteActivity.findOne({ saleId, tenant: req.tenantId });
     if (!sale) {
       return res
         .status(404)
@@ -73,8 +76,10 @@ const createOrUpdateReceipt = async (req, res) => {
     sale.hasReceipt = true;
     await sale.save({ session });
 
-    let receipt = await Receipt.findOne({ saleId }).session(session);
-    console.log('receipt', receipt)
+    let receipt = await Receipt.findOne({
+      saleId,
+      tenant: req.tenantId,
+    }).session(session);
     let previousAmountRecovered = 0;
 
     if (receipt) {
@@ -100,6 +105,7 @@ const createOrUpdateReceipt = async (req, res) => {
             saleId,
             credits: mergeCreditData([], credits, returnedCredits),
             advances,
+            tenant: req.tenantId,
           },
         ],
         { session }
@@ -166,7 +172,7 @@ const createOrUpdateReceipt = async (req, res) => {
 
 const getReceipts = async (req, res) => {
   try {
-    const receipts = await Receipt.find()
+    const receipts = await Receipt.find({ tenant: req.tenantId })
       .populate({
         path: 'saleId',
         select: 'profit expenses totalAmount',
@@ -198,9 +204,12 @@ const getReceipt = async (req, res) => {
       });
     }
 
-    const receipt = await Receipt.findOne({ saleId }).populate({
+    const receipt = await Receipt.findOne({
+      saleId,
+      tenant: req.tenantId,
+    }).populate({
       path: 'credits.shopId',
-      select: 'name'
+      select: 'name',
     });
 
     if (!receipt) {
@@ -216,7 +225,7 @@ const getReceipt = async (req, res) => {
       message: 'Receipt fetched successfully',
     });
   } catch (error) {
-    console.log('error', error)
+    console.log('error', error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
@@ -224,7 +233,7 @@ const getReceipt = async (req, res) => {
 const generateCreditReport = async (req, res) => {
   try {
     const { salesmanId, routeId, shopId } = req.query;
-    const matchStage = {};
+    const matchStage = { tenant: req.tenant };
 
     if (shopId) {
       matchStage['credits.shopId'] = mongoose.ObjectId.createFromTime(shopId);
@@ -303,10 +312,9 @@ const generateCreditReport = async (req, res) => {
   }
 };
 
-
 module.exports = {
   createOrUpdateReceipt,
   getReceipts,
   getReceipt,
-  generateCreditReport
-}
+  generateCreditReport,
+};
