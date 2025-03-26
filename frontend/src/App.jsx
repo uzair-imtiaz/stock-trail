@@ -35,8 +35,10 @@ const App = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
+      console.log("inside fetch")
       try {
         const response = await getUser();
+        
         if (response?.success) {
           setUser(response.data);
         } else {
@@ -51,6 +53,7 @@ const App = () => {
     };
 
     const token = Cookies.get('token');
+    console.log('token', token)
     if (token) {
       fetchUser();
     } else {
