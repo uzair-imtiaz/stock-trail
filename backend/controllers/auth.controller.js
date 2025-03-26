@@ -81,6 +81,7 @@ const login = async (req, res) => {
         httpOnly: false,
         sameSite: 'None',
         secure: true,
+        domain: '.algobricks.org',
         maxAge: 30 * 24 * 60 * 60 * 1000,
       })
       .status(200)

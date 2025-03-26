@@ -5,7 +5,7 @@ const axiosInstance = axios.create({
     process.env.NODE_ENV === 'production'
       ? `https://api.ds.algobricks.org/api`
       : 'http://localhost:3003/api',
-  timeout: 12000,
+  timeout: 35000,
   withCredentials: true,
 });
 
