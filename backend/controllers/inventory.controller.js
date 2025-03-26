@@ -80,7 +80,7 @@ const deleteInventory = async (req, res) => {
   });
 };
 
-const getGroupedInventory = asyncHandler(async (_, res) => {
+const getGroupedInventory = asyncHandler(async (req, res) => {
   const inventory = await inventoryService.getGroupedInventory(req.tenantId);
   if (!inventory) {
     return res.status(404).json({
