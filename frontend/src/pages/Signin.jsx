@@ -77,7 +77,7 @@ const SignIn = ({ onLogin }) => {
         </Form>
 
         <div style={{ textAlign: 'center', marginTop: '20px' }}>
-          <Text>Don&apos;t have an account?</Text>{' '}
+          <Text>Don&apos;t have an account?</Text>
           <Link to="/register">
             <Button type="link">Sign Up</Button>
           </Link>
