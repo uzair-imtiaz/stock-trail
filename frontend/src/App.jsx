@@ -38,7 +38,7 @@ const App = () => {
       console.log("inside fetch")
       try {
         const response = await getUser();
-        
+
         if (response?.success) {
           setUser(response.data);
         } else {
@@ -52,7 +52,7 @@ const App = () => {
       }
     };
 
-    const token = Cookies.get('token');
+    const token = Cookies.get('token') || localStorage.getItem('token');
     console.log('token', token)
     if (token) {
       fetchUser();
@@ -63,6 +63,7 @@ const App = () => {
 
   const handleLogin = (user) => {
     setUser(user);
+    localStorage.setItem('token', user.token);
   };
 
   const handleLogout = async () => {
