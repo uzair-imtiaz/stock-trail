@@ -3,8 +3,6 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { getPermission } from '../utils';
 
 function ProtectedRoute({ user, loading }) {
-  console.log('user', user)
-  console.log('loading', loading)
   const location = useLocation();
   const hasAccess = getPermission(user, location.pathname);
 
