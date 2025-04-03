@@ -110,8 +110,9 @@ export const getInvoices = async (query) => {
   return response;
 };
 
-export const getShops = async () => {
-  const response = await getCallback('/shops');
+export const getShops = async (saleId) => {
+  const url = saleId ? `/shops?saleId=${saleId}` : '/shops/';
+  const response = await getCallback(url);
   return response;
 };
 
