@@ -94,7 +94,7 @@ const Receipts = () => {
         <Button
           type="primary"
           icon={<PlusOutlined />}
-          onClick={() => navigate('/receipts/new')}
+          onClick={() => navigate('sales/receipts/new')}
           loading={loading}
         >
           Add Receipt

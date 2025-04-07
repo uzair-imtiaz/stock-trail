@@ -127,6 +127,10 @@ const ReceiptForm = () => {
           ),
           netAmount: sale?.profit,
         });
+      } else {
+        message.error(
+          saleRes?.message || shopsRes?.message || receiptRes?.message
+        );
       }
     } catch (error) {
       message.error(error.message);

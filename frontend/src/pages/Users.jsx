@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Modal, Table, message, Button } from 'antd';
-import { getUsers, updateUserAccess } from '../apis';
+import { addUser, getUsers, updateUserAccess } from '../apis';
 import AccessModulesColumn from '../components/AccessModulesColumn';
 import Title from 'antd/es/typography/Title';
 import UserForm from '../components/common/forms/user-form/user-form';
