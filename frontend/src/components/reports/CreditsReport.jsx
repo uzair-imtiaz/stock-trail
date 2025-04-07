@@ -174,7 +174,12 @@ const CreditsReport = () => {
       </Space>
 
       {data && (
-        <Table columns={columns} dataSource={data} bordered loading={loading} />
+        <PrintTable
+          title="Credits Report"
+          columns={columns}
+          data={data}
+          loading={loading}
+        />
       )}
     </div>
   );
