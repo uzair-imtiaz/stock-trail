@@ -1,12 +1,14 @@
+const { default: mongoose } = require('mongoose');
 const Inventory = require('../models/inventory.model');
 
 const inventoryService = {
   async getGroupedInventory(tenant) {
+    const tenantObjectId = new mongoose.Types.ObjectId(tenant);
     try {
       const inventory = await Inventory.aggregate([
         {
           $match: {
-            tenant,
+            tenant: tenantObjectId,
           },
         },
         {

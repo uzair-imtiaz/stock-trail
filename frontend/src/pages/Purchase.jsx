@@ -128,11 +128,11 @@ const Purchase = () => {
       0
     );
     // Apply totalDeductions (global level)
-    if (deductions.length > 0) {
+    if (deductions?.length > 0) {
       deductions.forEach((deduction) => {
         let deductionValue = deduction.isPercentage
-          ? (grandTotal * deduction.amount) / 100
-          : deduction.amount;
+          ? (grandTotal * deduction.amount) / 100 || 0
+          : deduction.amount || 0;
 
         grandTotal +=
           deduction.type === 'Charge' ? deductionValue : -deductionValue;
