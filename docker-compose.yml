@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - 3003:3003
+    depends_on:
+      - db
+    environment:
+      PORT: 3003
+      MONGO_URI: mongodb+srv://admin:pQkKWQMRzhCVlT90@stock-trail.yvhmp.mongodb.net/?retryWrites=true&w=majority&appName=stock-trail
+      JWT_SECRET: dK8mP9$vL2@nR5*qX7&jW4
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db-data:

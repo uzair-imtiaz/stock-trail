@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    const dbName = process.env.NODE_ENV === 'production' ? 'prod_database' : 'test';
+    const dbName = 'prod_database';
     const conn = await mongoose.connect(process.env.MONGO_URI, {
       dbName,
     });

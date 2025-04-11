@@ -66,7 +66,7 @@ const createOrUpdateReceipt = async (req, res) => {
         .json({ success: false, message: 'Account not found' });
     }
 
-    const sale = await RouteActivity.findOne({ saleId, tenant: req.tenantId });
+    const sale = await RouteActivity.findOne({ _id: saleId, tenant: req.tenantId });
     if (!sale) {
       return res
         .status(404)
@@ -77,7 +77,7 @@ const createOrUpdateReceipt = async (req, res) => {
     await sale.save({ session });
 
     let receipt = await Receipt.findOne({
-      saleId,
+      _id: saleId,
       tenant: req.tenantId,
     }).session(session);
     let previousAmountRecovered = 0;

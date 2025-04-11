@@ -1,7 +1,7 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, Flex, Table, Typography } from 'antd';
+import { Button, Flex, message, Table, Typography } from 'antd';
 import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { getReceipts } from '../apis';
 import { formatBalance } from '../utils';
@@ -34,7 +34,7 @@ const Receipts = () => {
 
   const columns = [
     {
-      title: 'Sales ID',
+      title: 'Sale ID',
       dataIndex: ['saleId', '_id'],
       key: 'id',
     },
@@ -94,7 +94,7 @@ const Receipts = () => {
         <Button
           type="primary"
           icon={<PlusOutlined />}
-          onClick={() => navigate('sales/receipts/new')}
+          onClick={() => navigate('/sales/receipts/new')}
           loading={loading}
         >
           Add Receipt
