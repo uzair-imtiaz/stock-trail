@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const axiosInstance = axios.create({
   baseURL:
@@ -22,6 +23,8 @@ axiosInstance.interceptors.response.use(
     const { response } = error;
     if (response) {
       if (response.status === 401) {
+        Cookies.remove('token');
+        localStorage.removeItem('token');
         window.location.href = '/signin';
       }
       return Promise.resolve(response);
