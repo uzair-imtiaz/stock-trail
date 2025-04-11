@@ -8,7 +8,7 @@ import {
   Input,
   message,
 } from 'antd';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IoAddOutline } from 'react-icons/io5';
 import { EditOutlined } from '@ant-design/icons';
 import { getShops, updateShop, createShop } from '../apis';

@@ -1,6 +1,6 @@
-import { Button, message, Select, Space, Table, Typography } from 'antd';
+import { Button, message, Select, Space, Typography } from 'antd';
 import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BsSearch } from 'react-icons/bs';
 import {
   getCreditsReport,
@@ -8,6 +8,7 @@ import {
   getShops,
   getUsersByRole,
 } from '../../apis';
+import { PrintTable } from '../common';
 import { formatBalance } from '../../utils';
 
 const CreditsReport = () => {

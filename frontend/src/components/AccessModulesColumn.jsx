@@ -13,7 +13,7 @@ const AccessModulesColumn = ({
   const moduleOptions = [
     {
       title: 'Routes',
-      value: '/routes',
+      value: 'routes',
     },
     {
       title: 'Inventory',
@@ -42,7 +42,7 @@ const AccessModulesColumn = ({
     },
     {
       title: 'Core',
-      value: 'core',
+      value: 'core_',
     }
   ];
 

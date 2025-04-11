@@ -6,7 +6,6 @@ import { getUser, logout } from './apis';
 import AppLayout from './components/AppLayout';
 import InventoryForm from './components/InventoryForm';
 import ProtectedRoute from './components/ProtectedRoute';
-import Dashboard from './pages/Dashbaord';
 import Inventory from './pages/Inventory';
 import Invoices from './pages/Invoices';
 import Register from './pages/Register';
@@ -86,7 +85,6 @@ const App = () => {
             path="/"
             element={<ProtectedRoute user={user} loading={loading} />}
           >
-            <Route path="dashboard" element={<Dashboard />} />
             <Route path="routes" element={<RoutesPage />} />
             <Route path="inventory" element={<Inventory />} />
             <Route path="users" element={<Users />} />
