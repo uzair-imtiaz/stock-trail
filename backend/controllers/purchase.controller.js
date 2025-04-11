@@ -209,8 +209,6 @@ const transformInventoryData = (report, inventoryItem) => {
           location: inventoryItem.location,
           unitPrice: inventoryItem.unitPrice,
           quantity: item.quantityDropped,
-          tpr: item.tpr,
-          wastage: item.wastage,
         };
       })
       .filter((item) => item !== null),

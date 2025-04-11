@@ -22,7 +22,7 @@ import {
   getExpenses,
   getGroupedInventory,
   getRoutes,
-  getUsersByRole,
+  getUsers,
 } from '../apis';
 import { default as DynamicListSection } from '../components/DynamicList';
 
@@ -202,7 +202,7 @@ const SalesScreen = () => {
       const [routesRes, inventoryRes, salesManRes] = await Promise.all([
         getRoutes(),
         getGroupedInventory(),
-        getUsersByRole('salesman'),
+        getUsers(),
       ]);
       if (inventoryRes.success && routesRes.success) {
         const processedData = processRowSpan(inventoryRes.data).map((item) => ({
@@ -419,7 +419,7 @@ const SalesScreen = () => {
       totalAmount,
       profit: 0,
       creditAmount: 0,
-      totalDeductions: deductions,
+      totalDeductions: deductions.filter((d) => d?.amount > 0),
     };
 
     try {

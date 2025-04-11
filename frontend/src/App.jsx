@@ -61,6 +61,7 @@ const App = () => {
 
   const handleLogin = (user) => {
     setUser(user);
+    Cookies.set('token', user.token);
     localStorage.setItem('token', user.token);
   };
 

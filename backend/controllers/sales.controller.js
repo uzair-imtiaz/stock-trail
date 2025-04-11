@@ -81,7 +81,11 @@ const getSale = async (req, res) => {
     })
       .populate({
         path: 'routeId',
-        select: 'name',
+        select: 'name shops',
+        populate: {
+          path: 'shops',
+          select: 'name',
+        }
       })
       .lean();
     if (!sale) {

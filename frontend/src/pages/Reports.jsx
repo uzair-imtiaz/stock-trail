@@ -1,12 +1,10 @@
-import React from 'react';
-import { Card, List, Avatar, Typography, Badge } from 'antd';
-import { Link } from 'react-router-dom';
 import {
-  DollarOutlined,
   CreditCardOutlined,
-  ShoppingCartOutlined,
-  ShoppingOutlined,
+  DollarOutlined,
+  ShoppingCartOutlined
 } from '@ant-design/icons';
+import { Avatar, Badge, Card, List, Typography } from 'antd';
+import { Link } from 'react-router-dom';
 
 const { Title } = Typography;
 
@@ -29,12 +27,12 @@ const REPORTS = [
     color: '#52c41a',
     description: 'View sales performance and analytics',
   },
-  {
-    name: 'Purchase',
-    icon: <ShoppingOutlined />,
-    color: '#1890ff',
-    description: 'Manage purchase orders and suppliers',
-  },
+  // {
+  //   name: 'Purchase',
+  //   icon: <ShoppingOutlined />,
+  //   color: '#1890ff',
+  //   description: 'Manage purchase orders and suppliers',
+  // },
 ];
 
 const Reports = () => {

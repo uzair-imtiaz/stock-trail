@@ -2,8 +2,8 @@ const Shop = require('../models/shop.model');
 
 const getShops = async (req, res) => {
   try {
-    const query = { tenantId: req.tenantId };
-    if (req.query.saleId) query.saleId = req.query.saleId;
+    const query = { tenant: req.tenantId };
+
     const shops = await Shop.find(query);
     if (!shops) {
       return res

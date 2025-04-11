@@ -11,16 +11,10 @@ import {
   Typography,
 } from 'antd';
 import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TbCreditCardPay, TbCreditCardRefund } from 'react-icons/tb';
 import { useNavigate } from 'react-router-dom';
-import {
-  createReceipt,
-  fetchReceipt,
-  fetchSale,
-  getAccounts,
-  getShops,
-} from '../apis';
+import { createReceipt, fetchReceipt, fetchSale, getAccounts } from '../apis';
 import DynamicListSection from '../components/DynamicList';
 import { Card } from '../components/common';
 
@@ -47,7 +41,7 @@ const ReceiptForm = () => {
         } else {
           message.error(response?.message || 'Failed to fetch accounts');
         }
-      } catch {
+      } catch(error) {
         message.error(error?.message || 'Failed to fetch accounts');
       } finally {
         setLoading(false);
@@ -100,14 +94,13 @@ const ReceiptForm = () => {
       setLoading(true);
       const saleId = form.getFieldValue('saleId');
 
-      const [saleRes, shopsRes, receiptRes] = await Promise.all([
+      const [saleRes, receiptRes] = await Promise.all([
         fetchSale(saleId),
-        getShops(saleId),
         fetchReceipt(saleId),
       ]);
-      if (saleRes?.success && shopsRes?.success) {
+      if (saleRes?.success) {
         setShops(
-          shopsRes?.data?.map((shop) => ({
+          saleRes?.data?.routeId?.shops?.map((shop) => ({
             value: shop._id,
             label: shop.name,
           }))
@@ -129,7 +122,7 @@ const ReceiptForm = () => {
         });
       } else {
         message.error(
-          saleRes?.message || shopsRes?.message || receiptRes?.message
+          saleRes?.message || receiptRes?.message
         );
       }
     } catch (error) {
