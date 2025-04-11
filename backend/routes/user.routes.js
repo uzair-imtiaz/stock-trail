@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
-router.get('/', isAdmin, getUsers);
+router.get('/', getUsers);
 router.put('/:userId/update-access', isAdmin, updateUserAccess);
 router.get('/:role', getSingleUser);
 router.post('/new', isAdmin, createUser);

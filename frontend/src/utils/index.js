@@ -1,11 +1,12 @@
 export const getPermission = (user, module) => {
   if (user?.role === 'admin') return true;
 
+  const routeWithoutSlash = module.replace(/^\/+/, '');
   return user?.modules?.some((mod) => {
     const normalizedMod = mod.replace(/_+$/, ""); 
     return mod.endsWith("_") 
-      ? module.startsWith(normalizedMod)
-      : module === normalizedMod;       
+      ? routeWithoutSlash.startsWith(normalizedMod)
+      : routeWithoutSlash === normalizedMod;       
   });
 };
 

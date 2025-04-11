@@ -8,7 +8,7 @@ import {
   Input,
   message,
 } from 'antd';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IoAddOutline } from 'react-icons/io5';
 import { EditOutlined } from '@ant-design/icons';
 import { createExpense, getExpenses, updateExpense } from '../apis';
@@ -20,6 +20,7 @@ const Expenses = () => {
   const [currentExpense, setCurrentExpense] = useState(null);
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   const { Title } = Typography;
 
@@ -64,6 +65,7 @@ const Expenses = () => {
 
   const handleSubmit = async (values) => {
     try {
+      setSubmitLoading(true);
       if (isEditing) {
         const response = await updateExpense(currentExpense._id, values);
         if (response?.success) {
@@ -85,6 +87,8 @@ const Expenses = () => {
       form.resetFields();
     } catch (error) {
       message.error(error?.message || 'An error occurred');
+    } finally {
+      setSubmitLoading(false); 
     }
   };
 
@@ -145,6 +149,7 @@ const Expenses = () => {
         open={isModalOpen}
         onCancel={handleCancel}
         footer={null}
+        loading={submitLoading}
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item

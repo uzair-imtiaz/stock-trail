@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { Table, Button, Typography } from 'antd';
 import { useReactToPrint } from 'react-to-print';
 import { IoPrintOutline } from 'react-icons/io5';
