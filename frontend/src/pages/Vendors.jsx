@@ -8,7 +8,7 @@ import {
   Input,
   message,
 } from 'antd';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IoAddOutline } from 'react-icons/io5';
 import { EditOutlined } from '@ant-design/icons';
 import { getVendors, updateVendor, createVendor } from '../apis';
@@ -19,6 +19,7 @@ const Vendors = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentVendor, setCurrentVendor] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [form] = Form.useForm();
 
   const { Title } = Typography;
@@ -64,6 +65,7 @@ const Vendors = () => {
 
   const handleSubmit = async (values) => {
     try {
+      setSubmitLoading(true);
       if (isEditing) {
         const response = await updateVendor(currentVendor._id, values);
         if (response?.success) {
@@ -85,6 +87,8 @@ const Vendors = () => {
       form.resetFields();
     } catch (error) {
       message.error(error?.message || 'An error occurred');
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
@@ -145,6 +149,7 @@ const Vendors = () => {
         title={isEditing ? 'Update Vendor' : 'Add New Vendor'}
         open={isModalOpen}
         onCancel={handleCancel}
+        loading={submitLoading}
         footer={null}
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>

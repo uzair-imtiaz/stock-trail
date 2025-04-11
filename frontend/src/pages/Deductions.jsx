@@ -10,7 +10,7 @@ import {
   Typography,
   message,
 } from 'antd';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IoAddOutline } from 'react-icons/io5';
 import {
   createDeduction,
@@ -26,6 +26,7 @@ const Deductions = () => {
   const [form] = Form.useForm();
   const [editingDeduction, setEditingDeduction] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   const { Title } = Typography;
 
@@ -52,6 +53,7 @@ const Deductions = () => {
 
   const handleAddEdit = async (values) => {
     try {
+      setSubmitLoading(true);
       if (editingDeduction) {
         const response = await updateDeduction(editingDeduction._id, values);
         if (response?.success) {
@@ -71,6 +73,8 @@ const Deductions = () => {
       await fetchDeductions();
     } catch (error) {
       message.error(error.message || 'Operation failed');
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
@@ -165,6 +169,7 @@ const Deductions = () => {
         onCancel={() => setModalVisible(false)}
         onOk={() => form.submit()}
         destroyOnClose
+        loading={submitLoading}
       >
         <Form form={form} layout="vertical" onFinish={handleAddEdit}>
           <Form.Item

@@ -19,6 +19,7 @@ const Shops = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentShop, setCurrentShop] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmittingLoading] = useState(false);
 
   const [form] = Form.useForm();
 
@@ -65,6 +66,7 @@ const Shops = () => {
 
   const handleSubmit = async (values) => {
     try {
+      setSubmittingLoading(true);
       if (isEditing) {
         const response = await updateShop(currentShop._id, values);
         if (response?.success) {
@@ -86,6 +88,8 @@ const Shops = () => {
       form.resetFields();
     } catch (error) {
       message.error(error?.message || 'An error occurred');
+    } finally {
+      setSubmittingLoading(false);
     }
   };
 
@@ -146,6 +150,7 @@ const Shops = () => {
         open={isModalOpen}
         onCancel={handleCancel}
         footer={null}
+        loading={submitLoading}
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item

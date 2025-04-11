@@ -9,7 +9,7 @@ import {
   Typography,
   message,
 } from 'antd';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IoAddOutline } from 'react-icons/io5';
 import {
   createAccount,
@@ -24,6 +24,7 @@ const Accounts = () => {
   const [form] = Form.useForm();
   const [editingAccount, setEditingAccount] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmittingLoading] = useState(false);
 
   const { Title } = Typography;
 
@@ -49,6 +50,7 @@ const Accounts = () => {
 
   const handleAddEdit = async (values) => {
     try {
+      setSubmittingLoading(true);
       if (editingAccount) {
         const response = await updateAccount(editingAccount._id, values);
         if (response?.success) {
@@ -68,6 +70,8 @@ const Accounts = () => {
       await fetchAccounts();
     } catch (error) {
       message.error(error.message || 'Operation failed');
+    } finally {
+      setSubmittingLoading(false);
     }
   };
 
@@ -161,6 +165,7 @@ const Accounts = () => {
         onCancel={() => setModalVisible(false)}
         onOk={() => form.submit()}
         destroyOnClose
+        loading={submitLoading}
       >
         <Form form={form} layout="vertical" onFinish={handleAddEdit}>
           <Form.Item
