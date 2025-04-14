@@ -5,7 +5,6 @@ const inventorySchema = new mongoose.Schema(
     product: {
       type: String,
       required: true,
-      enum: ['Lays'],
     },
     flavor: { type: String, required: true },
     grammage: { type: Number, required: true },
@@ -25,11 +24,9 @@ const inventorySchema = new mongoose.Schema(
     piecesPerCarton: { type: Number },
     salePrice: { type: Number, required: true },
     vendor: {
-      type: Object,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Vendor',
       required: true,
-      properties: {
-        name: { type: String, required: true },
-      },
     },
     unitPrice: { type: Number, required: true },
     quantity: { type: Number, required: true },

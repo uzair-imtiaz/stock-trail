@@ -1,15 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import {
-  Table,
-  Button,
-  Modal,
-  Form,
-  Input,
-  Select,
-  message,
-  Flex,
-  Tag,
-} from 'antd';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Flex, Form, Input, Modal, Select, Table, message } from 'antd';
+import Title from 'antd/es/typography/Title';
+import { useCallback, useEffect, useState } from 'react';
 import {
   createRoute,
   deleteRoute,
@@ -17,8 +9,8 @@ import {
   getShops,
   updateRoute,
 } from '../apis';
-import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import Title from 'antd/es/typography/Title';
+
+import ShopCell from '../components/ShopColumn';
 
 const RoutesPage = () => {
   const [routes, setRoutes] = useState([]);
@@ -125,12 +117,7 @@ const RoutesPage = () => {
       dataIndex: ['shops'],
       key: 'shops',
       width: '55%',
-      render: (shops) =>
-        shops?.length > 0 ? (
-          shops.map((shop) => <Tag key={shop._id}>{shop.name}</Tag>)
-        ) : (
-          <span>-</span>
-        ),
+      render: (shops) => <ShopCell shops={shops} />,
     },
     {
       title: 'Actions',
