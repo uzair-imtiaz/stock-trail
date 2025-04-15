@@ -10,7 +10,7 @@ import {
   Row,
   Col,
 } from 'antd';
-import { createInventory, updateInventory } from '../apis';
+import { createInventory, getVendors, updateInventory } from '../apis';
 import { useNavigate, useLocation } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { Card } from './common';
@@ -22,12 +22,29 @@ const InventoryForm = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const location = useLocation();
+  const [vendors, setVendors] = useState([]);
   const { item } = location.state || {};
+
+  useEffect(() => {
+    const fetchVendors = async () => {
+      try {
+        const response = await getVendors();
+        if (response?.success) {
+          setVendors(response?.data);
+        } else {
+          message.error(response?.message || 'Failed to fetch vendors');
+        }
+      } catch (error) {
+        message.error(error?.message || 'An error occurred');
+      }
+    };
+    fetchVendors();
+  }, []);
+
   useEffect(() => {
     form.setFieldsValue({
       product: 'Lays',
       location: 'Main',
-      vendor: { name: 'Pepsico' },
       ...item,
       openingDate: item?.openingDate ? dayjs(item.openingDate) : null,
     });
@@ -126,11 +143,17 @@ const InventoryForm = () => {
 
             <Col span={12}>
               <Form.Item
-                name={['vendor', 'name']}
-                label="Vendor Name"
-                rules={[{ required: true, message: 'Vendor name is required' }]}
+                name={['vendor']}
+                label="Vendor"
+                rules={[{ required: true, message: 'Vendor is required' }]}
               >
-                <Input defaultValue="Pepsico" />
+                <Select>
+                  {vendors.map((vendor) => (
+                    <Option key={vendor._id} value={vendor._id}>
+                      {vendor.name}
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
 
               <Form.Item
