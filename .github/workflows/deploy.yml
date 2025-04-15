@@ -1,0 +1,31 @@
+name: Deploy to ec2
+
+on:
+  push:
+    tags: live-v-*-*
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: set up ssh
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > key.pem
+          chmod 600 key.pem
+
+      - name: deploy to ec2
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            cd ~/stock-trail
+            git pull origin ${{ secrets.BRANCH }}
+            npm install
+            pm2 restart ecosystem.config.js
