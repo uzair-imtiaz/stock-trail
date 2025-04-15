@@ -25,6 +25,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            source ~/.nvm/nvm.sh
             cd ~/stock-trail
             git pull origin ${{ secrets.BRANCH }}
             npm install
