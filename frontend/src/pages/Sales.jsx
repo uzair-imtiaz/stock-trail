@@ -398,6 +398,8 @@ const SalesScreen = () => {
       return;
     }
 
+    //handle edit
+
     const inventoryDropped = inventory
       .filter((item) => item.dispatchQty > 0)
       .map((item) => ({
@@ -428,7 +430,7 @@ const SalesScreen = () => {
 
       if (response?.success) {
         message.success(response?.message);
-        navigate('/invoices');
+        navigate('sales/invoices');
       } else {
         message.error(response?.message || 'Submission failed');
       }
