@@ -28,6 +28,10 @@ app.get('/health-check', (req, res) => {
   res.send('API is running....');
 });
 
+app.get('/', (req, res) => {
+  res.send('Welcome to Stock Trail API');
+});
+
 app.use(notFound);
 app.use(errorHandler);
 
