@@ -80,6 +80,7 @@ const Deductions = () => {
 
   const handleDelete = async (id) => {
     try {
+      setLoading(true);
       const response = await deleteDeduction(id);
       if (response?.success) {
         message.success('Deduction deleted successfully');
@@ -89,6 +90,8 @@ const Deductions = () => {
       }
     } catch (error) {
       message.error(error.message || 'Failed to delete deduction');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -109,12 +112,6 @@ const Deductions = () => {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
-      width: 200,
-    },
-    {
-      title: 'Amount%',
-      dataIndex: 'amount',
-      key: 'amount',
       width: 200,
     },
     {

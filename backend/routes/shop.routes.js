@@ -3,6 +3,7 @@ const {
   createShop,
   getShops,
   updateShop,
+  deleteShop,
 } = require('../controllers/shop.controller');
 const { authMiddleware, isAdmin } = require('../middlewares/auth.middleware');
 
@@ -11,7 +12,8 @@ const router = express.Router();
 router.use(authMiddleware);
 
 router.get('/', getShops);
-router.post('/new', isAdmin, createShop);
-router.put('/:id/edit', isAdmin, updateShop);
+router.post('/new', createShop);
+router.put('/:id/edit', updateShop);
+router.delete('/:id', isAdmin, deleteShop);
 
 module.exports = router;

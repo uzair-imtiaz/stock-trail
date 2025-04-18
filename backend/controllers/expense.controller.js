@@ -51,8 +51,30 @@ const updateExpense = asyncHandler(async (req, res) => {
   });
 });
 
+const deleteExpense = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const expense = await Expense.findOneAndDelete({
+      _id: id,
+      tenant: req.tenantId,
+    });
+    if (!expense) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Expense not found' });
+    }
+    res.status(200).json({
+      success: true,
+      message: 'Expense deleted successfully',
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
 module.exports = {
   createExpense,
   getExpenses,
   updateExpense,
+  deleteExpense,
 };

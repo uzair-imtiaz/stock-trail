@@ -65,8 +65,27 @@ const updateShop = async (req, res) => {
   }
 };
 
+const deleteShop = async (req, res) => {
+  try {
+    const { id: _id } = req.params;
+    const shop = await Shop.findOneAndDelete({ _id, tenant: req.tenantId });
+    if (!shop) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Shop not found' });
+    }
+    res.status(200).json({
+      success: true,
+      message: 'Shop deleted successfully',
+    });
+  } catch {
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
 module.exports = {
   getShops,
   createShop,
   updateShop,
+  deleteShop,
 };

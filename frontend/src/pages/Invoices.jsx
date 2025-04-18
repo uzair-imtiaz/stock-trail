@@ -1,9 +1,9 @@
 import { Button, message, Table } from 'antd';
 import Title from 'antd/es/typography/Title';
 import React, { useEffect, useState } from 'react';
-import { getInvoices } from '../apis';
+import { deleteInvoice, getInvoices } from '../apis';
 import { formatBalance } from '../utils';
-import { EditOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import './invoices.css';
 
@@ -56,6 +56,23 @@ const Invoices = () => {
     fetchInvoices(pagination.current, pagination.pageSize);
   };
 
+  const handleDelete = async (id) => {
+    try {
+      setLoading(true);
+      const response = await deleteInvoice(id);
+      if (response?.success) {
+        message.success(response?.message);
+        fetchInvoices();
+      } else {
+        message.error(response?.message || 'Failed to delete invoice');
+      }
+    } catch (error) {
+      message.error(error?.message || 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const columns = [
     {
       title: 'Sales ID',
@@ -98,11 +115,18 @@ const Invoices = () => {
       title: 'Actions',
       key: 'actions',
       render: (_, record) => (
-        <Button
-          type="link"
-          icon={<EditOutlined />}
-          onClick={() => navigate(`/sales/${record._id}`)}
-        />
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <Button
+            type="link"
+            icon={<EditOutlined />}
+            onClick={() => navigate(`/sales/${record._id}`)}
+          />
+          <Button
+            type="link"
+            icon={<DeleteOutlined />}
+            onClick={() => handleDelete(record._id)}
+          />
+        </div>
       ),
     },
   ];

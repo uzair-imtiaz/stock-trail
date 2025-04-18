@@ -239,4 +239,29 @@ export const createVendor = async (data) => {
 export const addUser = async (data) => {
   const response = await postCallback('/users/new', data);
   return response;
-}
+};
+
+export const deleteShop = async (id) => {
+  const response = await deleteCallback(`/shops/${id}`);
+  return response;
+};
+
+export const deleteVendor = async (id) => {
+  const response = await deleteCallback(`/vendors/${id}`);
+  return response;
+};
+
+export const deleteExpense = async (id) => {
+  const response = await deleteCallback(`/expenses/${id}`);
+  return response;
+};
+
+export const deleteInvoice = async (id) => {
+  const response = await deleteCallback(`/sales/${id}`);
+  return response;
+};
+
+export const updateSale = async (id, data) => {
+  const response = await putCallback(`/sales/${id}`, data);
+  return response;
+};
