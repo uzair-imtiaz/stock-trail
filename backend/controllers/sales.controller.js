@@ -85,7 +85,7 @@ const getSale = async (req, res) => {
         populate: {
           path: 'shops',
           select: 'name',
-        }
+        },
       })
       .lean();
     if (!sale) {
@@ -323,10 +323,54 @@ const transformInventoryData = (report, inventoryList) => {
   }));
 };
 
+const deleteInvoice = async (req, res) => {
+  try {
+    const invoiceId = req.params.id;
+    const invoice = await RouteActivity.findOneAndDelete({
+      _id: invoiceId,
+      tenant: req.tenantId,
+    });
+    if (!invoice) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Invoice not found' });
+    }
+    res.status(200).json({
+      success: true,
+      message: 'Invoice deleted successfully',
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
+const editSale = async (req, res) => {
+  try {
+    const saleId = req.params.id;
+    const updatedSale = await RouteActivity.findOneAndUpdate(
+      { _id: saleId, tenant: req.tenantId },
+      req.body,
+      { new: true }
+    );
+    if (!updatedSale) {
+      return res.status(404).json({ success: false, message: 'Sale not found' });
+    }
+    res.status(200).json({
+      success: true,
+      message: 'Sale updated successfully',
+      data: updatedSale,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
 module.exports = {
   createSale,
   getSalesReport,
   getInvoices,
   getSale,
   getExpensesReport,
+  deleteInvoice,
+  editSale,
 };

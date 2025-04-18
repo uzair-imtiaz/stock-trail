@@ -10,8 +10,13 @@ import {
 } from 'antd';
 import { useEffect, useState } from 'react';
 import { IoAddOutline } from 'react-icons/io5';
-import { EditOutlined } from '@ant-design/icons';
-import { createExpense, getExpenses, updateExpense } from '../apis';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import {
+  createExpense,
+  deleteExpense,
+  getExpenses,
+  updateExpense,
+} from '../apis';
 
 const Expenses = () => {
   const [expenses, setExpenses] = useState([]);
@@ -88,7 +93,24 @@ const Expenses = () => {
     } catch (error) {
       message.error(error?.message || 'An error occurred');
     } finally {
-      setSubmitLoading(false); 
+      setSubmitLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      setLoading(true);
+      const response = await deleteExpense(id);
+      if (response?.success) {
+        message.success(response?.message);
+        fetchExpenses();
+      } else {
+        message.error(response?.message || 'Failed to delete expense');
+      }
+    } catch (error) {
+      message.error(error?.message || 'An error occurred');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,11 +129,21 @@ const Expenses = () => {
       title: 'Action',
       key: 'action',
       render: (_, record) => (
-        <Button
-          icon={<EditOutlined />}
-          type="link"
-          onClick={() => showEditModal(record)}
-        />
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => showEditModal(record)}
+            shape="circle"
+            size="small"
+          />
+          <Button
+            icon={<DeleteOutlined />}
+            onClick={() => handleDelete(record._id)}
+            shape="circle"
+            size="small"
+            danger
+          />
+        </div>
       ),
     },
   ];

@@ -8,7 +8,6 @@ import {
   message,
   Select,
   Space,
-  Spin,
   Switch,
   Table,
 } from 'antd';
@@ -23,6 +22,7 @@ import {
   getGroupedInventory,
   getRoutes,
   getUsers,
+  updateSale,
 } from '../apis';
 import { default as DynamicListSection } from '../components/DynamicList';
 
@@ -107,14 +107,12 @@ const SalesScreen = () => {
     if (response?.success) {
       setDeductions(response?.data);
     }
-    if (id) {
-      await fetchExistingSale(id);
-    }
   };
 
-  const fetchExistingSale = async (saleId) => {
-    setFetchingExistingSale(true);
+  const fetchExistingSale = async (saleId, inventoryData) => {
     try {
+      setFetchingExistingSale(true);
+      setLoading(true);
       const response = await fetchSale(saleId);
       if (response.success) {
         const saleData = response.data;
@@ -130,9 +128,8 @@ const SalesScreen = () => {
           _id: expense._id,
         }));
         setExpenses(mappedExpenses);
-
-        if (inventory.length > 0 && saleData.inventoryDropped?.length > 0) {
-          const updatedInventory = [...inventory];
+        if (inventoryData.length > 0 && saleData.inventoryDropped?.length > 0) {
+          const updatedInventory = [...inventoryData];
 
           saleData.inventoryDropped.forEach((droppedItem) => {
             const inventoryIndex = updatedInventory.findIndex(
@@ -174,6 +171,7 @@ const SalesScreen = () => {
       console.error(error);
     } finally {
       setFetchingExistingSale(false);
+      setLoading(false);
     }
   };
 
@@ -216,6 +214,7 @@ const SalesScreen = () => {
         setInventory(processedData);
         setRoutes(routesRes.data);
         setSalesmen(salesManRes.data);
+        if (id) await fetchExistingSale(id, processedData);
       }
     } catch (error) {
       message.error(error.message || 'Failed to fetch data');
@@ -426,11 +425,13 @@ const SalesScreen = () => {
 
     try {
       setLoading(true);
-      const response = await createSale(payload);
+      const response = id
+        ? await updateSale(id, payload)
+        : await createSale(payload);
 
       if (response?.success) {
         message.success(response?.message);
-        navigate('sales/invoices');
+        navigate('/sales/invoices');
       } else {
         message.error(response?.message || 'Submission failed');
       }
@@ -442,10 +443,6 @@ const SalesScreen = () => {
     }
   };
 
-  if (fetchingExistingSale && inventory.length === 0) {
-    return <Spin size="large" />;
-  }
-
   return (
     <>
       <div className="mb-2">
@@ -455,6 +452,8 @@ const SalesScreen = () => {
             placeholder="Select Route"
             style={{ width: 200 }}
             onSelect={(value) => setSelectedRoute(value)}
+            value={selectedRoute}
+            loading={fetchingExistingSale || loading}
           >
             {routes.map((route) => (
               <Option key={route._id} value={route._id}>
@@ -466,6 +465,8 @@ const SalesScreen = () => {
             placeholder="Select Salesman"
             style={{ width: 200 }}
             onSelect={(value) => setSelectedSalesman(value)}
+            value={selectedSalesman}
+            loading={fetchingExistingSale || loading}
           >
             {salesmen.map((salesman) => (
               <Option key={salesman._id} value={salesman._id}>
@@ -477,11 +478,15 @@ const SalesScreen = () => {
             placeholder="Driver Name"
             style={{ width: 200 }}
             onChange={(e) => setDriverName(e.target.value)}
+            value={driverName}
+            loading={fetchingExistingSale || loading}
           />
           <Input
             placeholder="License Plate #"
             style={{ width: 200 }}
             onChange={(e) => setLicensePlate(e.target.value)}
+            value={licensePlate}
+            loading={fetchingExistingSale || loading}
           />
         </div>
 
@@ -506,12 +511,17 @@ const SalesScreen = () => {
             selectOptions={expenseOptions}
             selectPlaceholder="Select Expense Type"
             numberPlaceholder="Amount"
+            loading={loading || fetchingExistingSale}
           />
         </div>
 
         {deductions?.length > 0 && (
           <Flex vertical gap={12}>
-            <Card title="Deductions" style={{ width: 400 }} loading={loading}>
+            <Card
+              title="Deductions"
+              style={{ width: 400 }}
+              loading={loading || fetchingExistingSale}
+            >
               {deductions.map((deduction) => (
                 <Space
                   key={deduction._id}
@@ -554,7 +564,14 @@ const SalesScreen = () => {
             </Card>
           </Flex>
         )}
-        <Button type="primary" onClick={handleSubmit} style={{ width: '10%' }}>
+      </Flex>
+      <Flex>
+        <Button
+          type="primary"
+          className="mt-2 p-1"
+          onClick={handleSubmit}
+          style={{ width: '10%' }}
+        >
           {id ? 'Update Sale' : 'Submit Sale'}
         </Button>
       </Flex>

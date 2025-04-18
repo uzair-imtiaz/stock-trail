@@ -4,6 +4,7 @@ const {
   getVendors,
   getVendor,
   updateVendor,
+  deleteVendor,
 } = require('../controllers/vendor.controller');
 const { authMiddleware } = require('../middlewares/auth.middleware');
 
@@ -15,5 +16,6 @@ router.post('/new', createVendor);
 router.get('/', getVendors);
 router.get('/:id', getVendor);
 router.put('/:id/edit', updateVendor);
+router.delete('/:id', deleteVendor);
 
 module.exports = router;

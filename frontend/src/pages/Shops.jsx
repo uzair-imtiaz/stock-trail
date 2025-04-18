@@ -10,8 +10,8 @@ import {
 } from 'antd';
 import { useEffect, useState } from 'react';
 import { IoAddOutline } from 'react-icons/io5';
-import { EditOutlined } from '@ant-design/icons';
-import { getShops, updateShop, createShop } from '../apis';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { getShops, updateShop, createShop, deleteShop } from '../apis';
 
 const Shops = () => {
   const [shops, setShops] = useState([]);
@@ -93,6 +93,23 @@ const Shops = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    try {
+      setLoading(true);
+      const response = await deleteShop(id);
+      if (response?.success) {
+        message.success(response?.message);
+        fetchShops();
+      } else {
+        message.error(response?.message || 'Failed to delete shop');
+      }
+    } catch (error) {
+      message.error(error?.message || 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const columns = [
     {
       title: 'ID',
@@ -108,11 +125,21 @@ const Shops = () => {
       title: 'Action',
       key: 'action',
       render: (_, record) => (
-        <Button
-          icon={<EditOutlined />}
-          type="link"
-          onClick={() => showEditModal(record)}
-        />
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => showEditModal(record)}
+            shape="circle"
+            size="small"
+          />
+          <Button
+            icon={<DeleteOutlined />}
+            onClick={() => handleDelete(record._id)}
+            shape="circle"
+            size="small"
+            danger
+          />
+        </div>
       ),
     },
   ];

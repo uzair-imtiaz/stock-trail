@@ -26,6 +26,7 @@ const DynamicListSection = ({
   showTotalAmount = true,
   width = '50%',
   totalText = 'Total Amount',
+  loading = false,
 }) => {
   const handleItemChange = (index, field, value) => {
     const updatedExpenses = items.map((expense, i) =>
@@ -58,6 +59,7 @@ const DynamicListSection = ({
         </Button>
       }
       style={{ maxWidth: width }}
+      loading={loading}
     >
       <List
         itemLayout="horizontal"

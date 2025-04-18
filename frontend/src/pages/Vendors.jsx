@@ -10,8 +10,8 @@ import {
 } from 'antd';
 import { useEffect, useState } from 'react';
 import { IoAddOutline } from 'react-icons/io5';
-import { EditOutlined } from '@ant-design/icons';
-import { getVendors, updateVendor, createVendor } from '../apis';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { getVendors, updateVendor, createVendor, deleteVendor } from '../apis';
 
 const Vendors = () => {
   const [vendors, setVendors] = useState([]);
@@ -92,7 +92,29 @@ const Vendors = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    try {
+      setLoading(true);
+      const response = await deleteVendor(id);
+      if (response?.success) {
+        message.success('Vendor deleted successfully');
+        fetchVendors();
+      } else {
+        message.error(response?.message || 'Failed to delete vendor');
+      }
+    } catch (error) {
+      message.error(error?.message || 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const columns = [
+    {
+      title: 'Purchase Delivery Number',
+      dataIndex: 'purchaseDeliveryNumber',
+      key: 'purchaseDeliveryNumber',
+    },
     {
       title: 'Name',
       dataIndex: 'name',
@@ -108,11 +130,21 @@ const Vendors = () => {
       title: 'Action',
       key: 'action',
       render: (_, record) => (
-        <Button
-          icon={<EditOutlined />}
-          type="link"
-          onClick={() => showEditModal(record)}
-        />
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => showEditModal(record)}
+            shape="circle"
+            size="small"
+          />
+          <Button
+            icon={<DeleteOutlined />}
+            onClick={() => handleDelete(record._id)}
+            shape="circle"
+            size="small"
+            danger
+          />
+        </div>
       ),
     },
   ];
@@ -162,6 +194,12 @@ const Vendors = () => {
             ]}
           >
             <Input placeholder="Enter vendor name" />
+          </Form.Item>
+          <Form.Item
+            name="purchaseDeliveryNumber"
+            label="Purchase Delivery Number"
+          >
+            <Input placeholder="Enter purchase delivery number" />
           </Form.Item>
           <Form.Item name="balance" label="Balance">
             <Input type="number" placeholder="Enter initial balance" />

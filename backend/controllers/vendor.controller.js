@@ -86,7 +86,7 @@ const deleteVendor = async (req, res) => {
   try {
     const { id: vendorId } = req.params;
     const vendor = await Vendor.findOneAndDelete({
-      vendorId,
+      _id: vendorId,
       tenant: req.tenantId,
     });
     if (!vendor) {
