@@ -345,25 +345,59 @@ const deleteInvoice = async (req, res) => {
 };
 
 const editSale = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const saleId = req.params.id;
-    const updatedSale = await RouteActivity.findOneAndUpdate(
-      { _id: saleId, tenant: req.tenantId },
-      req.body,
-      { new: true }
-    );
-    if (!updatedSale) {
+    const newData = req.body;
+
+    const existingSale = await RouteActivity.findOne({ _id: saleId, tenant: req.tenantId }).session(session);
+    if (!existingSale) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({ success: false, message: 'Sale not found' });
     }
-    res.status(200).json({
+
+    const oldItemsMap = {};
+    for (const item of existingSale.inventoryDropped) {
+      oldItemsMap[item.itemId.toString()] = item.quantityDropped;
+    }
+
+    for (const newItem of newData.inventoryDropped) {
+      const itemId = newItem.itemId;
+      const oldQty = oldItemsMap[itemId.toString()] || 0;
+      const newQty = newItem.quantityDropped;
+      const diff = newQty - oldQty;
+
+      if (diff !== 0) {
+        await Inventory.updateOne(
+          { _id: itemId, tenant: req.tenantId },
+          { $inc: { quantity: -diff } },
+          { session }
+        );
+      }
+    }
+
+    Object.assign(existingSale, newData);
+    const updatedSale = await existingSale.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return res.status(200).json({
       success: true,
-      message: 'Sale updated successfully',
+      message: 'Sale updated and inventory adjusted successfully',
       data: updatedSale,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Internal Server Error' });
+    await session.abortTransaction();
+    session.endSession();
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
+
 
 module.exports = {
   createSale,

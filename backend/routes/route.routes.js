@@ -5,6 +5,7 @@ const {
   deleteRoute,
   getRoutes,
   updateRoute,
+  getRoutesWithoutShops,
 } = require('../controllers/route.controller');
 
 const router = express.Router();
@@ -15,5 +16,6 @@ router.get('/', getRoutes);
 router.post('/new', createRoute);
 router.put('/:id/edit', updateRoute);
 router.delete('/:id/delete', deleteRoute);
+router.get('/without-shops', getRoutesWithoutShops);
 
 module.exports = router;

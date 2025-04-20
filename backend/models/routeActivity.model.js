@@ -92,7 +92,7 @@ RouteActivitySchema.pre('save', async function (next) {
 
     if (this.inventoryDropped && this.inventoryDropped.length > 0) {
       for (const item of this.inventoryDropped) {
-        if (!item.unitPrice) {
+        if (!item.salePrice) {
           inventoryIds.add(item.itemId.toString());
         }
       }
@@ -101,19 +101,20 @@ RouteActivitySchema.pre('save', async function (next) {
     const inventoryItems = await mongoose
       .model('Inventory')
       .find({ _id: { $in: Array.from(inventoryIds) } })
-      .select('_id unitPrice');
+      .select('_id salePrice');
 
     const inventoryMap = {};
     inventoryItems.forEach((inv) => {
-      inventoryMap[inv._id.toString()] = inv.unitPrice;
+      inventoryMap[inv._id.toString()] = inv.salePrice;
     });
 
     for (const item of this.inventoryDropped) {
-      if (!item.unitPrice) {
-        item.unitPrice = inventoryMap[item.itemId.toString()] || 0;
+      if (!item.salePrice) {
+        item.salePrice = inventoryMap[item.itemId.toString()] || 0;
       }
 
-      let itemTotal = item.quantityDropped * item.unitPrice;
+      let itemTotal = item.quantityDropped * item.salePrice;
+      console.log('itemTotal', itemTotal)
 
       if (item.unitDeductions.length > 0) {
         for (const deduction of item.unitDeductions) {
@@ -152,7 +153,7 @@ RouteActivitySchema.pre('save', async function (next) {
         0
       );
     }
-
+console.log('totalAmount', totalAmount)
     this.totalAmount = totalAmount;
     this.profit = totalAmount - totalExpenses;
 

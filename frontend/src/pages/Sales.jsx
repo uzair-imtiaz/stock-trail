@@ -20,7 +20,7 @@ import {
   getDeductions,
   getExpenses,
   getGroupedInventory,
-  getRoutes,
+  getRoutesWithoutShops,
   getUsers,
   updateSale,
 } from '../apis';
@@ -198,7 +198,7 @@ const SalesScreen = () => {
     setLoading(true);
     try {
       const [routesRes, inventoryRes, salesManRes] = await Promise.all([
-        getRoutes(),
+        getRoutesWithoutShops(),
         getGroupedInventory(),
         getUsers(),
       ]);

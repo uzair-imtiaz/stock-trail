@@ -265,3 +265,8 @@ export const updateSale = async (id, data) => {
   const response = await putCallback(`/sales/${id}`, data);
   return response;
 };
+
+export const getRoutesWithoutShops = async () => {
+  const response = await getCallback('/routes/without-shops');
+  return response;
+};

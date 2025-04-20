@@ -37,6 +37,27 @@ const getRoutes = async (req, res) => {
   });
 };
 
+const getRoutesWithoutShops = async (req, res) => {
+  try {
+    const routes = await Route.find({ tenant: req.tenantId });
+    if (!routes) {
+      return res.status(400).json({
+        success: false,
+        message: 'Failed to fetch routes',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Routes fetched successfully',
+      data: routes,
+    });
+  } catch (error) {
+    console.log('error', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
 const updateRoute = async (req, res) => {
   const { id } = req.params;
   const { name, shops } = req.body;
@@ -83,4 +104,5 @@ module.exports = {
   getRoutes,
   updateRoute,
   deleteRoute,
+  getRoutesWithoutShops,
 };

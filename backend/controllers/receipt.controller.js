@@ -77,7 +77,7 @@ const createOrUpdateReceipt = async (req, res) => {
     await sale.save({ session });
 
     let receipt = await Receipt.findOne({
-      _id: saleId,
+      saleId,
       tenant: req.tenantId,
     }).session(session);
     let previousAmountRecovered = 0;
