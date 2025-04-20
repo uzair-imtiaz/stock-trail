@@ -4,7 +4,6 @@ const AutoIncrement = require('mongoose-sequence');
 const vendorSchema = new mongoose.Schema({
   vendorId: { type: Number, unique: true },
   name: { type: String, required: true },
-  purchaseDeliveryNumber: { type: String },
   balance: { type: Number, default: 0 },
   tenant: {
     type: mongoose.Schema.Types.ObjectId,

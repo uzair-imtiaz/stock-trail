@@ -114,7 +114,6 @@ RouteActivitySchema.pre('save', async function (next) {
       }
 
       let itemTotal = item.quantityDropped * item.salePrice;
-      console.log('itemTotal', itemTotal)
 
       if (item.unitDeductions.length > 0) {
         for (const deduction of item.unitDeductions) {
@@ -153,7 +152,6 @@ RouteActivitySchema.pre('save', async function (next) {
         0
       );
     }
-console.log('totalAmount', totalAmount)
     this.totalAmount = totalAmount;
     this.profit = totalAmount - totalExpenses;
 

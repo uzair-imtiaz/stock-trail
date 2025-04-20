@@ -9,7 +9,7 @@ const createPurchase = async (req, res) => {
   session.startTransaction();
 
   try {
-    const { items, bank, vendor, totalDeductions = [] } = req.body;
+    const { items, bank, vendor, totalDeductions = [], purchaseDeliveryNumber } = req.body;
 
     let totalPurchaseAmount = items.reduce((acc, item) => acc + item.total, 0);
 
@@ -29,6 +29,7 @@ const createPurchase = async (req, res) => {
           bank,
           vendor,
           totalDeductions,
+          purchaseDeliveryNumber,
           total: totalPurchaseAmount,
           tenant: req.tenantId,
         },
@@ -154,6 +155,7 @@ const getPurchaseReport = async (req, res) => {
           _id: 1,
           purchaseId: 1,
           vendor: 1,
+          purchaseDeliveryNumber: 1,
           createdAt: 1,
           bank: '$bankDetails.name',
           items: 1,

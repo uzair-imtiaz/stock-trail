@@ -2,6 +2,7 @@ import {
   Button,
   Card,
   Flex,
+  Input,
   InputNumber,
   message,
   Select,
@@ -49,6 +50,7 @@ const Purchase = () => {
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [loading, setLoading] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [purchaseDN, setPurchaseDN] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -270,7 +272,7 @@ const Purchase = () => {
   ];
 
   const handleSubmit = async () => {
-    if (!selectedBank || !selectedVendor) {
+    if (!selectedBank || !selectedVendor || !purchaseDN) {
       message.error('Please fill in all required fields.');
       return;
     }
@@ -288,6 +290,7 @@ const Purchase = () => {
     const payload = {
       bank: selectedBank,
       vendor: selectedVendor._id,
+      purchaseDeliveryNumber: purchaseDN,
       items: inventoryItems,
       totalDeductions: deductions,
     };
@@ -354,6 +357,13 @@ const Purchase = () => {
           {selectedVendor && (
             <Tag color="#108ee9">{formatBalance(selectedVendor?.balance)}</Tag>
           )}
+          <Input
+            placeholder="Enter purchase delivery number"
+            style={{ width: 200 }}
+            allowClear
+            value={purchaseDN}
+            onChange={(e) => setPurchaseDN(e.target.value)}
+          />
         </Flex>
 
         <Table

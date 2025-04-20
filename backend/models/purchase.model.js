@@ -36,6 +36,7 @@ const PurchaseSchema = new mongoose.Schema(
       ref: 'Vendor',
       required: true,
     },
+    purchaseDeliveryNumber: { type: String, required: true },
     totalDeductions: [
       {
         _id: {

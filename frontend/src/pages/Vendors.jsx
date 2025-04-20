@@ -111,11 +111,6 @@ const Vendors = () => {
 
   const columns = [
     {
-      title: 'Purchase Delivery Number',
-      dataIndex: 'purchaseDeliveryNumber',
-      key: 'purchaseDeliveryNumber',
-    },
-    {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
@@ -194,12 +189,6 @@ const Vendors = () => {
             ]}
           >
             <Input placeholder="Enter vendor name" />
-          </Form.Item>
-          <Form.Item
-            name="purchaseDeliveryNumber"
-            label="Purchase Delivery Number"
-          >
-            <Input placeholder="Enter purchase delivery number" />
           </Form.Item>
           <Form.Item name="balance" label="Balance">
             <Input type="number" placeholder="Enter initial balance" />
