@@ -272,35 +272,49 @@ const Purchase = () => {
   ];
 
   const handleSubmit = async () => {
-    if (!selectedBank || !selectedVendor || !purchaseDN) {
-      message.error('Please fill in all required fields.');
-      return;
-    }
-
-    const inventoryItems = inventory
-      .filter((item) => item.buyingQuantity > 0)
-      .map((item) => ({
-        itemId: item._id,
-        quantity: item.buyingQuantity,
-        gst: item.totalGST || 0,
-        total: item.amount || 0,
-        unitDeductions: item.unitDeductions.filter((d) => d?.amount > 0),
-      }));
-
-    const payload = {
-      bank: selectedBank,
-      vendor: selectedVendor._id,
-      purchaseDeliveryNumber: purchaseDN,
-      items: inventoryItems,
-      totalDeductions: deductions,
-    };
-
     try {
+      if (!selectedBank || !selectedVendor || !purchaseDN) {
+        message.error('Please fill in all required fields.');
+        return;
+      }
+
+      const inventoryItems = inventory
+        .filter((item) => item.buyingQuantity > 0)
+        .map((item) => ({
+          itemId: item._id,
+          quantity: item.buyingQuantity,
+          gst: item.totalGST || 0,
+          total: item.amount || 0,
+          unitDeductions: item.unitDeductions.filter((d) => d?.amount > 0),
+        }));
+
+      const payload = {
+        bank: selectedBank,
+        vendor: selectedVendor._id,
+        purchaseDeliveryNumber: purchaseDN,
+        items: inventoryItems,
+        totalDeductions: deductions,
+      };
+
       setLoading(true);
       const response = await createPurchase(payload);
 
       if (response?.success) {
         message.success(response?.message);
+        // ✅ Clear states
+        setSelectedBank(null);
+        setSelectedVendor(null);
+        setPurchaseDN('');
+        setInventory((prev) =>
+          prev.map((item) => ({
+            ...item,
+            buyingQuantity: 0,
+            amount: 0,
+            totalGST: 0,
+            unitDeductions: [],
+          }))
+        );
+        setDeductions([]);
       } else {
         message.error(response?.message || 'Submission failed');
       }
