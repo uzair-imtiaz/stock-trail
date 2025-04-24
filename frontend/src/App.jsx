@@ -50,7 +50,7 @@ const App = () => {
       }
     };
 
-    const token = Cookies.get('token') || localStorage.getItem('token');
+    const token = Cookies.get('token');
     if (token) {
       fetchUser();
     } else {
@@ -61,7 +61,6 @@ const App = () => {
   const handleLogin = (user) => {
     setUser(user);
     Cookies.set('token', user.token);
-    localStorage.setItem('token', user.token);
   };
 
   const handleLogout = async () => {
