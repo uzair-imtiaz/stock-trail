@@ -76,6 +76,7 @@ const login = async (req, res) => {
     }
 
     const token = await generateToken(user);
+    res.clearCookie('token', { domain: 'api.ds.algobricks.org', path: '/' });
     return res
       .cookie('token', token, {
         httpOnly: false,
