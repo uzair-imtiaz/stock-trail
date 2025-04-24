@@ -24,7 +24,6 @@ axiosInstance.interceptors.response.use(
     if (response) {
       if (response.status === 401) {
         Cookies.remove('token');
-        localStorage.removeItem('token');
         window.location.href = '/signin';
       }
       return Promise.resolve(response);
