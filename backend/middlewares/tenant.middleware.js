@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 
 const tenantMiddleware = async (req, res, next) => {
   const token = req.cookies?.token;
-  console.log('re.cookies', req.cookies)
   if (!token) {
     console.log('token not found');
     return res.status(401).json({
