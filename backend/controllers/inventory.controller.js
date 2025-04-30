@@ -67,7 +67,10 @@ const updateInventory = async (req, res) => {
 
 const deleteInventory = async (req, res) => {
   const { id } = req.params;
-  const item = await Inventory.findOneAndDelete({_id: id, tenant: req.tenantId});
+  const item = await Inventory.findOneAndDelete({
+    _id: id,
+    tenant: req.tenantId,
+  });
   if (!item) {
     res.status(404).json({
       success: false,
@@ -98,7 +101,10 @@ const getGroupedInventory = asyncHandler(async (req, res) => {
 
 const transferStock = asyncHandler(async (req, res) => {
   const { id, quantity, from, to } = req.body;
-  const inventoryItem = await Inventory.findOne({_id: id, tenant: req.tenantId});
+  const inventoryItem = await Inventory.findOne({
+    _id: id,
+    tenant: req.tenantId,
+  });
 
   if (!inventoryItem) {
     return res.status(404).json({
@@ -122,7 +128,9 @@ const transferStock = asyncHandler(async (req, res) => {
   }
 
   inventoryItem.quantity -= quantity;
-  await inventoryItem.save();
+  if (inventoryItem.quantity === 0) {
+    await Inventory.deleteOne({ _id: id, tenant: req.tenantId });
+  } else await inventoryItem.save();
 
   const {
     _id,

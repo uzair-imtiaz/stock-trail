@@ -119,45 +119,47 @@ const StockManagement = () => {
         bordered
       />
 
-      <Modal
-        title={`Transfer Stock - ${selectedItem?.product}`}
-        open={modalVisible}
-        onCancel={() => setModalVisible(false)}
-        onOk={() => transferForm.submit()}
-        okText="Transfer"
-      >
-        <Form form={transferForm} layout="vertical" onFinish={handleTransfer}>
-          <Form.Item
-            name="location"
-            label="Transfer Location"
-            rules={[
-              { required: true, message: 'Please select transfer location' },
-            ]}
-            initialValue={
-              selectedItem?.location === 'Main' ? 'Wastage' : 'Main'
-            }
-          >
-            <Input
+      {modalVisible && (
+        <Modal
+          title={`Transfer Stock - ${selectedItem?.product}`}
+          open={modalVisible}
+          onCancel={() => setModalVisible(false)}
+          onOk={() => transferForm.submit()}
+          okText="Transfer"
+        >
+          <Form form={transferForm} layout="vertical" onFinish={handleTransfer}>
+            <Form.Item
+              name="location"
+              label="Transfer Location"
+              rules={[
+                { required: true, message: 'Please select transfer location' },
+              ]}
               initialValue={
                 selectedItem?.location === 'Main' ? 'Wastage' : 'Main'
               }
-              disabled
-            />
-          </Form.Item>
+            >
+              <Input
+                initialValue={
+                  selectedItem?.location === 'Main' ? 'Wastage' : 'Main'
+                }
+                disabled
+              />
+            </Form.Item>
 
-          <Form.Item
-            name="quantity"
-            label="Quantity"
-            rules={[{ required: true, message: 'Please enter quantity' }]}
-          >
-            <InputNumber
-              min={1}
-              max={selectedItem?.quantity || 1}
-              style={{ width: '100%' }}
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
+            <Form.Item
+              name="quantity"
+              label="Quantity"
+              rules={[{ required: true, message: 'Please enter quantity' }]}
+            >
+              <InputNumber
+                min={0}
+                max={selectedItem?.quantity || 1}
+                style={{ width: '100%' }}
+              />
+            </Form.Item>
+          </Form>
+        </Modal>
+      )}
     </Flex>
   );
 };
