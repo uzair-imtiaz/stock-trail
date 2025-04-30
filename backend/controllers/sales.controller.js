@@ -50,7 +50,8 @@ const createSale = async (req, res) => {
       inventoryItem.quantity -=
         item.quantityDropped +
         (item.tpr / inventoryItem?.piecesPerCarton || 0) +
-        item.wastage;
+        item.wastage -
+        item.returnPieces;
       await inventoryItem.save();
     }
     await session.commitTransaction();
@@ -352,33 +353,80 @@ const editSale = async (req, res) => {
     const saleId = req.params.id;
     const newData = req.body;
 
-    const existingSale = await RouteActivity.findOne({ _id: saleId, tenant: req.tenantId }).session(session);
+    const existingSale = await RouteActivity.findOne({
+      _id: saleId,
+      tenant: req.tenantId,
+    }).session(session);
+
     if (!existingSale) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(404).json({ success: false, message: 'Sale not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Sale not found' });
     }
 
+    // Fetch all involved inventory items to get piecesPerCarton
+    const itemIds = [
+      ...new Set(newData.inventoryDropped.map((item) => item.itemId)),
+    ];
+
+    const inventoryDocs = await Inventory.find({
+      _id: { $in: itemIds },
+      tenant: req.tenantId,
+    }).session(session);
+
+    const inventoryMap = {};
+    for (const inv of inventoryDocs) {
+      inventoryMap[inv._id.toString()] = inv;
+    }
+
+    // Map old items by itemId
     const oldItemsMap = {};
     for (const item of existingSale.inventoryDropped) {
-      oldItemsMap[item.itemId.toString()] = item.quantityDropped;
+      oldItemsMap[item.itemId.toString()] = {
+        quantityDropped: item.quantityDropped,
+        tpr: item.tpr || 0,
+        wastage: item.wastage || 0,
+        returnPieces: item.returnPieces || 0,
+      };
     }
 
     for (const newItem of newData.inventoryDropped) {
-      const itemId = newItem.itemId;
-      const oldQty = oldItemsMap[itemId.toString()] || 0;
-      const newQty = newItem.quantityDropped;
-      const diff = newQty - oldQty;
+      const itemId = newItem.itemId.toString();
+      const invDoc = inventoryMap[itemId];
+      if (!invDoc) continue; // safety check
 
-      if (diff !== 0) {
+      const piecesPerCarton = invDoc.piecesPerCarton || 1;
+
+      const oldItem = oldItemsMap[itemId] || {
+        quantityDropped: 0,
+        tpr: 0,
+        wastage: 0,
+        returnPieces: 0,
+      };
+
+      const qtyDiff = (newItem.quantityDropped || 0) - oldItem.quantityDropped;
+      const tprDiff =
+        ((newItem.tpr || 0) - oldItem.tpr) / piecesPerCarton;
+      const wastageDiff =
+        ((newItem.wastage || 0) - oldItem.wastage) / piecesPerCarton;
+      const returnedDiff =
+        ((newItem.returnPieces || 0) - oldItem.returnPieces) / piecesPerCarton;
+
+      // Final net stock adjustment
+      const netStockChange =
+        -qtyDiff - tprDiff - wastageDiff + returnedDiff;
+      if (netStockChange !== 0) {
         await Inventory.updateOne(
           { _id: itemId, tenant: req.tenantId },
-          { $inc: { quantity: -diff } },
+          { $inc: { quantity: netStockChange } },
           { session }
         );
       }
     }
 
+    // Save updated sale
     Object.assign(existingSale, newData);
     const updatedSale = await existingSale.save({ session });
 
@@ -394,7 +442,9 @@ const editSale = async (req, res) => {
     await session.abortTransaction();
     session.endSession();
     console.error(error);
-    return res.status(500).json({ success: false, message: 'Internal Server Error' });
+    return res
+      .status(500)
+      .json({ success: false, message: 'Internal Server Error' });
   }
 };
 

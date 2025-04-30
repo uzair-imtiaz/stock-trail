@@ -143,6 +143,7 @@ const SalesScreen = () => {
                 tpr: droppedItem.tpr || 0,
                 wastage: droppedItem.wastage || 0,
                 unitDeductions: droppedItem.unitDeductions || [],
+                returnPieces: droppedItem.returnPieces || 0,
               };
             }
           });
@@ -336,6 +337,20 @@ const SalesScreen = () => {
       ),
     },
     {
+      title: 'Return Pieces',
+      dataIndex: 'returnPieces',
+      key: 'returnPieces',
+      render: (_, record) => (
+        <InputNumber
+          min={0}
+          placeholder="Return Pieces"
+          value={record.returnPieces}
+          defaultValue={0}
+          onChange={(value) => handleValueChange(value, record, 'returnPieces')}
+        />
+      ),
+    },
+    {
       title: 'Transfer to Wastage',
       dataIndex: 'wastage',
       key: 'wastage',
@@ -407,6 +422,7 @@ const SalesScreen = () => {
         tpr: item.tpr || 0,
         wastage: item.wastage || 0,
         unitDeductions: item.unitDeductions.filter((d) => d?.amount > 0),
+        returnPieces: item.returnPieces || 0,
       }));
 
     const payload = {

@@ -10,6 +10,7 @@ const ItemSchema = new mongoose.Schema({
   quantityDropped: { type: Number, required: true },
   wastage: { type: Number, default: 0, required: true },
   tpr: { type: Number, default: 0, required: true },
+  returnPieces: { type: Number, default: 0, required: true },
   unitPrice: { type: Number },
   unitDeductions: [
     {
