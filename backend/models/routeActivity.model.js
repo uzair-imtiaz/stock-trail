@@ -88,17 +88,30 @@ RouteActivitySchema.pre('save', async function (next) {
   try {
     let totalAmount = 0;
     let totalExpenses = 0;
-
     const inventoryIds = new Set();
+    const deductionIds = new Set();
 
+    // Collect inventory IDs first
     if (this.inventoryDropped && this.inventoryDropped.length > 0) {
       for (const item of this.inventoryDropped) {
         if (!item.salePrice) {
           inventoryIds.add(item.itemId.toString());
         }
+        if (item.unitDeductions && item.unitDeductions.length > 0) {
+          for (const deduction of item.unitDeductions) {
+            deductionIds.add(deduction._id.toString());
+          }
+        }
       }
     }
 
+    if (this.totalDeductions && this.totalDeductions.length > 0) {
+      for (const deduction of this.totalDeductions) {
+        deductionIds.add(deduction._id.toString());
+      }
+    }
+
+    // Fetch inventory items with sale prices
     const inventoryItems = await mongoose
       .model('Inventory')
       .find({ _id: { $in: Array.from(inventoryIds) } })
@@ -109,6 +122,21 @@ RouteActivitySchema.pre('save', async function (next) {
       inventoryMap[inv._id.toString()] = inv.salePrice;
     });
 
+    // Fetch deduction items
+    const deductionItems = await mongoose
+      .model('Deduction')
+      .find({ _id: { $in: Array.from(deductionIds) } })
+      .select('_id type amount isPercentage');
+
+    const deductionMap = {};
+    deductionItems.forEach((ded) => {
+      deductionMap[ded._id.toString()] = {
+        type: ded.type,
+      };
+    });
+
+    // Calculate total amount from inventory items
+    console.log('deductionMap', deductionMap);
     for (const item of this.inventoryDropped) {
       if (!item.salePrice) {
         item.salePrice = inventoryMap[item.itemId.toString()] || 0;
@@ -116,15 +144,18 @@ RouteActivitySchema.pre('save', async function (next) {
 
       let itemTotal = item.quantityDropped * item.salePrice;
 
-      if (item.unitDeductions.length > 0) {
+      if (item.unitDeductions && item.unitDeductions.length > 0) {
         for (const deduction of item.unitDeductions) {
-          if (deduction.type === 'Charge') {
+          const { type } = deductionMap[deduction._id.toString()];
+          if (!type) continue;
+
+          if (type === 'Charge') {
             itemTotal += deduction.isPercentage
-              ? itemTotal * deduction.amount
+              ? itemTotal * (deduction.amount / 100)
               : deduction.amount;
-          } else if (deduction.type === 'Deduction') {
+          } else if (type === 'Deduction') {
             itemTotal -= deduction.isPercentage
-              ? itemTotal * deduction.amount
+              ? itemTotal * (deduction.amount / 100)
               : deduction.amount;
           }
         }
@@ -133,18 +164,30 @@ RouteActivitySchema.pre('save', async function (next) {
       totalAmount += itemTotal;
     }
 
+    // Store the base amount before applying total deductions
+    const baseAmount = totalAmount;
+
     if (this.totalDeductions && this.totalDeductions.length > 0) {
+      let totalDeductionAmount = 0;
+
       for (const deduction of this.totalDeductions) {
-        if (deduction.type === 'Charge') {
-          totalAmount += deduction.isPercentage
-            ? totalAmount * deduction.amount
+        const { type } = deductionMap[deduction._id.toString()];
+        if (!type) continue;
+
+        if (type === 'Charge') {
+          const chargeAmount = deduction.isPercentage
+            ? baseAmount * (deduction.amount / 100)
             : deduction.amount;
-        } else if (deduction.type === 'Deduction') {
-          totalAmount -= deduction.isPercentage
-            ? totalAmount * deduction.amount
+          totalDeductionAmount += chargeAmount;
+        } else if (type === 'Deduction') {
+          const deductionAmount = deduction.isPercentage
+            ? baseAmount * (deduction.amount / 100)
             : deduction.amount;
+          totalDeductionAmount -= deductionAmount;
         }
       }
+
+      totalAmount -= totalDeductionAmount;
     }
 
     if (this.expenses && this.expenses.length > 0) {
@@ -153,6 +196,7 @@ RouteActivitySchema.pre('save', async function (next) {
         0
       );
     }
+
     this.totalAmount = totalAmount;
     this.profit = totalAmount - totalExpenses;
 
