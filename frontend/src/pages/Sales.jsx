@@ -62,9 +62,14 @@ const SalesScreen = () => {
   const navigate = useNavigate();
 
   const { id } = useParams();
-
   useEffect(() => {
-    fetch();
+    const init = async () => {
+      const data = await fetchData();
+      if (id && data?.inventory) {
+        await fetchExistingSale(id, data.inventory, data.deductions);
+      }
+    };
+    init();
   }, []);
 
   useEffect(() => {
@@ -73,20 +78,26 @@ const SalesScreen = () => {
       inventory.forEach((item) => {
         let itemTotal = (item.dispatchQty || 0) * (item.salePrice || 0);
         (item.unitDeductions || []).forEach((deduction) => {
-          itemTotal -= deduction.isPercentage
-            ? (itemTotal * (deduction.amount || 0)) / 100
-            : deduction.amount || 0;
+          if (deduction.type === 'Deduction')
+            itemTotal -= deduction.isPercentage
+              ? (itemTotal * (deduction.amount || 0)) / 100
+              : deduction.amount || 0;
+          else
+            itemTotal += deduction.isPercentage
+              ? (itemTotal * (deduction.amount || 0)) / 100
+              : deduction.amount || 0;
         });
         total += itemTotal;
       });
 
       const totalDeductions = deductions.reduce((sum, deduction) => {
-        return (
-          sum +
-          (deduction.isPercentage
-            ? (total * (deduction.amount || 0)) / 100
-            : deduction.amount || 0)
-        );
+        let amount = deduction.isPercentage
+          ? (total * (deduction.amount || 0)) / 100
+          : deduction.amount || 0;
+        if (deduction.type === 'Deduction') {
+          amount = -amount;
+        }
+        return sum + amount;
       }, 0);
 
       total -= totalDeductions;
@@ -100,16 +111,19 @@ const SalesScreen = () => {
     return () => clearTimeout(timer);
   }, [inventory, expenses, deductions]);
 
-  const fetch = async () => {
-    await fetchData();
-    await fetchExpenseOptions();
-    const response = await getDeductions();
-    if (response?.success) {
-      setDeductions(response?.data);
-    }
+  const getFullDeductionObject = (deductions, dedObj) => {
+    const updatedDeductions = deductions.map((deduction) => {
+      const matchingDeduction = dedObj.find(
+        (totalDeduction) => totalDeduction._id === deduction._id
+      );
+      return matchingDeduction
+        ? { ...deduction, ...matchingDeduction }
+        : deduction;
+    });
+    return updatedDeductions;
   };
 
-  const fetchExistingSale = async (saleId, inventoryData) => {
+  const fetchExistingSale = async (saleId, inventoryData, deductions) => {
     try {
       setFetchingExistingSale(true);
       setLoading(true);
@@ -142,7 +156,11 @@ const SalesScreen = () => {
                 dispatchQty: droppedItem.quantityDropped,
                 tpr: droppedItem.tpr || 0,
                 wastage: droppedItem.wastage || 0,
-                unitDeductions: droppedItem.unitDeductions || [],
+                unitDeductions:
+                  getFullDeductionObject(
+                    deductions,
+                    droppedItem.unitDeductions
+                  ) || [],
                 returnPieces: droppedItem.returnPieces || 0,
               };
             }
@@ -151,15 +169,10 @@ const SalesScreen = () => {
           setInventory(updatedInventory);
         }
 
-        const updatedDeductions = deductions.map((deduction) => {
-          const matchingDeduction = saleData.totalDeductions.find(
-            (totalDeduction) => totalDeduction._id === deduction._id
-          );
-          console.log('matchingDeduction', matchingDeduction);
-          return matchingDeduction
-            ? { ...deduction, ...matchingDeduction }
-            : deduction;
-        });
+        const updatedDeductions = getFullDeductionObject(
+          deductions,
+          saleData.totalDeductions
+        );
 
         if (updatedDeductions.length > 0) setDeductions(updatedDeductions);
 
@@ -175,53 +188,59 @@ const SalesScreen = () => {
       setLoading(false);
     }
   };
-
-  const fetchExpenseOptions = async () => {
-    try {
-      const response = await getExpenses();
-      if (response.success) {
-        setExpenseOptions(
-          response.data.map((expense) => ({
-            label: expense.name,
-            value: expense._id,
-          }))
-        );
-      } else {
-        message.error(response.message || 'Failed to fetch expenses');
-      }
-    } catch (error) {
-      message.error(error.message || 'Failed to fetch expenses');
-      console.error(error);
-    }
-  };
-
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [routesRes, inventoryRes, salesManRes] = await Promise.all([
-        getRoutesWithoutShops(),
-        getGroupedInventory(),
-        getUsers(),
-      ]);
-      if (inventoryRes.success && routesRes.success) {
+      const [routesRes, inventoryRes, salesManRes, deductionsRes, expensesRes] =
+        await Promise.all([
+          getRoutesWithoutShops(),
+          getGroupedInventory(),
+          getUsers(),
+          getDeductions(),
+          getExpenses(),
+        ]);
+
+      if (
+        inventoryRes.success &&
+        routesRes.success &&
+        salesManRes.success &&
+        deductionsRes.success &&
+        expensesRes.success
+      ) {
         const processedData = processRowSpan(inventoryRes.data).map((item) => ({
           ...item,
-          unitDeductions: deductions.map((d) => ({
+          unitDeductions: deductionsRes.data.map((d) => ({
             ...d,
             amount: 0,
             isPercentage: false,
           })),
         }));
-        setInventory(processedData);
+
         setRoutes(routesRes.data);
         setSalesmen(salesManRes.data);
-        if (id) await fetchExistingSale(id, processedData);
+        setExpenseOptions(
+          expensesRes.data.map((expense) => ({
+            label: expense.name,
+            value: expense._id,
+          }))
+        );
+
+        if (!id) {
+          setInventory(processedData);
+          setDeductions(deductionsRes.data);
+        }
+
+        return {
+          inventory: processedData,
+          deductions: deductionsRes.data,
+        };
       }
     } catch (error) {
       message.error(error.message || 'Failed to fetch data');
       console.error(error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleValueChange = (value, record, field) => {
