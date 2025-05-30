@@ -100,7 +100,7 @@ const SalesScreen = () => {
         return sum + amount;
       }, 0);
 
-      total -= totalDeductions;
+      total += totalDeductions;
       expenses.forEach((expense) => {
         total -= expense.amount || 0;
       });
@@ -533,6 +533,55 @@ const SalesScreen = () => {
           pagination={false}
           bordered
           scroll={{ x: 'max-content' }}
+          summary={() => {
+            const totalDispatch = inventory.reduce(
+              (sum, item) => sum + (item.dispatchQty || 0),
+              0
+            );
+            const totalTpr = inventory.reduce(
+              (sum, item) => sum + (item.tpr || 0),
+              0
+            );
+            const totalReturnPieces = inventory.reduce(
+              (sum, item) => sum + (item.returnPieces || 0),
+              0
+            );
+            const totalWastage = inventory.reduce(
+              (sum, item) => sum + (item.wastage || 0),
+              0
+            );
+
+            const deductionTotals = deductions.map((deduction) => {
+              const total = inventory.reduce((sum, item) => {
+                const ded = item.unitDeductions.find(
+                  (d) => d._id === deduction._id
+                );
+                return sum + (ded ? ded.amount || 0 : 0);
+              }, 0);
+              return { _id: deduction._id, total };
+            });
+
+            return (
+              <Table.Summary fixed>
+                <Table.Summary.Row>
+                  {/* Fixed columns */}
+                  <Table.Summary.Cell index={0} colSpan={6}>
+                    <strong>Total</strong>
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell>{totalDispatch}</Table.Summary.Cell>
+                  <Table.Summary.Cell>{totalTpr}</Table.Summary.Cell>
+                  <Table.Summary.Cell>{totalReturnPieces}</Table.Summary.Cell>
+                  <Table.Summary.Cell>{totalWastage}</Table.Summary.Cell>
+                  {/* Dynamic Deduction columns */}
+                  {deductionTotals.map((deductionTotal, idx) => (
+                    <Table.Summary.Cell key={deductionTotal._id}>
+                      {deductionTotal.total}
+                    </Table.Summary.Cell>
+                  ))}
+                </Table.Summary.Row>
+              </Table.Summary>
+            );
+          }}
         />
       </div>
       <Flex gap={12} align="start">
