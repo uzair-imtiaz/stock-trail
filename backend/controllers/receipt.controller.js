@@ -66,7 +66,10 @@ const createOrUpdateReceipt = async (req, res) => {
         .json({ success: false, message: 'Account not found' });
     }
 
-    const sale = await RouteActivity.findOne({ _id: saleId, tenant: req.tenantId });
+    const sale = await RouteActivity.findOne({
+      _id: saleId,
+      tenant: req.tenantId,
+    });
     if (!sale) {
       return res
         .status(404)
@@ -131,23 +134,23 @@ const createOrUpdateReceipt = async (req, res) => {
     );
     const amountRecovered = totalCreditAmount - totalReturnedAmount;
 
-    if (totalCreditAmount > sale.profit) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(400).json({
-        success: false,
-        message: 'Total credit amount cannot exceed profit amount',
-      });
-    }
+    // if (totalCreditAmount > sale.profit) {
+    //   await session.abortTransaction();
+    //   session.endSession();
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'Total credit amount cannot exceed profit amount',
+    //   });
+    // }
 
-    if (totalReturnedAmount > totalCreditAmount) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(400).json({
-        success: false,
-        message: 'Total returned amount cannot exceed total credit amount',
-      });
-    }
+    // if (totalReturnedAmount > totalCreditAmount) {
+    //   await session.abortTransaction();
+    //   session.endSession();
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'Total returned amount cannot exceed total credit amount',
+    //   });
+    // }
 
     const balanceAdjustment = amountRecovered - previousAmountRecovered;
     backAccount.balance += balanceAdjustment;
