@@ -3,13 +3,12 @@ export const getPermission = (user, module) => {
 
   const routeWithoutSlash = module.replace(/^\/+/, '');
   return user?.modules?.some((mod) => {
-    const normalizedMod = mod.replace(/_+$/, ""); 
-    return mod.endsWith("_") 
+    const normalizedMod = mod.replace(/_+$/, '');
+    return mod.endsWith('_')
       ? routeWithoutSlash.startsWith(normalizedMod)
-      : routeWithoutSlash === normalizedMod;       
+      : routeWithoutSlash === normalizedMod;
   });
 };
-
 
 export const formatBalance = (balance) => {
   return new Intl.NumberFormat('en-US', {
@@ -17,3 +16,15 @@ export const formatBalance = (balance) => {
     currency: 'PKR',
   }).format(balance);
 };
+
+export function objectToQueryString(params) {
+  const query = Object.entries(params)
+    .filter(([_, value]) => value !== undefined && value !== null)
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
+    )
+    .join('&');
+
+  return query ? `?${query}` : '';
+}

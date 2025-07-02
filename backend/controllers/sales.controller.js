@@ -160,7 +160,7 @@ const getExpensesReport = async (req, res) => {
   try {
     const { startDate, endDate, routeId, salesman } = req.query;
 
-    const matchStage = { tenant: req.tenantId };
+    const matchStage = { tenant: new mongoose.Types.ObjectId(req.tenantId) };
     if (startDate && endDate) {
       matchStage.date = {
         $gte: new Date(startDate),
@@ -222,7 +222,7 @@ const getSalesReport = async (req, res) => {
   try {
     const { startDate, endDate, routeId, salesman } = req.query;
 
-    const matchStage = { tenant: req.tenantId };
+    const matchStage = { tenant: new mongoose.Types.ObjectId(req.tenantId) };
     if (startDate && endDate) {
       matchStage.date = {
         $gte: new Date(startDate),
@@ -231,7 +231,6 @@ const getSalesReport = async (req, res) => {
     }
     if (routeId) matchStage.routeId = new mongoose.Types.ObjectId(routeId);
     if (salesman) matchStage.salesman = new mongoose.Types.ObjectId(salesman);
-
     const pipeline = [
       { $match: matchStage },
       {
@@ -407,16 +406,14 @@ const editSale = async (req, res) => {
       };
 
       const qtyDiff = (newItem.quantityDropped || 0) - oldItem.quantityDropped;
-      const tprDiff =
-        ((newItem.tpr || 0) - oldItem.tpr) / piecesPerCarton;
+      const tprDiff = ((newItem.tpr || 0) - oldItem.tpr) / piecesPerCarton;
       const wastageDiff =
         ((newItem.wastage || 0) - oldItem.wastage) / piecesPerCarton;
       const returnedDiff =
         ((newItem.returnPieces || 0) - oldItem.returnPieces) / piecesPerCarton;
 
       // Final net stock adjustment
-      const netStockChange =
-        -qtyDiff - tprDiff - wastageDiff + returnedDiff;
+      const netStockChange = -qtyDiff - tprDiff - wastageDiff + returnedDiff;
       if (netStockChange !== 0) {
         await Inventory.updateOne(
           { _id: itemId, tenant: req.tenantId },
@@ -447,7 +444,6 @@ const editSale = async (req, res) => {
       .json({ success: false, message: 'Internal Server Error' });
   }
 };
-
 
 module.exports = {
   createSale,

@@ -1,17 +1,10 @@
-import {
-  Button,
-  DatePicker,
-  message,
-  Select,
-  Space,
-  Table,
-  Typography,
-} from 'antd';
+import { Button, DatePicker, message, Select, Space, Typography } from 'antd';
 import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
-import { BsSearch } from 'react-icons/bs';
+import { useEffect, useState } from 'react';
+import { BsPrinter, BsSearch } from 'react-icons/bs';
 import { getExpensesReport, getRoutes, getUsersByRole } from '../../apis';
 import { formatBalance } from '../../utils';
+import { PrintTable } from '../common';
 
 const { RangePicker } = DatePicker;
 
@@ -133,7 +126,6 @@ const ExpenseReport = () => {
             }
           />
         </div>
-
         <Button
           type="primary"
           icon={<BsSearch />}
@@ -142,11 +134,19 @@ const ExpenseReport = () => {
         >
           Search
         </Button>
+
+        {data && (
+          <Button
+            type="primary"
+            icon={<BsPrinter />}
+            onClick={() => window.print()}
+          >
+            Print
+          </Button>
+        )}
       </Space>
 
-      {data && (
-        <Table columns={columns} dataSource={data} bordered loading={loading} />
-      )}
+      {data && <PrintTable columns={columns} data={data} loading={loading} />}
     </div>
   );
 };

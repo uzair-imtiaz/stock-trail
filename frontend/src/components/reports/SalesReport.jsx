@@ -1,16 +1,10 @@
-import {
-  Button,
-  DatePicker,
-  message,
-  Select,
-  Space,
-  Table,
-  Typography,
-} from 'antd';
+import { Button, DatePicker, message, Select, Space, Typography } from 'antd';
 import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
-import { BsSearch } from 'react-icons/bs';
+import { useEffect, useState } from 'react';
+import { BsPrinter, BsSearch } from 'react-icons/bs';
 import { getRoutes, getSalesReport, getUsersByRole } from '../../apis';
+import { objectToQueryString } from '../../utils';
+import { PrintTable } from '../common';
 
 const { RangePicker } = DatePicker;
 const processDataForRowSpan = (rawData) => {
@@ -87,12 +81,13 @@ const SalesReport = () => {
   const handleSearch = async () => {
     try {
       setLoading(true);
-      const response = await getSalesReport({
+      const queryString = objectToQueryString({
         startDate: dateRange[0],
         endDate: dateRange[1],
         routeId: route,
         salesman: salesman,
       });
+      const response = await getSalesReport(queryString);
 
       if (response?.success) {
         const processedData = processDataForRowSpan(response?.data);
@@ -276,7 +271,6 @@ const SalesReport = () => {
             }
           />
         </div>
-
         <Button
           type="primary"
           icon={<BsSearch />}
@@ -285,10 +279,24 @@ const SalesReport = () => {
         >
           Search
         </Button>
+
+      {data && (
+          <Button
+            type="primary"
+            icon={<BsPrinter />}
+            onClick={() => window.print()}
+            >
+            Print
+          </Button>
+      )}
       </Space>
 
       {data && (
-        <Table columns={columns} dataSource={data} bordered loading={loading} />
+        <PrintTable
+          columns={columns}
+          data={data}
+          loading={loading}
+        />
       )}
     </div>
   );

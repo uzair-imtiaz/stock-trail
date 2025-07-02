@@ -196,8 +196,8 @@ export const getCreditsReport = async (query) => {
   return response;
 };
 
-export const getSalesReport = async (query) => {
-  const response = await getCallback('/sales/report/sales', query);
+export const getSalesReport = async (query = '') => {
+  const response = await getCallback(`/sales/report/sales${query}`);
   return response;
 };
 

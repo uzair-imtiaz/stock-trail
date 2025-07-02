@@ -236,7 +236,7 @@ const getReceipt = async (req, res) => {
 const generateCreditReport = async (req, res) => {
   try {
     const { salesmanId, routeId, shopId } = req.query;
-    const matchStage = { tenant: req.tenant };
+    const matchStage = { tenant: new mongoose.Types.ObjectId(req.tenantId) };
 
     if (shopId) {
       matchStage['credits.shopId'] = mongoose.ObjectId.createFromTime(shopId);

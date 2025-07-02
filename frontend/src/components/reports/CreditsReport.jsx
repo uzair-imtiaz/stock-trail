@@ -2,6 +2,7 @@ import { Button, message, Select, Space, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { BsSearch } from 'react-icons/bs';
+import { BsPrinter } from 'react-icons/bs';
 import {
   getCreditsReport,
   getRoutes,
@@ -126,7 +127,7 @@ const CreditsReport = () => {
 
   return (
     <div className="p-4">
-      <Title level={3}>Expense Report</Title>
+      <Title level={3}>Credits Report</Title>
       <Space className="w-full my-3 flex flex-wrap md:flex-nowrap justify-between gap-2">
         <div className="flex flex-wrap md:flex-nowrap gap-2 flex-grow">
           <Select
@@ -163,7 +164,6 @@ const CreditsReport = () => {
             }
           />
         </div>
-
         <Button
           type="primary"
           icon={<BsSearch />}
@@ -172,16 +172,18 @@ const CreditsReport = () => {
         >
           Search
         </Button>
-      </Space>
 
-      {data && (
-        <PrintTable
-          title="Credits Report"
-          columns={columns}
-          data={data}
-          loading={loading}
-        />
-      )}
+        {data && (
+          <Button
+            type="primary"
+            icon={<BsPrinter />}
+            onClick={() => window.print()}
+          >
+            Print
+          </Button>
+        )}
+      </Space>
+      {data && <PrintTable columns={columns} data={data} loading={loading} />}
     </div>
   );
 };
