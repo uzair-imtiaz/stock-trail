@@ -325,6 +325,7 @@ const SalesScreen = () => {
       title: 'Available Qty',
       dataIndex: 'quantity',
       key: 'quantity',
+      render: (text) => `${text?.toFixed?.(2)}`,
     },
     {
       title: 'Dispatch Qty (Cartons)',
@@ -534,48 +535,58 @@ const SalesScreen = () => {
           bordered
           scroll={{ x: 'max-content' }}
           summary={() => {
-            const totalDispatch = inventory.reduce(
-              (sum, item) => sum + (item.dispatchQty || 0),
-              0
-            );
-            const totalTpr = inventory.reduce(
-              (sum, item) => sum + (item.tpr || 0),
-              0
-            );
-            const totalReturnPieces = inventory.reduce(
-              (sum, item) => sum + (item.returnPieces || 0),
-              0
-            );
-            const totalWastage = inventory.reduce(
-              (sum, item) => sum + (item.wastage || 0),
-              0
-            );
+            // --- Initialize ---
+            const totals = {
+              totalDispatch: 0,
+              totalTpr: 0,
+              totalReturnPieces: 0,
+              totalWastage: 0,
+              quantity: 0,
+              deductionTotals: new Map(deductions.map((d) => [d._id, 0])),
+            };
 
-            const deductionTotals = deductions.map((deduction) => {
-              const total = inventory.reduce((sum, item) => {
-                const ded = item.unitDeductions.find(
-                  (d) => d._id === deduction._id
-                );
-                return sum + (ded ? ded.amount || 0 : 0);
-              }, 0);
-              return { _id: deduction._id, total };
-            });
+            // --- Single pass ---
+            for (const item of inventory) {
+              totals.totalDispatch += item.dispatchQty || 0;
+              totals.totalTpr += item.tpr || 0;
+              totals.totalReturnPieces += item.returnPieces || 0;
+              totals.totalWastage += item.wastage || 0;
+              totals.quantity += item.quantity || 0;
+
+              for (const unitDeduction of item.unitDeductions || []) {
+                if (totals.deductionTotals.has(unitDeduction._id)) {
+                  totals.deductionTotals.set(
+                    unitDeduction._id,
+                    totals.deductionTotals.get(unitDeduction._id) +
+                      (unitDeduction.amount || 0)
+                  );
+                }
+              }
+            }
 
             return (
               <Table.Summary fixed>
                 <Table.Summary.Row>
                   {/* Fixed columns */}
-                  <Table.Summary.Cell index={0} colSpan={6}>
+                  <Table.Summary.Cell index={0} colSpan={5}>
                     <strong>Total</strong>
                   </Table.Summary.Cell>
-                  <Table.Summary.Cell>{totalDispatch}</Table.Summary.Cell>
-                  <Table.Summary.Cell>{totalTpr}</Table.Summary.Cell>
-                  <Table.Summary.Cell>{totalReturnPieces}</Table.Summary.Cell>
-                  <Table.Summary.Cell>{totalWastage}</Table.Summary.Cell>
+                  <Table.Summary.Cell>
+                    {(totals.quantity || 0).toFixed(2)}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell>
+                    {totals.totalDispatch}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell>{totals.totalTpr}</Table.Summary.Cell>
+                  <Table.Summary.Cell>
+                    {totals.totalReturnPieces}
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell>{totals.totalWastage}</Table.Summary.Cell>
+
                   {/* Dynamic Deduction columns */}
-                  {deductionTotals.map((deductionTotal, idx) => (
-                    <Table.Summary.Cell key={deductionTotal._id}>
-                      {deductionTotal.total}
+                  {deductions.map((deduction) => (
+                    <Table.Summary.Cell key={deduction._id}>
+                      {totals.deductionTotals.get(deduction._id) || 0}
                     </Table.Summary.Cell>
                   ))}
                 </Table.Summary.Row>
