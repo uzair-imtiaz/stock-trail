@@ -79,6 +79,10 @@ const DynamicListSection = ({
                   className="flex-grow mb-1 w-100"
                   disabled={item?.disabled}
                   options={selectOptions}
+                  showSearch
+                  filterOption={(input, option) =>
+                    option.label.toLowerCase().includes(input.toLowerCase())
+                  }
                 />
                 <Button
                   type="text"

@@ -178,7 +178,7 @@ const InventoryForm = () => {
                   },
                 ]}
               >
-                <InputNumber min={1} />
+                <InputNumber min={0} />
               </Form.Item>
 
               <Form.Item

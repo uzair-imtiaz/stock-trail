@@ -125,6 +125,7 @@ const Invoices = () => {
             type="link"
             icon={<DeleteOutlined />}
             onClick={() => handleDelete(record._id)}
+            disabled={record?.hasReceipt}
           />
         </div>
       ),

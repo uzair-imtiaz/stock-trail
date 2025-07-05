@@ -1,19 +1,26 @@
-import { useEffect, useState } from 'react';
-import { Table, Button, message, Popconfirm, Flex } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { deleteInventory, getInventory } from '../apis';
-import { useNavigate } from 'react-router-dom';
-import dayjs from 'dayjs';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Flex, Input, message, Popconfirm, Table } from 'antd';
 import Title from 'antd/es/typography/Title';
+import dayjs from 'dayjs';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { deleteInventory, getInventory } from '../apis';
+
+const { Search } = Input;
 
 const InventoryList = () => {
   const [inventory, setInventory] = useState([]);
+  const [filteredInventory, setFilteredInventory] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchInventory();
   }, []);
+
+  useEffect(() => {
+    setFilteredInventory(inventory);
+  }, [inventory]);
 
   const fetchInventory = async () => {
     setLoading(true);
@@ -42,6 +49,16 @@ const InventoryList = () => {
     } catch (error) {
       message.error(error.message || 'Failed to delete inventory item');
     }
+  };
+
+  const handleSearch = (value) => {
+    const searchValue = value.toLowerCase();
+    const filtered = inventory.filter(
+      (item) =>
+        item.product.toLowerCase().includes(searchValue) ||
+        item.flavor.toLowerCase().includes(searchValue)
+    );
+    setFilteredInventory(filtered);
   };
 
   const columns = [
@@ -127,9 +144,15 @@ const InventoryList = () => {
           Add Inventory
         </Button>
       </Flex>
+      <Search
+        placeholder="Search by Product or Flavor"
+        onSearch={handleSearch}
+        style={{ marginBottom: 16, width: '30%' }}
+        allowClear
+      />
       <Table
         columns={columns}
-        dataSource={inventory}
+        dataSource={filteredInventory}
         loading={loading}
         rowKey="_id"
         bordered
