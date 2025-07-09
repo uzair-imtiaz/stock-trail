@@ -44,7 +44,9 @@ const createSale = async (req, res) => {
             message: 'Inventory item not found',
           });
         } else {
-          await wastageItem.save();
+          const savedWastageItem = await wastageItem.save();
+          // Store the wastage item ID in the sale record for proper tracking
+          item.wastageItemId = savedWastageItem._id;
         }
       }
       inventoryItem.quantity -=
@@ -324,22 +326,75 @@ const transformInventoryData = (report, inventoryList) => {
 };
 
 const deleteInvoice = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const invoiceId = req.params.id;
-    const invoice = await RouteActivity.findOneAndDelete({
+
+    const invoice = await RouteActivity.findOne({
       _id: invoiceId,
       tenant: req.tenantId,
-    });
+    }).session(session);
+
     if (!invoice) {
+      await session.abortTransaction();
+      session.endSession();
       return res
         .status(404)
         .json({ success: false, message: 'Invoice not found' });
     }
+
+    // Reverse inventory changes for each item in the sale
+    for (const item of invoice.inventoryDropped) {
+      const inventoryItem = await Inventory.findOne({
+        _id: item.itemId,
+        tenant: req.tenantId,
+      }).session(session);
+
+      if (!inventoryItem) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(404).json({
+          success: false,
+          message: 'Inventory item not found',
+        });
+      }
+
+      // Reverse the inventory changes made during sale creation
+      // Add back: dispatch quantity, TPR (converted to cartons), wastage (converted to cartons)
+      // Subtract: return pieces (converted to cartons)
+      const piecesPerCarton = inventoryItem.piecesPerCarton || 1;
+      const tprInCartons = (item.tpr || 0) / piecesPerCarton;
+      const wastage = item.wastage || 0;
+      const returnPieces = item.returnPieces || 0;
+
+      const quantityToAddBack =
+        (item.quantityDropped || 0) + tprInCartons + wastage - returnPieces;
+
+      inventoryItem.quantity += quantityToAddBack;
+      await inventoryItem.save({ session });
+
+      // Remove wastage items if they exist
+      if (item.wastage > 0 && item.wastageItemId) {
+        await Inventory.findByIdAndDelete(item.wastageItemId).session(session);
+      }
+    }
+
+    // Delete the sale
+    await RouteActivity.findByIdAndDelete(invoiceId).session(session);
+
+    await session.commitTransaction();
+    session.endSession();
+
     res.status(200).json({
       success: true,
       message: 'Invoice deleted successfully',
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error('Error deleting invoice:', error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };

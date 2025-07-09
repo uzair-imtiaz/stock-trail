@@ -26,6 +26,7 @@ import {
   updateSale,
 } from '../apis';
 import { default as DynamicListSection } from '../components/DynamicList';
+import dayjs from 'dayjs';
 
 const { Option } = Select;
 
@@ -137,6 +138,7 @@ const SalesScreen = () => {
         setSelectedSalesman(saleData.salesman);
         setDriverName(saleData.driverName);
         setLicensePlate(saleData.licenseNumber);
+        setSelectedDate(dayjs(saleData.date));
 
         const mappedExpenses = saleData.expenses.map((expense) => ({
           description: expense.description,
@@ -339,7 +341,6 @@ const SalesScreen = () => {
       render: (_, record) => (
         <InputNumber
           min={0}
-          max={record.dispatchQty ? null : record.quantity}
           value={record.dispatchQty}
           placeholder="Enter Qty"
           defaultValue={0}
@@ -548,7 +549,7 @@ const SalesScreen = () => {
           loading={loading}
           pagination={false}
           bordered
-          scroll={{ x: 'max-content', y: 'calc(100vh - 300px)' }}
+          scroll={{ x: 'max-content' }}
           sticky
           summary={() => {
             // --- Initialize ---
