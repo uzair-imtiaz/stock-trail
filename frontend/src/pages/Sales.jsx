@@ -445,7 +445,13 @@ const SalesScreen = () => {
     //handle edit
 
     const inventoryDropped = inventory
-      .filter((item) => item.dispatchQty > 0)
+      .filter(
+        (item) =>
+          item.dispatchQty > 0 ||
+          item.wastage > 0 ||
+          item.tpr > 0 ||
+          item.returnPieces > 0
+      )
       .map((item) => ({
         itemId: item._id,
         quantityDropped: item.dispatchQty,

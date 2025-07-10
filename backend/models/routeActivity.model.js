@@ -7,7 +7,7 @@ const ItemSchema = new mongoose.Schema({
     ref: 'Inventory',
     required: true,
   },
-  quantityDropped: { type: Number, required: true },
+  quantityDropped: { type: Number, required: true, default: 0 },
   wastage: { type: Number, default: 0, required: true },
   tpr: { type: Number, default: 0, required: true },
   returnPieces: { type: Number, default: 0, required: true },
@@ -135,8 +135,6 @@ RouteActivitySchema.pre('save', async function (next) {
       };
     });
 
-    // Calculate total amount from inventory items
-    console.log('deductionMap', deductionMap);
     for (const item of this.inventoryDropped) {
       if (!item.salePrice) {
         item.salePrice = inventoryMap[item.itemId.toString()] || 0;
