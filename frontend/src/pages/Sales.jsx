@@ -506,6 +506,11 @@ const SalesScreen = () => {
             onSelect={(value) => setSelectedRoute(value)}
             value={selectedRoute}
             loading={fetchingExistingSale || loading}
+            showSearch
+            allowClear
+            filterOption={(input, option) =>
+              option.children.toLowerCase().includes(input.toLowerCase())
+            }
           >
             {routes.map((route) => (
               <Option key={route._id} value={route._id}>
@@ -518,6 +523,11 @@ const SalesScreen = () => {
             style={{ width: 200 }}
             onSelect={(value) => setSelectedSalesman(value)}
             value={selectedSalesman}
+            allowClear
+            showSearch
+            filterOption={(input, option) =>
+              option.children.toLowerCase().includes(input.toLowerCase())
+            }
             loading={fetchingExistingSale || loading}
           >
             {salesmen.map((salesman) => (
