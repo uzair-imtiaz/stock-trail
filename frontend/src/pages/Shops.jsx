@@ -55,7 +55,7 @@ const Shops = () => {
   const showEditModal = (shop) => {
     setIsEditing(true);
     setCurrentShop(shop);
-    form.setFieldsValue({ name: shop.name });
+    form.setFieldsValue({ name: shop.name, shopId: shop.shopId });
     setIsModalOpen(true);
   };
 
@@ -180,6 +180,16 @@ const Shops = () => {
         loading={submitLoading}
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
+          <Form.Item
+            name="shopId"
+            label="Shop ID"
+            rules={[
+              { required: true, message: 'Please enter the shop ID' },
+              { min: 2, message: 'Shop ID must be at least 2 characters' },
+            ]}
+          >
+            <Input placeholder="Shop ID" />
+          </Form.Item>
           <Form.Item
             name="name"
             label="Shop Name"

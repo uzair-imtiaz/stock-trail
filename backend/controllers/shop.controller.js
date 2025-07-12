@@ -24,8 +24,8 @@ const getShops = async (req, res) => {
 
 const createShop = async (req, res) => {
   try {
-    const { name } = req.body;
-    const shop = await Shop.create({ name, tenant: req.tenantId });
+    const { name, shopId } = req.body;
+    const shop = await Shop.create({ name, shopId, tenant: req.tenantId });
     if (!shop) {
       return res
         .status(400)
@@ -36,7 +36,8 @@ const createShop = async (req, res) => {
       message: 'Shop created successfully',
       data: shop,
     });
-  } catch {
+  } catch (error) {
+    console.log('error', error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
