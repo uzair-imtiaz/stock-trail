@@ -20,10 +20,15 @@ export const formatBalance = (balance) => {
 export function objectToQueryString(params) {
   const query = Object.entries(params)
     .filter(([_, value]) => value !== undefined && value !== null)
-    .map(
-      ([key, value]) =>
-        `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
-    )
+    .flatMap(([key, value]) => {
+      if (Array.isArray(value)) {
+        return value.map(
+          (v) => `${encodeURIComponent(key)}[]=${encodeURIComponent(v)}`
+        );
+      } else {
+        return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+      }
+    })
     .join('&');
 
   return query ? `?${query}` : '';

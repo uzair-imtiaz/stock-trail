@@ -231,8 +231,18 @@ const getSalesReport = async (req, res) => {
         $lte: new Date(endDate),
       };
     }
-    if (routeId) matchStage.routeId = new mongoose.Types.ObjectId(routeId);
-    if (salesman) matchStage.salesman = new mongoose.Types.ObjectId(salesman);
+    if (routeId) {
+      if (Array.isArray(routeId)) {
+        matchStage.routeId = {
+          $in: routeId.map((id) => new mongoose.Types.ObjectId(id)),
+        };
+      } else {
+        matchStage.routeId = new mongoose.Types.ObjectId(routeId);
+      }
+    }
+    if (salesman) {
+      matchStage.salesman = new mongoose.Types.ObjectId(salesman);
+    }
     const pipeline = [
       { $match: matchStage },
       {

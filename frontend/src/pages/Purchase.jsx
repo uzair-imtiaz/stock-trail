@@ -388,6 +388,7 @@ const Purchase = () => {
           pagination={false}
           bordered
           scroll={{ x: 'max-content' }}
+          sticky
           footer={() => (
             <div
               style={{

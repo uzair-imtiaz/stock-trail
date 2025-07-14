@@ -42,7 +42,8 @@ const PrintTable = ({ columns, data, loading }) => {
         dataSource={data}
         bordered
         loading={loading}
-        // pagination={{ position: ['none', 'none'] }}
+        pagination={false}
+        sticky
       />
     </div>
   );

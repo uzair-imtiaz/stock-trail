@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { BsPrinter, BsSearch } from 'react-icons/bs';
 import { getRoutes, getSalesReport, getUsersByRole } from '../../apis';
-import { objectToQueryString } from '../../utils';
+import { formatBalance, objectToQueryString } from '../../utils';
 import { PrintTable } from '../common';
 
 const { RangePicker } = DatePicker;
@@ -108,6 +108,7 @@ const SalesReport = () => {
       title: 'Drop ID',
       dataIndex: 'dropId',
       key: 'dropId',
+      width: 90,
       render: (text, record) => {
         // Only render for the first row of each drop
         if (record.isFirstRow) {
@@ -222,7 +223,7 @@ const SalesReport = () => {
             (item) => item.dropId === record.dropId
           ).length;
           return {
-            children: text,
+            children: formatBalance(text),
             props: {
               rowSpan: rowCount,
             },
@@ -250,11 +251,16 @@ const SalesReport = () => {
           />
           <Select
             placeholder="Select Route"
-            style={{ width: 150 }}
+            style={{ width: 280 }}
             onChange={(value) => setRoute(value)}
             options={routes}
             showSearch
             allowClear
+            mode="multiple"
+            maxTagCount={1}
+            maxTagPlaceholder={(omittedValues) =>
+              `+${omittedValues.length} more`
+            }
             filterOption={(input, option) =>
               option.label.toLowerCase().includes(input.toLowerCase())
             }
@@ -280,24 +286,18 @@ const SalesReport = () => {
           Search
         </Button>
 
-      {data && (
+        {data && (
           <Button
             type="primary"
             icon={<BsPrinter />}
             onClick={() => window.print()}
-            >
+          >
             Print
           </Button>
-      )}
+        )}
       </Space>
 
-      {data && (
-        <PrintTable
-          columns={columns}
-          data={data}
-          loading={loading}
-        />
-      )}
+      {data && <PrintTable columns={columns} data={data} loading={loading} />}
     </div>
   );
 };

@@ -45,6 +45,11 @@ const Receipts = () => {
       render: (date) => dayjs(date).format('DD-MMMM-YYYY'),
     },
     {
+      title: 'Salesman',
+      dataIndex: ['saleId', 'salesman', 'name'],
+      key: 'salesman',
+    },
+    {
       title: 'Net Amount',
       dataIndex: ['saleId', 'profit'],
       key: 'netAmount',

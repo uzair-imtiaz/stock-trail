@@ -178,7 +178,11 @@ const getReceipts = async (req, res) => {
     const receipts = await Receipt.find({ tenant: req.tenantId })
       .populate({
         path: 'saleId',
-        select: 'profit expenses totalAmount',
+        select: 'profit expenses totalAmount salesman',
+        populate: {
+          path: 'salesman',
+          select: 'name',
+        },
       })
       .sort({ createdAt: -1 });
     if (!receipts) {

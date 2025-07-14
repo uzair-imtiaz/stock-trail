@@ -9,15 +9,24 @@ const createPurchase = async (req, res) => {
   session.startTransaction();
 
   try {
-    const { items, bank, vendor, totalDeductions = [], purchaseDeliveryNumber } = req.body;
+    const {
+      items,
+      bank,
+      vendor,
+      totalDeductions = [],
+      purchaseDeliveryNumber,
+    } = req.body;
 
     let totalPurchaseAmount = items.reduce((acc, item) => acc + item.total, 0);
+    const sanitizedDeductions = totalDeductions.filter(
+      (deduction) => deduction?.amount
+    );
 
-    if (totalDeductions?.length > 0) {
-      totalDeductions.forEach((deduction) => {
+    if (sanitizedDeductions?.length > 0) {
+      sanitizedDeductions.forEach((deduction) => {
         const deductionAmount = deduction.isPercentage
-          ? (totalPurchaseAmount * deduction.amount) / 100
-          : deduction.amount;
+          ? (totalPurchaseAmount * deduction?.amount || 0) / 100
+          : deduction?.amount || 0;
         totalPurchaseAmount -= deductionAmount;
       });
     }
@@ -28,9 +37,9 @@ const createPurchase = async (req, res) => {
           items,
           bank,
           vendor,
-          totalDeductions,
+          totalDeductions: sanitizedDeductions,
           purchaseDeliveryNumber,
-          total: totalPurchaseAmount,
+          total: totalPurchaseAmount || 0,
           tenant: req.tenantId,
         },
       ],
