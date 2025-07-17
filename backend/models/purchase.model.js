@@ -49,6 +49,8 @@ const PurchaseSchema = new mongoose.Schema(
       },
     ],
     total: { type: Number },
+    dispatchDate: { type: Date, required: true },
+    orderDate: { type: Date, required: true },
     tenant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Tenant',

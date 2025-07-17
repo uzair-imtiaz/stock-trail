@@ -1,6 +1,7 @@
 import {
   Button,
   Card,
+  DatePicker,
   Flex,
   Input,
   InputNumber,
@@ -51,6 +52,8 @@ const Purchase = () => {
   const [loading, setLoading] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
   const [purchaseDN, setPurchaseDN] = useState('');
+  const [dispatchDate, setDispatchDate] = useState(null);
+  const [orderDate, setOrderDate] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -305,6 +308,8 @@ const Purchase = () => {
         setSelectedBank(null);
         setSelectedVendor(null);
         setPurchaseDN('');
+        setDispatchDate(null);
+        setOrderDate(null);
         setInventory((prev) =>
           prev.map((item) => ({
             ...item,
@@ -377,6 +382,18 @@ const Purchase = () => {
             allowClear
             value={purchaseDN}
             onChange={(e) => setPurchaseDN(e.target.value)}
+          />
+          <DatePicker
+            style={{ width: 200 }}
+            placeholder="Dispatch Date"
+            value={dispatchDate}
+            onChange={(value) => setDispatchDate(value)}
+          />
+          <DatePicker
+            style={{ width: 200 }}
+            placeholder="Order Date"
+            value={orderDate}
+            onChange={(value) => setOrderDate(value)}
           />
         </Flex>
 

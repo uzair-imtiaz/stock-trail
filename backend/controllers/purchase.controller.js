@@ -15,6 +15,8 @@ const createPurchase = async (req, res) => {
       vendor,
       totalDeductions = [],
       purchaseDeliveryNumber,
+      dispatchDate = new Date(),
+      orderDate = new Date(),
     } = req.body;
 
     let totalPurchaseAmount = items.reduce((acc, item) => acc + item.total, 0);
@@ -40,6 +42,8 @@ const createPurchase = async (req, res) => {
           totalDeductions: sanitizedDeductions,
           purchaseDeliveryNumber,
           total: totalPurchaseAmount || 0,
+          dispatchDate,
+          orderDate,
           tenant: req.tenantId,
         },
       ],
