@@ -139,6 +139,9 @@ const getInvoices = async (req, res) => {
       });
     }
 
+    const total =
+      (await RouteActivity.countDocuments({ tenant: req.tenantId })) / pageSize;
+
     res.status(200).json({
       success: true,
       message: 'Invoices fetched successfully',
@@ -146,7 +149,9 @@ const getInvoices = async (req, res) => {
       pagination: {
         page,
         pageSize,
-        total: await RouteActivity.countDocuments({ tenant: req.tenantId }),
+        next: page + 1 < total ? page + 1 : null,
+        prev: page - 1 > 0 ? page - 1 : null,
+        total,
       },
     });
   } catch (error) {

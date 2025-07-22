@@ -2,7 +2,7 @@ import { Button, message, Table } from 'antd';
 import Title from 'antd/es/typography/Title';
 import React, { useEffect, useState } from 'react';
 import { deleteInvoice, getInvoices } from '../apis';
-import { formatBalance } from '../utils';
+import { formatBalance, objectToQueryString } from '../utils';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import './invoices.css';
@@ -29,15 +29,18 @@ const Invoices = () => {
   const fetchInvoices = async (page, pageSize) => {
     try {
       setLoading(true);
-      const response = await getInvoices({ page, limit: pageSize });
+      const query = objectToQueryString({ page, limit: pageSize });
+      const response = await getInvoices(query);
 
       if (response?.success) {
         setInvoices(response.data);
         setPagination((prev) => ({
           ...prev,
           current: page,
-          pageSize,
-          total: response.pagination?.totalPages * pageSize || 0,
+          next: response.pagination?.next,
+          prev: response.pagination?.prev,
+          pageSize: response.pagination?.pageSize,
+          total: response.pagination?.total * pageSize || 0,
         }));
 
         // Update the URL with new pagination params
@@ -51,9 +54,12 @@ const Invoices = () => {
       setLoading(false);
     }
   };
-
   const handleTableChange = (pagination) => {
-    fetchInvoices(pagination.current, pagination.pageSize);
+    setPagination((prev) => ({
+      ...prev,
+      current: pagination.current,
+      pageSize: pagination.pageSize,
+    }));
   };
 
   const handleDelete = async (id) => {

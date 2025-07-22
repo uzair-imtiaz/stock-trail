@@ -106,7 +106,7 @@ export const fetchSale = async (id) => {
 };
 
 export const getInvoices = async (query) => {
-  const response = await getCallback('/sales', query);
+  const response = await getCallback(`sales${query}`);
   return response;
 };
 
