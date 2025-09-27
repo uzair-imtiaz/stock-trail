@@ -91,6 +91,30 @@ const Receipts = () => {
         return formatBalance(returnedCredits);
       },
     },
+    {
+      title: 'Other Credits',
+      key: 'otherCredits',
+      render: (_, record) => {
+        const total =
+          record.otherCredits?.reduce(
+            (sum, entry) => sum + (Number(entry.amount) || 0),
+            0
+          ) || 0;
+        return formatBalance(total);
+      },
+    },
+    {
+      title: 'Other Debits',
+      key: 'otherDebits',
+      render: (_, record) => {
+        const total =
+          record.otherDebits?.reduce(
+            (sum, entry) => sum + (Number(entry.amount) || 0),
+            0
+          ) || 0;
+        return formatBalance(total);
+      },
+    },
   ];
   return (
     <>

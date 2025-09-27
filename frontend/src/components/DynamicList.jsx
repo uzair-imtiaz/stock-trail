@@ -27,6 +27,8 @@ const DynamicListSection = ({
   width = '50%',
   totalText = 'Total Amount',
   loading = false,
+  filterOption,
+  valueKey = 'description',
 }) => {
   const handleItemChange = (index, field, value) => {
     const updatedExpenses = items.map((expense, i) =>
@@ -36,7 +38,7 @@ const DynamicListSection = ({
   };
 
   const handleAddItem = () => {
-    setItems([...items, { description: '', amount: 0 }]);
+    setItems([...items, { [valueKey]: '', amount: 0 }]);
   };
 
   const handleRemoveItem = (index) => {
@@ -72,16 +74,23 @@ const DynamicListSection = ({
                 <Select
                   placeholder={selectPlaceholder}
                   onChange={(value) =>
-                    handleItemChange(index, 'description', value)
+                    handleItemChange(index, valueKey, value)
                   }
                   allowClear
-                  value={item?.description || null}
+                  value={item?.[valueKey] ?? null}
                   className="flex-grow mb-1 w-100"
                   disabled={item?.disabled}
                   options={selectOptions}
                   showSearch
-                  filterOption={(input, option) =>
-                    option.label.toLowerCase().includes(input.toLowerCase())
+                  filterOption={
+                    filterOption ||
+                    ((input, option) => {
+                      const label = option?.label ?? '';
+                      return label
+                        .toString()
+                        .toLowerCase()
+                        .includes(input.toLowerCase());
+                    })
                   }
                 />
                 <Button

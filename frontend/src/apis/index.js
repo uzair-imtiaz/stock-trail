@@ -166,6 +166,39 @@ export const deleteAccount = async (id) => {
   return response;
 };
 
+export const getOtherAccounts = async (params = {}) => {
+  const sanitizedParams = Object.entries(params).reduce((acc, [key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
+  const query = new URLSearchParams(sanitizedParams).toString();
+  const url = query ? `/other-accounts?${query}` : '/other-accounts';
+  const response = await getCallback(url);
+  return response;
+};
+
+export const createOtherAccount = async (data) => {
+  const response = await postCallback('/other-accounts/new', data);
+  return response;
+};
+
+export const updateOtherAccount = async (id, data) => {
+  const response = await putCallback(`/other-accounts/${id}`, data);
+  return response;
+};
+
+export const deleteOtherAccount = async (id) => {
+  const response = await deleteCallback(`/other-accounts/${id}`);
+  return response;
+};
+
+export const getOtherAccountCategories = async () => {
+  const response = await getCallback('/other-accounts/categories');
+  return response;
+};
+
 export const getExpenses = async () => {
   const response = await getCallback('/expenses');
   return response;

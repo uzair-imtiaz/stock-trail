@@ -19,6 +19,18 @@ const AdvanceSchema = new mongoose.Schema({
   amount: { type: Number, required: true, default: 0 },
 });
 
+const OtherAccountEntrySchema = new mongoose.Schema(
+  {
+    otherAccount: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'OtherAccount',
+      required: true,
+    },
+    amount: { type: Number, required: true, default: 0 },
+  },
+  { timestamps: true }
+);
+
 const ReceiptSchema = new mongoose.Schema(
   {
     account: {
@@ -34,6 +46,8 @@ const ReceiptSchema = new mongoose.Schema(
     },
     credits: [CreditSchema],
     advances: [AdvanceSchema],
+    otherCredits: [OtherAccountEntrySchema],
+    otherDebits: [OtherAccountEntrySchema],
     tenant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Tenant',

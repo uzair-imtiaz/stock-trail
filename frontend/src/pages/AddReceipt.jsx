@@ -5,16 +5,24 @@ import {
   Flex,
   Form,
   InputNumber,
-  message,
   Row,
   Select,
+  Space,
   Typography,
+  message,
 } from 'antd';
 import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { SwapOutlined, WalletOutlined } from '@ant-design/icons';
 import { TbCreditCardPay, TbCreditCardRefund } from 'react-icons/tb';
 import { useNavigate } from 'react-router-dom';
-import { createReceipt, fetchReceipt, fetchSale, getAccounts } from '../apis';
+import {
+  createReceipt,
+  fetchReceipt,
+  fetchSale,
+  getAccounts,
+  getOtherAccounts,
+} from '../apis';
 import DynamicListSection from '../components/DynamicList';
 import { Card } from '../components/common';
 
@@ -27,9 +35,13 @@ const ReceiptForm = () => {
   const [submitLoading, setSumbitLoading] = useState(false);
   const [creditSale, setCreditSale] = useState([]);
   const [creditReceived, setCreditReceived] = useState([]);
+  const [otherCredits, setOtherCredits] = useState([]);
+  const [otherDebits, setOtherDebits] = useState([]);
   const [saleData, setSaleData] = useState(null);
   const [shops, setShops] = useState([]);
   const [banks, setBanks] = useState([]);
+  const [otherAccounts, setOtherAccounts] = useState([]);
+  const [otherAccountsLoading, setOtherAccountsLoading] = useState(false);
 
   useEffect(() => {
     const fetchBanks = async () => {
@@ -50,6 +62,37 @@ const ReceiptForm = () => {
 
     fetchBanks();
   }, []);
+
+  useEffect(() => {
+    const fetchOtherAccounts = async () => {
+      try {
+        setOtherAccountsLoading(true);
+        const response = await getOtherAccounts({ limit: 200 });
+        if (response?.success) {
+          setOtherAccounts(response?.data || []);
+        } else {
+          message.error(
+            response?.message || 'Failed to fetch other accounts list'
+          );
+        }
+      } catch (error) {
+        message.error(error?.message || 'Failed to fetch other accounts list');
+      } finally {
+        setOtherAccountsLoading(false);
+      }
+    };
+
+    fetchOtherAccounts();
+  }, []);
+
+  const otherAccountOptions = useMemo(
+    () =>
+      otherAccounts.map((account) => ({
+        value: account._id,
+        label: `${account.name} (${account.category})`,
+      })),
+    [otherAccounts]
+  );
 
   const createCreditsData = (response) => {
     const { data = [] } = response;
@@ -89,6 +132,34 @@ const ReceiptForm = () => {
     setCreditReceived(creditReceivedArray);
   };
 
+  const hydrateReceiptData = (receiptResponse) => {
+    if (!receiptResponse?.success || !receiptResponse?.data) {
+      setCreditSale([]);
+      setCreditReceived([]);
+      setOtherCredits([]);
+      setOtherDebits([]);
+      return;
+    }
+
+    createCreditsData(receiptResponse);
+
+    const receipt = receiptResponse.data;
+    const mappedOtherCredits = (receipt.otherCredits || []).map((entry) => ({
+      otherAccount:
+        entry?.otherAccount?._id?.toString() || entry?.otherAccount?.toString(),
+      amount: Number(entry?.amount) || 0,
+    }));
+
+    const mappedOtherDebits = (receipt.otherDebits || []).map((entry) => ({
+      otherAccount:
+        entry?.otherAccount?._id?.toString() || entry?.otherAccount?.toString(),
+      amount: Number(entry?.amount) || 0,
+    }));
+
+    setOtherCredits(mappedOtherCredits);
+    setOtherDebits(mappedOtherDebits);
+  };
+
   const handleShowData = async () => {
     try {
       setLoading(true);
@@ -106,7 +177,13 @@ const ReceiptForm = () => {
           }))
         );
         if (receiptRes?.success) {
-          createCreditsData(receiptRes);
+          hydrateReceiptData(receiptRes);
+        }
+        if (!receiptRes?.success) {
+          setCreditSale([]);
+          setCreditReceived([]);
+          setOtherCredits([]);
+          setOtherDebits([]);
         }
         const sale = saleRes.data;
         setSaleData({
@@ -140,18 +217,36 @@ const ReceiptForm = () => {
       const payload = {
         account: bank,
         saleId: saleData?.id,
-        credits: creditSale.filter(
-          (item) => item.amount > 0 && item?.disabled !== true
-        ),
-        returnedCredits: creditReceived.filter(
-          (item) => item.amount > 0 && item?.disabled !== true
-        ),
+        credits: creditSale
+          .filter((item) => item.amount > 0 && item?.disabled !== true)
+          .map((item) => ({
+            description: item.description,
+            amount: Number(item.amount) || 0,
+          })),
+        returnedCredits: creditReceived
+          .filter((item) => item.amount > 0 && item?.disabled !== true)
+          .map((item) => ({
+            description: item.description,
+            amount: Number(item.amount) || 0,
+          })),
+        otherCredits: otherCredits
+          .filter((item) => item.otherAccount && item.amount > 0)
+          .map((item) => ({
+            otherAccount: item.otherAccount,
+            amount: Number(item.amount) || 0,
+          })),
+        otherDebits: otherDebits
+          .filter((item) => item.otherAccount && item.amount > 0)
+          .map((item) => ({
+            otherAccount: item.otherAccount,
+            amount: Number(item.amount) || 0,
+          })),
       };
 
       response = await createReceipt(payload);
       if (response?.success) {
         message.success(response?.message);
-        navigate('/receipts');
+        navigate('/sales/receipts');
       } else {
         message.error(response?.message);
       }
@@ -161,6 +256,55 @@ const ReceiptForm = () => {
       setSumbitLoading(false);
     }
   };
+
+  const creditSaleTotal = useMemo(
+    () =>
+      creditSale.reduce(
+        (total, credit) => total + (Number(credit.amount) || 0),
+        0
+      ),
+    [creditSale]
+  );
+
+  const creditReceivedTotal = useMemo(
+    () =>
+      creditReceived.reduce(
+        (total, credit) => total + (Number(credit.amount) || 0),
+        0
+      ),
+    [creditReceived]
+  );
+
+  const otherCreditsTotal = useMemo(
+    () =>
+      otherCredits.reduce(
+        (total, entry) => total + (Number(entry.amount) || 0),
+        0
+      ),
+    [otherCredits]
+  );
+
+  const otherDebitsTotal = useMemo(
+    () =>
+      otherDebits.reduce(
+        (total, entry) => total + (Number(entry.amount) || 0),
+        0
+      ),
+    [otherDebits]
+  );
+
+  const amountToBeReceived = useMemo(() => {
+    const base = Number(saleData?.netAmount) || 0;
+    return (
+      base - creditSaleTotal + creditReceivedTotal - otherCreditsTotal + otherDebitsTotal
+    );
+  }, [
+    saleData?.netAmount,
+    creditSaleTotal,
+    creditReceivedTotal,
+    otherCreditsTotal,
+    otherDebitsTotal,
+  ]);
 
   return (
     <>
@@ -228,7 +372,7 @@ const ReceiptForm = () => {
 
           {saleData && (
             <Row>
-              <div className="w-100">
+              <Space direction="vertical" size={16} style={{ width: '100%' }}>
                 <DynamicListSection
                   title="Credit Sale"
                   icon={<TbCreditCardPay size={'1.3em'} />}
@@ -239,10 +383,7 @@ const ReceiptForm = () => {
                   numberPlaceholder="Credit Amount"
                   width={'100%'}
                   totalText="Total Credit"
-                  totalAmount={creditSale.reduce(
-                    (total, credit) => total + credit.amount,
-                    0
-                  )}
+                  totalAmount={creditSaleTotal}
                 />
 
                 <DynamicListSection
@@ -255,12 +396,39 @@ const ReceiptForm = () => {
                   numberPlaceholder="Amount"
                   width={'100%'}
                   totalText="Total Return"
-                  totalAmount={creditReceived.reduce(
-                    (total, credit) => total + credit.amount,
-                    0
-                  )}
+                  totalAmount={creditReceivedTotal}
                 />
-              </div>
+
+                <DynamicListSection
+                  title="Other Amount Credit"
+                  icon={<WalletOutlined />}
+                  items={otherCredits}
+                  setItems={setOtherCredits}
+                  selectOptions={otherAccountOptions}
+                  selectPlaceholder="Select Other Account"
+                  numberPlaceholder="Amount"
+                  width={'100%'}
+                  totalText="Total Other Credits"
+                  valueKey="otherAccount"
+                  totalAmount={otherCreditsTotal}
+                  loading={otherAccountsLoading}
+                />
+
+                <DynamicListSection
+                  title="Other Account Debit"
+                  icon={<SwapOutlined />}
+                  items={otherDebits}
+                  setItems={setOtherDebits}
+                  selectOptions={otherAccountOptions}
+                  selectPlaceholder="Select Other Account"
+                  numberPlaceholder="Amount"
+                  width={'100%'}
+                  totalText="Total Other Debits"
+                  valueKey="otherAccount"
+                  totalAmount={otherDebitsTotal}
+                  loading={otherAccountsLoading}
+                />
+              </Space>
             </Row>
           )}
         </Col>
@@ -268,17 +436,14 @@ const ReceiptForm = () => {
         {saleData && (
           <Col span={12}>
             <Row>
-              <Card
-                title="Sale Details"
-                className="mt-3"
-                style={{
-                  maxWidth: 600,
-                  flex: 1,
-                  padding: '20px',
-                  maxHeight: '530px',
-                }}
-              >
-                <Descriptions bordered column={1} className="mb-4">
+              <Card title="Sale Details" className="mt-3" style={{ maxWidth: 600 }}>
+                <Descriptions
+                  bordered
+                  column={1}
+                  labelStyle={{ width: 180, fontWeight: 500 }}
+                  contentStyle={{ fontWeight: 600 }}
+                  className="mb-4"
+                >
                   <Descriptions.Item label="Sale ID">
                     {saleData.id}
                   </Descriptions.Item>
@@ -297,29 +462,32 @@ const ReceiptForm = () => {
                   <Descriptions.Item label="Net Amount">
                     PKR {saleData.netAmount}
                   </Descriptions.Item>
+                  <Descriptions.Item label="Other Credits">
+                    PKR {otherCreditsTotal.toFixed(2)}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Other Debits">
+                    PKR {otherDebitsTotal.toFixed(2)}
+                  </Descriptions.Item>
                   <Descriptions.Item label="Amount to be Received">
                     <Text strong>
                       PKR&nbsp;
-                      {saleData.netAmount -
-                        creditSale.reduce((a, b) => a + b.amount, 0) +
-                        creditReceived.reduce((a, b) => a + b.amount, 0)}
+                      {amountToBeReceived.toFixed(2)}
                     </Text>
                   </Descriptions.Item>
                 </Descriptions>
               </Card>
             </Row>
-            <Row style={{ marginTop: '15px', width: '20%' }}>
+            <Flex justify="end" style={{ marginTop: 16 }}>
               <Button
                 type="primary"
                 htmlType="submit"
-                style={{ marginLeft: '535px' }}
                 loading={submitLoading}
                 onClick={handleSave}
-                block
+                style={{ minWidth: 160 }}
               >
-                Save
+                Save Receipt
               </Button>
-            </Row>
+            </Flex>
           </Col>
         )}
       </Flex>
