@@ -5,6 +5,9 @@ const Inventory = require('../models/inventory.model');
 const inventoryService = require('../services/inventory.services');
 
 const createPurchase = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const {
       items,
@@ -24,25 +27,34 @@ const createPurchase = async (req, res) => {
     if (sanitizedDeductions?.length > 0) {
       sanitizedDeductions.forEach((deduction) => {
         const deductionAmount = deduction.isPercentage
-          ? (totalPurchaseAmount * (deduction?.amount || 0)) / 100
+          ? (totalPurchaseAmount * deduction?.amount || 0) / 100
           : deduction?.amount || 0;
         totalPurchaseAmount -= deductionAmount;
       });
     }
 
-    const purchase = await Purchase.create({
-      items,
-      bank,
-      vendor,
-      totalDeductions: sanitizedDeductions,
-      purchaseDeliveryNumber,
-      total: totalPurchaseAmount || 0,
-      dispatchDate,
-      orderDate,
-      tenant: req.tenantId,
-    });
+    const purchase = await Purchase.create(
+      [
+        {
+          items,
+          bank,
+          vendor,
+          totalDeductions: sanitizedDeductions,
+          purchaseDeliveryNumber,
+          total: totalPurchaseAmount || 0,
+          dispatchDate,
+          orderDate,
+          tenant: req.tenantId,
+        },
+      ],
+      {
+        session,
+      }
+    );
 
     if (!purchase) {
+      await session.abortTransaction();
+      session.endSession();
       return res
         .status(400)
         .json({ success: false, message: 'Unable to create purchase' });
@@ -52,14 +64,18 @@ const createPurchase = async (req, res) => {
     const bankAccount = await Account.findOne({
       _id: bank,
       tenant: req.tenantId,
-    });
+    }).session(session);
     if (!bankAccount) {
+      await session.abortTransaction();
+      session.endSession();
       return res
         .status(404)
         .json({ success: false, message: 'Bank account not found' });
     }
 
     if (bankAccount.balance < totalPurchaseAmount) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         success: false,
         message: 'Insufficient balance in bank account',
@@ -67,33 +83,41 @@ const createPurchase = async (req, res) => {
     }
 
     bankAccount.balance -= totalPurchaseAmount;
-    await bankAccount.save();
+    await bankAccount.save({ session });
 
     // 5️⃣ Update Inventory Quantities
     for (const item of items) {
       const inventoryItem = await Inventory.findOne({
         _id: item.itemId,
         tenant: req.tenantId,
-      });
+      }).session(session);
 
       if (!inventoryItem) {
+        await session.abortTransaction();
+        session.endSession();
         return res
           .status(400)
           .json({ success: false, message: `Item not found in inventory` });
       }
 
       inventoryItem.quantity += item.quantity;
-      await inventoryItem.save();
+      await inventoryItem.save({ session });
     }
 
-    return res.status(201).json({
+    // 6️⃣ Commit the Transaction
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(201).json({
       success: true,
       message: 'Purchase created successfully',
       data: purchase,
     });
   } catch (error) {
     console.log('error', error);
-    return res.status(500).json({
+    await session.abortTransaction();
+    session.endSession();
+    res.status(500).json({
       success: false,
       message: 'Internal Server Error',
       error: error.message,

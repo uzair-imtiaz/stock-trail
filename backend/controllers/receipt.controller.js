@@ -50,11 +50,15 @@ const sanitizeOtherAccountEntries = async (entries = [], tenantId, session) => {
   }
 
   const sanitized = [];
-  const accountIdSet = new Set();
+  const accountIds = new Set();
 
   entries.forEach((entry, index) => {
     const rawId =
-      entry?.otherAccount || entry?.otherAccountId || entry?._id || entry?.id;
+      entry?.otherAccount ||
+      entry?.otherAccountId ||
+      entry?._id ||
+      entry?.id ||
+      entry?.value;
 
     if (!rawId || !mongoose.Types.ObjectId.isValid(rawId)) {
       const err = new Error(
@@ -75,11 +79,11 @@ const sanitizeOtherAccountEntries = async (entries = [], tenantId, session) => {
 
     const normalizedId = rawId.toString();
     sanitized.push({ otherAccount: normalizedId, amount });
-    accountIdSet.add(normalizedId);
+    accountIds.add(normalizedId);
   });
 
   const query = OtherAccount.find({
-    _id: { $in: Array.from(accountIdSet) },
+    _id: { $in: Array.from(accountIds) },
     tenant: tenantId,
   }).select('_id');
 
@@ -89,7 +93,7 @@ const sanitizeOtherAccountEntries = async (entries = [], tenantId, session) => {
 
   const accounts = await query.exec();
 
-  if (accounts.length !== accountIdSet.size) {
+  if (accounts.length !== accountIds.size) {
     const err = new Error('One or more other accounts could not be found');
     err.statusCode = 404;
     throw err;
@@ -101,7 +105,7 @@ const sanitizeOtherAccountEntries = async (entries = [], tenantId, session) => {
 const buildAmountMap = (entries = []) => {
   const map = new Map();
   entries.forEach((entry) => {
-    if (!entry || !entry.otherAccount) return;
+    if (!entry?.otherAccount) return;
     const key = entry.otherAccount.toString();
     const amount = Number(entry.amount) || 0;
     if (amount <= 0) return;
@@ -156,12 +160,17 @@ const applyOtherAccountAdjustments = async (
     );
 
     if (!updatedAccount) {
-      throw new Error('Unable to update other account balance');
+      const err = new Error('Unable to update other account balance');
+      err.statusCode = 400;
+      throw err;
     }
   }
 };
 
 const createOrUpdateReceipt = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const {
       account,
@@ -173,42 +182,54 @@ const createOrUpdateReceipt = async (req, res) => {
       otherDebits: incomingOtherDebits = [],
     } = req.body;
 
-    const backAccount = await Account.findOne({
+    let accountQuery = Account.findOne({
       _id: account,
       tenant: req.tenantId,
     });
+    accountQuery = accountQuery.session(session);
+    const backAccount = await accountQuery.exec();
     if (!backAccount) {
+      await session.abortTransaction();
+      session.endSession();
       return res
         .status(404)
         .json({ success: false, message: 'Account not found' });
     }
 
-    const sale = await RouteActivity.findOne({
+    let saleQuery = RouteActivity.findOne({
       _id: saleId,
       tenant: req.tenantId,
     });
+    saleQuery = saleQuery.session(session);
+    const sale = await saleQuery.exec();
     if (!sale) {
+      await session.abortTransaction();
+      session.endSession();
       return res
         .status(404)
         .json({ success: false, message: 'Sale not found' });
     }
 
     sale.hasReceipt = true;
-    await sale.save();
+    await sale.save({ session });
 
     const sanitizedOtherCredits = await sanitizeOtherAccountEntries(
       incomingOtherCredits,
-      req.tenantId
+      req.tenantId,
+      session
     );
     const sanitizedOtherDebits = await sanitizeOtherAccountEntries(
       incomingOtherDebits,
-      req.tenantId
+      req.tenantId,
+      session
     );
 
-    let receipt = await Receipt.findOne({
+    let receiptQuery = Receipt.findOne({
       saleId,
       tenant: req.tenantId,
     });
+    receiptQuery = receiptQuery.session(session);
+    let receipt = await receiptQuery.exec();
     let previousAmountRecovered = 0;
     let previousOtherCredits = [];
     let previousOtherDebits = [];
@@ -222,13 +243,13 @@ const createOrUpdateReceipt = async (req, res) => {
       previousOtherCredits = receipt.otherCredits
         ? receipt.otherCredits.map((entry) => ({
             otherAccount: entry.otherAccount,
-            amount: entry.amount,
+            amount: Number(entry.amount) || 0,
           }))
         : [];
       previousOtherDebits = receipt.otherDebits
         ? receipt.otherDebits.map((entry) => ({
             otherAccount: entry.otherAccount,
-            amount: entry.amount,
+            amount: Number(entry.amount) || 0,
           }))
         : [];
 
@@ -238,13 +259,16 @@ const createOrUpdateReceipt = async (req, res) => {
         returnedCredits
       );
 
-      receipt.advances.push(...advances);
+      if (Array.isArray(advances) && advances.length > 0) {
+        receipt.advances.push(...advances);
+      }
+
       receipt.otherCredits = sanitizedOtherCredits;
       receipt.otherDebits = sanitizedOtherDebits;
 
-      await receipt.save();
+      await receipt.save({ session });
     } else {
-      receipt = await Receipt.create({
+      const receiptPayload = {
         account,
         saleId,
         credits: mergeCreditData([], credits, returnedCredits),
@@ -252,13 +276,19 @@ const createOrUpdateReceipt = async (req, res) => {
         otherCredits: sanitizedOtherCredits,
         otherDebits: sanitizedOtherDebits,
         tenant: req.tenantId,
-      });
+      };
 
-      if (!receipt) {
+      const [createdReceipt] = await Receipt.create([receiptPayload], {
+        session,
+      });
+      if (!createdReceipt) {
+        await session.abortTransaction();
+        session.endSession();
         return res
           .status(400)
           .json({ success: false, message: 'Unable to create receipt' });
       }
+      receipt = createdReceipt;
     }
 
     const totalCreditAmount = receipt.credits.reduce(
@@ -270,21 +300,6 @@ const createOrUpdateReceipt = async (req, res) => {
       0
     );
     const amountRecovered = totalCreditAmount - totalReturnedAmount;
-
-    const creditDeltaMap = calculateDeltaMap(
-      previousOtherCredits,
-      sanitizedOtherCredits
-    );
-    const debitDeltaMap = calculateDeltaMap(
-      previousOtherDebits,
-      sanitizedOtherDebits
-    );
-
-    await applyOtherAccountAdjustments(
-      creditDeltaMap,
-      debitDeltaMap,
-      req.tenantId
-    );
 
     // if (totalCreditAmount > sale.profit) {
     //   await session.abortTransaction();
@@ -304,9 +319,28 @@ const createOrUpdateReceipt = async (req, res) => {
     //   });
     // }
 
+    const creditDeltaMap = calculateDeltaMap(
+      previousOtherCredits,
+      sanitizedOtherCredits
+    );
+    const debitDeltaMap = calculateDeltaMap(
+      previousOtherDebits,
+      sanitizedOtherDebits
+    );
+
     const balanceAdjustment = amountRecovered - previousAmountRecovered;
     backAccount.balance += balanceAdjustment;
-    await backAccount.save();
+    await backAccount.save({ session });
+
+    await applyOtherAccountAdjustments(
+      creditDeltaMap,
+      debitDeltaMap,
+      req.tenantId,
+      session
+    );
+
+    await session.commitTransaction();
+    session.endSession();
 
     res.status(201).json({
       success: true,
@@ -314,7 +348,14 @@ const createOrUpdateReceipt = async (req, res) => {
       message: 'Receipt updated successfully',
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error(error);
+    if (error?.statusCode) {
+      return res
+        .status(error.statusCode)
+        .json({ success: false, message: error.message });
+    }
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
@@ -332,11 +373,11 @@ const getReceipts = async (req, res) => {
       })
       .populate({
         path: 'otherCredits.otherAccount',
-        select: 'otherAccountId name category balance',
+        select: 'name category balance',
       })
       .populate({
         path: 'otherDebits.otherAccount',
-        select: 'otherAccountId name category balance',
+        select: 'name category balance',
       })
       .sort({ createdAt: -1 });
     if (!receipts) {
@@ -375,11 +416,11 @@ const getReceipt = async (req, res) => {
       })
       .populate({
         path: 'otherCredits.otherAccount',
-        select: 'otherAccountId name category balance',
+        select: 'name category balance',
       })
       .populate({
         path: 'otherDebits.otherAccount',
-        select: 'otherAccountId name category balance',
+        select: 'name category balance',
       });
 
     if (!receipt) {

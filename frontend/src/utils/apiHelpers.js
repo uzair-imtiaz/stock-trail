@@ -2,10 +2,10 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const axiosInstance = axios.create({
-  baseURL:
-    process.env.NODE_ENV === 'production'
-      ? 'https://api.ds.algobricks.org/api'
-      : 'http://localhost:3003/api',
+  // In production, keep existing API URL; in dev, use Vite env or fallback to 5000
+  baseURL: import.meta.env.PROD
+    ? 'https://api.ds.algobricks.org/api'
+    : import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   timeout: 35000,
   withCredentials: true,
 });

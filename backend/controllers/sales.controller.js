@@ -4,6 +4,8 @@ const Inventory = require('../models/inventory.model');
 const inventoryService = require('../services/inventory.services');
 
 const createSale = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const sale = new RouteActivity({ ...req.body, tenant: req.tenantId });
     const savedSale = await sale.save();
@@ -17,8 +19,9 @@ const createSale = async (req, res) => {
       const inventoryItem = await Inventory.findOne({
         _id: item.itemId,
         tenant: req.tenantId,
-      });
+      }).session(session);
       if (!inventoryItem) {
+        await session.abortTransaction();
         return res.status(404).json({
           success: false,
           message: 'Inventory item not found',
@@ -35,12 +38,14 @@ const createSale = async (req, res) => {
         });
 
         if (!wastageItem) {
+          await session.abortTransaction();
           return res.status(404).json({
             success: false,
             message: 'Inventory item not found',
           });
         } else {
           const savedWastageItem = await wastageItem.save();
+          // Store the wastage item ID in the sale record for proper tracking
           item.wastageItemId = savedWastageItem._id;
         }
       }
@@ -51,14 +56,20 @@ const createSale = async (req, res) => {
         item.returnPieces;
       await inventoryItem.save();
     }
-    return res.status(201).json({
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(201).json({
       success: true,
       message: 'Sale created successfully',
       data: savedSale,
     });
   } catch (error) {
     console.log('error', error);
-    return res.status(500).json({
+    await session.abortTransaction();
+    session.endSession();
+
+    res.status(500).json({
       success: false,
       message: 'Internal Server Error',
     });
@@ -330,15 +341,20 @@ const transformInventoryData = (report, inventoryList) => {
 };
 
 const deleteInvoice = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const invoiceId = req.params.id;
 
     const invoice = await RouteActivity.findOne({
       _id: invoiceId,
       tenant: req.tenantId,
-    });
+    }).session(session);
 
     if (!invoice) {
+      await session.abortTransaction();
+      session.endSession();
       return res
         .status(404)
         .json({ success: false, message: 'Invoice not found' });
@@ -349,9 +365,11 @@ const deleteInvoice = async (req, res) => {
       const inventoryItem = await Inventory.findOne({
         _id: item.itemId,
         tenant: req.tenantId,
-      });
+      }).session(session);
 
       if (!inventoryItem) {
+        await session.abortTransaction();
+        session.endSession();
         return res.status(404).json({
           success: false,
           message: 'Inventory item not found',
@@ -370,30 +388,36 @@ const deleteInvoice = async (req, res) => {
         (item.quantityDropped || 0) + tprInCartons + wastage - returnPieces;
 
       inventoryItem.quantity += quantityToAddBack;
-      await inventoryItem.save();
+      await inventoryItem.save({ session });
 
       // Remove wastage items if they exist
       if (item.wastage > 0 && item.wastageItemId) {
-        await Inventory.findByIdAndDelete(item.wastageItemId);
+        await Inventory.findByIdAndDelete(item.wastageItemId).session(session);
       }
     }
 
     // Delete the sale
-    await RouteActivity.findByIdAndDelete(invoiceId);
+    await RouteActivity.findByIdAndDelete(invoiceId).session(session);
 
-    return res.status(200).json({
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({
       success: true,
       message: 'Invoice deleted successfully',
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error('Error deleting invoice:', error);
-    return res
-      .status(500)
-      .json({ success: false, message: 'Internal Server Error' });
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
 
 const editSale = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const saleId = req.params.id;
     const newData = req.body;
@@ -401,9 +425,11 @@ const editSale = async (req, res) => {
     const existingSale = await RouteActivity.findOne({
       _id: saleId,
       tenant: req.tenantId,
-    });
+    }).session(session);
 
     if (!existingSale) {
+      await session.abortTransaction();
+      session.endSession();
       return res
         .status(404)
         .json({ success: false, message: 'Sale not found' });
@@ -417,7 +443,7 @@ const editSale = async (req, res) => {
     const inventoryDocs = await Inventory.find({
       _id: { $in: itemIds },
       tenant: req.tenantId,
-    });
+    }).session(session);
 
     const inventoryMap = {};
     for (const inv of inventoryDocs) {
@@ -461,14 +487,18 @@ const editSale = async (req, res) => {
       if (netStockChange !== 0) {
         await Inventory.updateOne(
           { _id: itemId, tenant: req.tenantId },
-          { $inc: { quantity: netStockChange } }
+          { $inc: { quantity: netStockChange } },
+          { session }
         );
       }
     }
 
     // Save updated sale
     Object.assign(existingSale, newData);
-    const updatedSale = await existingSale.save();
+    const updatedSale = await existingSale.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
 
     return res.status(200).json({
       success: true,
@@ -476,6 +506,8 @@ const editSale = async (req, res) => {
       data: updatedSale,
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error(error);
     return res
       .status(500)
