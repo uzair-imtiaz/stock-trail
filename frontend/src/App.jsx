@@ -21,6 +21,7 @@ import Accounts from './pages/Accounts';
 import Expenses from './pages/Expenses';
 import Purchase from './pages/Purchase';
 import Reports from './pages/Reports';
+import OtherAccounts from './pages/OtherAccounts';
 import ExpenseReport from './components/reports/ExpenseReport';
 import CreditsReport from './components/reports/CreditsReport';
 import SalesReport from './components/reports/SalesReport';
@@ -100,6 +101,7 @@ const App = () => {
             />
             <Route path="core/shops" element={<Shops />} />
             <Route path="core/accounts" element={<Accounts />} />
+            <Route path="core/other-accounts" element={<OtherAccounts />} />
             <Route path="core/expenses" element={<Expenses />} />
             <Route path="core/deductions" element={<Deductions />} />
             <Route path="core/vendors" element={<Vendors />} />

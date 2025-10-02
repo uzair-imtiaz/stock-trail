@@ -167,6 +167,16 @@ const AppLayout = ({ user, onLogout }) => {
                 </Menu.Item>
               )}
               {getPermission(user, 'core') && (
+                <Menu.Item key="7-2a" icon={<BsBank />}>
+                  <Link
+                    to="/core/other-accounts"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    Other Accounts
+                  </Link>
+                </Menu.Item>
+              )}
+              {getPermission(user, 'core') && (
                 <Menu.Item key="7-3" icon={<MoneyCollectOutlined />}>
                   <Link to="/core/expenses" style={{ textDecoration: 'none' }}>
                     Expenses

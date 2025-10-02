@@ -23,6 +23,7 @@
   "scripts": {
     "start": "npx nodemon backend/server.js",
     "dev": "npx nodemon backend/server.js",
+    "migrate": "node backend/scripts/migrate.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\""
