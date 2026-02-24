@@ -1,5 +1,6 @@
 const allowedOrigins = [
   'http://localhost:5173',
+  'http://localhost:5176',
   'https://ds.algobricks.org',
   'https://www.ds.algobricks.org',
   'https://stock-trail-git-main-uzair-imtiazs-projects.vercel.app',

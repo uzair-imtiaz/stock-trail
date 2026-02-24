@@ -208,6 +208,11 @@ const SalesReport = () => {
       key: 'tpr',
     },
     {
+      title: 'Free Pieces Discount',
+      dataIndex: 'freePiecesDiscount',
+      key: 'freePiecesDiscount',
+    },
+    {
       title: 'Wastage',
       dataIndex: 'wastage',
       key: 'wastage',

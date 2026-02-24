@@ -1,4 +1,4 @@
-import { DollarOutlined } from '@ant-design/icons';
+import { DollarOutlined, UploadOutlined, DownloadOutlined } from '@ant-design/icons';
 import {
   Button,
   Card,
@@ -11,6 +11,8 @@ import {
   Space,
   Switch,
   Table,
+  Modal,
+  Upload,
 } from 'antd';
 import Title from 'antd/es/typography/Title';
 import { useEffect, useState } from 'react';
@@ -24,6 +26,8 @@ import {
   getRoutesWithoutShops,
   getUsers,
   updateSale,
+  importSalesFromExcel,
+  downloadSalesTemplate,
 } from '../apis';
 import { default as DynamicListSection } from '../components/DynamicList';
 import dayjs from 'dayjs';
@@ -62,6 +66,9 @@ const SalesScreen = () => {
   const [fetchingExistingSale, setFetchingExistingSale] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
   const [deductions, setDeductions] = useState([]);
+  const [importModalVisible, setImportModalVisible] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [fileList, setFileList] = useState([]);
   const navigate = useNavigate();
 
   const { id } = useParams();
@@ -159,6 +166,7 @@ const SalesScreen = () => {
                 ...updatedInventory[inventoryIndex],
                 dispatchQty: droppedItem.quantityDropped,
                 tpr: droppedItem.tpr || 0,
+                freePiecesDiscount: droppedItem.freePiecesDiscount || 0,
                 wastage: droppedItem.wastage || 0,
                 unitDeductions:
                   getFullDeductionObject(
@@ -364,6 +372,21 @@ const SalesScreen = () => {
       ),
     },
     {
+      title: 'Free Pieces Discount',
+      dataIndex: 'freePiecesDiscount',
+      key: 'freePiecesDiscount',
+      width: 180,
+      render: (_, record) => (
+        <InputNumber
+          min={0}
+          placeholder="Enter Discount"
+          value={record.freePiecesDiscount}
+          defaultValue={0}
+          onChange={(value) => handleValueChange(value, record, 'freePiecesDiscount')}
+        />
+      ),
+    },
+    {
       title: 'Return Pieces',
       dataIndex: 'returnPieces',
       key: 'returnPieces',
@@ -450,12 +473,14 @@ const SalesScreen = () => {
           item.dispatchQty > 0 ||
           item.wastage > 0 ||
           item.tpr > 0 ||
+          item.freePiecesDiscount > 0 ||
           item.returnPieces > 0
       )
       .map((item) => ({
         itemId: item._id,
         quantityDropped: item.dispatchQty,
         tpr: item.tpr || 0,
+        freePiecesDiscount: item.freePiecesDiscount || 0,
         wastage: item.wastage || 0,
         unitDeductions: item.unitDeductions.filter((d) => d?.amount > 0),
         returnPieces: item.returnPieces || 0,
@@ -495,10 +520,109 @@ const SalesScreen = () => {
     }
   };
 
+  const handleDownloadTemplate = async () => {
+    try {
+      const response = await downloadSalesTemplate();
+      if (response?.success) {
+        message.success('Template downloaded successfully');
+      } else {
+        message.error(response?.message || 'Failed to download template');
+      }
+    } catch (error) {
+      message.error('Failed to download template');
+      console.error(error);
+    }
+  };
+
+  const handleImport = async () => {
+    if (fileList.length === 0) {
+      message.error('Please select a file to import');
+      return;
+    }
+
+    const file = fileList[0].originFileObj;
+    if (!file) {
+      message.error('Invalid file');
+      return;
+    }
+
+    try {
+      setImporting(true);
+      const response = await importSalesFromExcel(file);
+
+      if (response?.success) {
+        const { created, errors, skipped, warnings } = response.data;
+        let messageText = `Successfully imported ${created} sale(s)`;
+        
+        if (errors > 0 || skipped > 0) {
+          messageText += `. ${errors} error(s), ${skipped} row(s) skipped.`;
+        }
+        
+        if (warnings > 0) {
+          message.warning(
+            `${warnings} warning(s): Multiple inventory items found for some products. Selected items with highest quantity. Check console for details.`,
+            5
+          );
+          if (response.data.details?.duplicateInventoryWarnings) {
+            console.log('Duplicate inventory warnings:', response.data.details.duplicateInventoryWarnings);
+          }
+        }
+        
+        message.success(messageText);
+        setImportModalVisible(false);
+        setFileList([]);
+        
+        // Refresh the page or navigate to invoices
+        if (created > 0) {
+          navigate('/sales/invoices');
+        }
+      } else {
+        message.error(response?.message || 'Import failed');
+        if (response?.errors || response?.skippedRows) {
+          console.log('Import errors:', response.errors || response.skippedRows);
+        }
+      }
+    } catch (error) {
+      console.error('Error importing sales:', error);
+      message.error(error.response?.data?.message || 'Import failed');
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const uploadProps = {
+    beforeUpload: () => false, // Prevent auto upload
+    fileList,
+    onChange: ({ fileList: newFileList }) => {
+      setFileList(newFileList);
+    },
+    accept: '.xlsx,.xls',
+    maxCount: 1,
+  };
+
   return (
     <>
       <div className="mb-2">
-        <Title level={3}>Add a Sale</Title>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <Title level={3}>Add a Sale</Title>
+          {!id && (
+            <Space>
+              <Button
+                icon={<DownloadOutlined />}
+                onClick={handleDownloadTemplate}
+              >
+                Download Template
+              </Button>
+              <Button
+                type="primary"
+                icon={<UploadOutlined />}
+                onClick={() => setImportModalVisible(true)}
+              >
+                Import from Excel
+              </Button>
+            </Space>
+          )}
+        </div>
         <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
           <Select
             placeholder="Select Route"
@@ -572,6 +696,7 @@ const SalesScreen = () => {
             const totals = {
               totalDispatch: 0,
               totalTpr: 0,
+              totalFreePiecesDiscount: 0,
               totalReturnPieces: 0,
               totalWastage: 0,
               quantity: 0,
@@ -582,6 +707,7 @@ const SalesScreen = () => {
             for (const item of inventory) {
               totals.totalDispatch += item.dispatchQty || 0;
               totals.totalTpr += item.tpr || 0;
+              totals.totalFreePiecesDiscount += item.freePiecesDiscount || 0;
               totals.totalReturnPieces += item.returnPieces || 0;
               totals.totalWastage += item.wastage || 0;
               totals.quantity += item.quantity || 0;
@@ -611,6 +737,7 @@ const SalesScreen = () => {
                     {totals.totalDispatch}
                   </Table.Summary.Cell>
                   <Table.Summary.Cell>{totals.totalTpr}</Table.Summary.Cell>
+                  <Table.Summary.Cell>{totals.totalFreePiecesDiscount}</Table.Summary.Cell>
                   <Table.Summary.Cell>
                     {totals.totalReturnPieces}
                   </Table.Summary.Cell>
@@ -703,6 +830,49 @@ const SalesScreen = () => {
           {id ? 'Update Sale' : 'Submit Sale'}
         </Button>
       </Flex>
+
+      <Modal
+        title="Import Sales from Excel"
+        open={importModalVisible}
+        onOk={handleImport}
+        onCancel={() => {
+          setImportModalVisible(false);
+          setFileList([]);
+        }}
+        confirmLoading={importing}
+        okText="Import"
+        cancelText="Cancel"
+      >
+        <div style={{ marginBottom: '16px' }}>
+          <p>Please upload an Excel file with the following columns:</p>
+          <ul style={{ marginLeft: '20px' }}>
+            <li>Route Name (required)</li>
+            <li>Salesman Name (required)</li>
+            <li>Date (required)</li>
+            <li>Driver Name</li>
+            <li>License Number</li>
+            <li>Product (required)</li>
+            <li>Flavor (required)</li>
+            <li>Grammage (required)</li>
+            <li>Dispatch Qty (Cartons)</li>
+            <li>TPR (Free Pieces)</li>
+            <li>Free Pieces Discount</li>
+            <li>Wastage</li>
+            <li>Return Pieces</li>
+          </ul>
+          <Button
+            type="link"
+            icon={<DownloadOutlined />}
+            onClick={handleDownloadTemplate}
+            style={{ padding: 0 }}
+          >
+            Download template file
+          </Button>
+        </div>
+        <Upload {...uploadProps}>
+          <Button icon={<UploadOutlined />}>Select Excel File</Button>
+        </Upload>
+      </Modal>
     </>
   );
 };
